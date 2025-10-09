@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kinolive_mobile/design/theme.dart';
 
 import 'package:kinolive_mobile/screens/login/login_screen.dart';
 import 'package:kinolive_mobile/screens/register/register_screen.dart';
@@ -13,11 +14,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const RegisterScreen(title: 'Flutter Demo Home Page'),
+      title: 'KinoLive',
+      theme: customThemeData,
+      home: const LoginScreen(title: 'KinoLive'),
     );
   }
 }
