@@ -1,7 +1,9 @@
 import 'package:go_router/go_router.dart';
 
 import 'package:kinolive_mobile/screens/login/login_screen.dart';
+
 import 'package:kinolive_mobile/screens/register/register_screen.dart';
+import 'package:kinolive_mobile/screens/register/complete_profile_screen.dart';
 
 import 'package:kinolive_mobile/screens/forgot_password/forgot_password_screen.dart';
 import 'package:kinolive_mobile/screens/forgot_password/check_email_screen.dart';
@@ -14,7 +16,16 @@ final appRouter = GoRouter(
   routes: [
     GoRoute(path: '/', builder: (context, state) => const LoginScreen()),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-    GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
+    GoRoute(
+      path: '/register',
+      builder: (context, state) => const RegisterScreen(),
+      routes: [
+        GoRoute(
+          path: 'complete-profile',
+          builder: (context, state) => const CompleteProfileScreen(),
+        )
+      ]
+    ),
     GoRoute(
       path: '/forgot-password',
       builder: (context, state) => const ForgotPasswordScreen(),

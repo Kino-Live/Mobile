@@ -21,7 +21,7 @@ final ColorScheme customColorScheme = ColorScheme.fromSeed(
   primaryContainer: Color(0xFF25AA68),
   onPrimaryContainer: Color(0xFF161621),
   surface: Color(0xFF161621),
-  // surfaceContainer: Color(0xFF2B2B38),
+  surfaceContainer: Color(0xFF2B2B38),
   onSurface: Color(0xFFF1F1F1),
   outline: Color(0xFFF1F1F1),
   onSurfaceVariant: Color(0xFF989898),

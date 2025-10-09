@@ -33,6 +33,7 @@ class _RegisterFormState extends State<RegisterForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registering...')),
       );
+      context.go('/register/complete-profile');
     }
   }
 
