@@ -107,7 +107,7 @@ class _LoginFormState extends State<LoginForm> {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () {
-                // TODO: Recover Password
+                context.push('/forgot-password');
               },
               style: TextButton.styleFrom(
                 foregroundColor: colorScheme.primary,
