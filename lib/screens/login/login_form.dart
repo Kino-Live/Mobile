@@ -43,6 +43,8 @@ class _LoginFormState extends State<LoginForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 24),
+
+          // Header
           Text('Login',
             textAlign: TextAlign.center,
             style: textTheme.headlineLarge?.copyWith(
@@ -61,7 +63,6 @@ class _LoginFormState extends State<LoginForm> {
             'Email',
             style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           ),
-          const SizedBox(height: 8),
           TextFormField(
             controller: _email,
             keyboardType: TextInputType.emailAddress,
@@ -74,14 +75,13 @@ class _LoginFormState extends State<LoginForm> {
             validator: (v) =>
             (v == null || v.isEmpty) ? 'Enter your email' : null,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 30),
 
           // Password
           Text(
             'Password',
             style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           ),
-          const SizedBox(height: 8),
           TextFormField(
             controller: _password,
             obscureText: _obscure,
@@ -101,7 +101,6 @@ class _LoginFormState extends State<LoginForm> {
             validator: (v) =>
             (v == null || v.length < 6) ? 'Min 6 characters' : null,
           ),
-
           const SizedBox(height: 10),
           Align(
             alignment: Alignment.centerRight,
@@ -123,7 +122,6 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
           ),
-
           const SizedBox(height: 40),
 
           // Login button
@@ -154,7 +152,6 @@ class _LoginFormState extends State<LoginForm> {
               Expanded(child: Divider(color: colorScheme.outline)),
             ],
           ),
-
           const SizedBox(height: 28),
 
           // Google button
@@ -186,23 +183,18 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
           ),
-
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Footer
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("Don't have an account? ",
-                  style: textTheme.bodyMedium
-                      ?.copyWith(color: colorScheme.onSurfaceVariant)),
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: colorScheme.onSurfaceVariant)),
               TextButton(
-                onPressed: () {
-                  context.push('/register');
-                },
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                ),
+                onPressed: () => context.go('/register'),
+                style: TextButton.styleFrom(padding: EdgeInsets.zero,),
                 child: const Text('Sign up', style: TextStyle(color: myBlue)),
               ),
             ],

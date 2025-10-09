@@ -13,10 +13,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24) ,
-            child: LoginForm()
-          ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: LoginForm()
+        ),
       )
     );
   }

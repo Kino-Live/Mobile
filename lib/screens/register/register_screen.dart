@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kinolive_mobile/screens/register/register_form.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -11,12 +12,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Center(
-        child: Text(
-          "Register",
-          style: TextStyle(fontSize: 24),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: RegisterForm()
         ),
-      ),
+      )
     );
   }
 }
