@@ -18,6 +18,7 @@ final ColorScheme customColorScheme = ColorScheme.fromSeed(
 ).copyWith(
   //
   //
+  primary: Color(0xFF25AA68),
   primaryContainer: Color(0xFF25AA68),
   onPrimaryContainer: Color(0xFF161621),
   surface: Color(0xFF161621),
