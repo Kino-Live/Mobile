@@ -8,9 +8,6 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-//login
-//Enter your email and password to log in
-
 class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
