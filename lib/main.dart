@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'KinoLive',
       theme: customThemeData,
-      home: const LoginScreen(title: 'KinoLive'),
+      home: const LoginScreen(),
     );
   }
 }
