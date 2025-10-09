@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import 'package:kinolive_mobile/design/colors.dart';
 
 class LoginForm extends StatefulWidget {
@@ -196,7 +198,7 @@ class _LoginFormState extends State<LoginForm> {
                       ?.copyWith(color: colorScheme.onSurfaceVariant)),
               TextButton(
                 onPressed: () {
-                  // TODO: Navigation to Sign up
+                  context.push('/register');
                 },
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
