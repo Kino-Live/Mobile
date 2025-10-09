@@ -4,10 +4,10 @@ class SuccessfulScreen extends StatefulWidget {
   const SuccessfulScreen({super.key});
 
   @override
-  State<SuccessfulScreen> createState() => _SuccessfulScreenState();
+  State<SuccessfulScreen> createState() => _SuccessScreenState();
 }
 
-class _SuccessfulScreenState extends State<SuccessfulScreen> {
+class _SuccessScreenState extends State<SuccessfulScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -6,10 +6,10 @@ import 'package:kinolive_mobile/screens/register/register_screen.dart';
 import 'package:kinolive_mobile/screens/register/complete_profile_screen.dart';
 
 import 'package:kinolive_mobile/screens/forgot_password/forgot_password_screen.dart';
-import 'package:kinolive_mobile/screens/forgot_password/check_email_screen.dart';
-import 'package:kinolive_mobile/screens/forgot_password/password_reset_screen.dart';
-import 'package:kinolive_mobile/screens/forgot_password/set_password_screen.dart';
-import 'package:kinolive_mobile/screens/forgot_password/successful_screen.dart';
+import 'package:kinolive_mobile/screens/forgot_password/check_email/check_email_screen.dart';
+import 'package:kinolive_mobile/screens/forgot_password/password_reset/password_reset_screen.dart';
+import 'package:kinolive_mobile/screens/forgot_password/set_password/set_password_screen.dart';
+import 'package:kinolive_mobile/screens/forgot_password/success/success_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
