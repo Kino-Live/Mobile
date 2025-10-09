@@ -44,6 +44,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
         children: [
           const SizedBox(height: 24),
 
+          // Header
           Text(
             'Complete your profile',
             textAlign: TextAlign.center,
@@ -60,7 +61,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 60),
 
           // Name
           Text(
@@ -79,7 +80,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
             validator: (v) =>
             (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 30),
 
           // Phone number
           Text(
@@ -104,7 +105,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
             },
           ),
 
-          const SizedBox(height: 135),
+          const SizedBox(height: 105),
 
           SizedBox(
             height: 56,
