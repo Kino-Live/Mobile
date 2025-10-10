@@ -14,7 +14,7 @@ import 'package:kinolive_mobile/presentation/screens/forgot_password/success/suc
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_screen.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/login',
   routes: [
     GoRoute(path: '/', builder: (context, state) => const BillboardScreen()),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
