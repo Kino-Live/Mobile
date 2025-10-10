@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kinolive_mobile/screens/forgot_password/set_password/set_password_form.dart';
 
 class SetPasswordScreen extends StatefulWidget {
   const SetPasswordScreen({super.key});
@@ -11,10 +12,10 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Center(
-        child: Text(
-          "SetPassword",
-          style: TextStyle(fontSize: 24),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 72, 24, 24),
+          child: SetPasswordForm(),
         ),
       ),
     );
