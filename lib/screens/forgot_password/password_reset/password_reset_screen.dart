@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kinolive_mobile/screens/forgot_password/password_reset/password_reset_form.dart';
 
 class PasswordResetScreen extends StatefulWidget {
   const PasswordResetScreen({super.key});
@@ -11,10 +12,10 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Center(
-        child: Text(
-          "PasswordReset",
-          style: TextStyle(fontSize: 24),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 72, 24, 24),
+          child: PasswordResetForm(),
         ),
       ),
     );
