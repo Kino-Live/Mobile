@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/screens/forgot_password/check_email/check_email_form.dart';
 
 class CheckEmailScreen extends StatefulWidget {
   const CheckEmailScreen({super.key});
@@ -10,13 +12,29 @@ class CheckEmailScreen extends StatefulWidget {
 class _CheckEmailScreenState extends State<CheckEmailScreen> {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      body: const Center(
-        child: Text(
-          "CheckEmail",
-          style: TextStyle(fontSize: 24),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 72,
+        leading: IconButton.filled(
+          style: IconButton.styleFrom(
+            backgroundColor: colorScheme.surfaceContainerHighest,
+          ),
+          onPressed: () => context.pop(),
+          icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.primary),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          child: const CheckEmailForm(),
         ),
       ),
     );
   }
 }
+
+
