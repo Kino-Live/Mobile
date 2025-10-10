@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kinolive_mobile/screens/forgot_password/check_email/check_email_form.dart';
+import 'package:kinolive_mobile/presentation/screens/forgot_password/check_email/check_email_form.dart';
 
 class CheckEmailScreen extends StatefulWidget {
   const CheckEmailScreen({super.key, required this.email});

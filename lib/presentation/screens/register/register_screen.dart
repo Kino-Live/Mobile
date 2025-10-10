@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kinolive_mobile/screens/register/register_form.dart';
+import 'package:kinolive_mobile/presentation/screens/register/register_form.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});

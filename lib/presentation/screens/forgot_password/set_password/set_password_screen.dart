@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kinolive_mobile/screens/forgot_password/set_password/set_password_form.dart';
+import 'package:kinolive_mobile/presentation/screens/forgot_password/set_password/set_password_form.dart';
 
 class SetPasswordScreen extends StatefulWidget {
   const SetPasswordScreen({super.key});

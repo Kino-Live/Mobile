@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kinolive_mobile/screens/forgot_password/success/success_form.dart';
+import 'package:kinolive_mobile/presentation/screens/forgot_password/success/success_form.dart';
 
 class SuccessScreen extends StatefulWidget {
   const SuccessScreen({super.key});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kinolive_mobile/screens/forgot_password/password_reset/password_reset_form.dart';
+import 'package:kinolive_mobile/presentation/screens/forgot_password/password_reset/password_reset_form.dart';
 
 class PasswordResetScreen extends StatefulWidget {
   const PasswordResetScreen({super.key});

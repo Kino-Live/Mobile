@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kinolive_mobile/screens/billboard/billboard_form.dart';
+import 'package:kinolive_mobile/presentation/screens/billboard/billboard_form.dart';
 
 class BillboardScreen extends StatefulWidget {
   const BillboardScreen({super.key});

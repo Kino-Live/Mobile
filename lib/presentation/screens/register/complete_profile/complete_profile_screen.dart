@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kinolive_mobile/screens/register/complete_profile_form.dart';
+import 'package:kinolive_mobile/presentation/screens/register/complete_profile/complete_profile_form.dart';
 
 class CompleteProfileScreen extends StatefulWidget {
   const CompleteProfileScreen({super.key});
