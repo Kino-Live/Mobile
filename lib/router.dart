@@ -47,7 +47,7 @@ final appRouter = GoRouter(
         ),
         GoRoute(
           path: 'successful',
-          builder: (context, state) => const SuccessfulScreen(),
+          builder: (context, state) => const SuccessScreen(),
         ),
       ],
     ),

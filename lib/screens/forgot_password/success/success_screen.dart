@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:kinolive_mobile/screens/forgot_password/success/success_form.dart';
 
-class SuccessfulScreen extends StatefulWidget {
-  const SuccessfulScreen({super.key});
+class SuccessScreen extends StatefulWidget {
+  const SuccessScreen({super.key});
 
   @override
-  State<SuccessfulScreen> createState() => _SuccessScreenState();
+  State<SuccessScreen> createState() => _SuccessScreenState();
 }
 
-class _SuccessScreenState extends State<SuccessfulScreen> {
+class _SuccessScreenState extends State<SuccessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const Center(
-        child: Text(
-          "Successful",
-          style: TextStyle(fontSize: 24),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 72, 24, 24),
+          child: SuccessForm(),
         ),
       ),
     );
