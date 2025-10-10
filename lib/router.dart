@@ -11,10 +11,12 @@ import 'package:kinolive_mobile/screens/forgot_password/password_reset/password_
 import 'package:kinolive_mobile/screens/forgot_password/set_password/set_password_screen.dart';
 import 'package:kinolive_mobile/screens/forgot_password/success/success_screen.dart';
 
+import 'package:kinolive_mobile/screens/billboard/billboard_screen.dart';
+
 final appRouter = GoRouter(
   initialLocation: '/',
   routes: [
-    GoRoute(path: '/', builder: (context, state) => const LoginScreen()),
+    GoRoute(path: '/', builder: (context, state) => const BillboardScreen()),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     GoRoute(
       path: '/register',
