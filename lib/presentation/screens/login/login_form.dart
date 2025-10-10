@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'package:kinolive_mobile/app/colors_theme.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/login_vm.dart';
 
-// TODO: Implement HookConsumerWidget
-final obscureProvider = StateProvider<bool>((ref) => true);
-
-class LoginForm extends ConsumerWidget {
+class LoginForm extends HookConsumerWidget {
   const LoginForm({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final obscure = ref.watch(obscureProvider);
+
+    final obscure = useState<bool>(true);
+    final email = useTextEditingController();
+    final password = useTextEditingController();
+    final formKey = useMemoized(() => GlobalKey<FormState>());
+
     final loginState = ref.watch(loginVmProvider);
 
-    final email = TextEditingController();
-    final password = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    void onLogin() async {
-      // TODO: Create logic
+    Future<void> onLogin() async {
       if (formKey.currentState!.validate()) {
-        await ref
-            .read(loginVmProvider.notifier)
-            .login(email.text, password.text);
+        await ref.read(loginVmProvider.notifier).login(
+          email.text.trim(),
+          password.text.trim(),
+        );
 
         final state = ref.read(loginVmProvider);
         if (state.status == LoginStatus.success) {
@@ -43,9 +42,11 @@ class LoginForm extends ConsumerWidget {
       }
     }
 
-    return loginState.status == LoginStatus.loading ?
-    Center(child: CircularProgressIndicator()) :
-    Form(
+    if (loginState.status == LoginStatus.loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Form(
       key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,15 +63,17 @@ class LoginForm extends ConsumerWidget {
           Text(
             'Enter your email and password to log in',
             textAlign: TextAlign.center,
-            style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 60),
 
           // Email
-          Text(
-            'Email',
-            style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
-          ),
+          Text('Email',
+              style: textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurface,
+              )),
           TextFormField(
             controller: email,
             keyboardType: TextInputType.emailAddress,
@@ -92,17 +95,16 @@ class LoginForm extends ConsumerWidget {
           ),
           TextFormField(
             controller: password,
-            obscureText: obscure,
+            obscureText: obscure.value,
             decoration: InputDecoration(
               hintText: 'Enter your password',
               hintStyle: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
               suffixIcon: IconButton(
-                onPressed: () =>
-                ref.read(obscureProvider.notifier).state = !obscure,
+                onPressed: () => obscure.value = !obscure.value,
                 icon: Icon(
-                  obscure ? Icons.visibility_off : Icons.visibility,
+                  obscure.value ? Icons.visibility_off : Icons.visibility,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -114,9 +116,7 @@ class LoginForm extends ConsumerWidget {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () {
-                context.push('/forgot-password');
-              },
+              onPressed: () => context.push('/forgot-password'),
               style: TextButton.styleFrom(
                 foregroundColor: colorScheme.primary,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -203,7 +203,7 @@ class LoginForm extends ConsumerWidget {
                       ?.copyWith(color: colorScheme.onSurfaceVariant)),
               TextButton(
                 onPressed: () => context.go('/register'),
-                style: TextButton.styleFrom(padding: EdgeInsets.zero,),
+                style: TextButton.styleFrom(padding: EdgeInsets.zero),
                 child: const Text('Sign up', style: TextStyle(color: myBlue)),
               ),
             ],
