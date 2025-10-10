@@ -32,7 +32,10 @@ final appRouter = GoRouter(
       routes: [
         GoRoute(
           path: 'check-email',
-          builder: (context, state) => const CheckEmailScreen(),
+            builder: (context, state) {
+              final email = state.extra as String;
+              return CheckEmailScreen(email: email);
+            },
         ),
         GoRoute(
           path: 'password-reset',

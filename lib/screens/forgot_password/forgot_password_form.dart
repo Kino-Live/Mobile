@@ -24,7 +24,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Reset link sent to email')),
       );
-      context.push('/forgot-password/check-email');
+      context.push('/forgot-password/check-email', extra: _email.text);
     }
   }
 

@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 class CheckEmailForm extends StatefulWidget {
-  const CheckEmailForm({super.key});
+  const CheckEmailForm({super.key, required this.email});
+
+  final String email;
 
   @override
   State<CheckEmailForm> createState() => _CheckEmailFormState();
@@ -30,6 +32,20 @@ class _CheckEmailFormState extends State<CheckEmailForm> {
         const SnackBar(content: Text('Code verified')),
       );
       context.go('/forgot-password/password-reset');
+    }
+  }
+
+  String maskEmail(String email) {
+    final atIndex = email.indexOf('@');
+    if (atIndex <= 1) return email;
+
+    final name = email.substring(0, atIndex);
+    final domain = email.substring(atIndex);
+
+    if (name.length <= 4) {
+      return '${name[0]}...$domain';
+    } else {
+      return '${name.substring(0, 4)}...$domain';
     }
   }
 
@@ -117,7 +133,7 @@ class _CheckEmailFormState extends State<CheckEmailForm> {
                   ),
                 ),
                 TextSpan(
-                  text: 'contact@dscode...com',
+                  text: maskEmail(widget.email), //contact@dscode...com
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
