@@ -1,45 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:kinolive_mobile/app/colors_theme.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/login_vm.dart';
 
-class LoginForm extends StatefulWidget {
+final obscureProvider = StateProvider<bool>((ref) => true);
+
+class LoginForm extends ConsumerWidget {
   const LoginForm({super.key});
 
   @override
-  State<LoginForm> createState() => _LoginFormState();
-}
-
-class _LoginFormState extends State<LoginForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController();
-  final _password = TextEditingController();
-  bool _obscure = true;
-
-  @override
-  void dispose() {
-    _email.dispose();
-    _password.dispose();
-    super.dispose();
-  }
-
-  void _onLogin() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Create logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logging in...')),
-      );
-      context.go('/');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final obscure = ref.watch(obscureProvider);
+    final loginState = ref.watch(loginVmProvider);
 
-    return Form(
-      key: _formKey,
+    final email = TextEditingController();
+    final password = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    void onLogin() async {
+      // TODO: Create logic
+      if (formKey.currentState!.validate()) {
+        await ref
+            .read(loginVmProvider.notifier)
+            .login(email.text, password.text);
+
+        final state = ref.read(loginVmProvider);
+        if (state.status == LoginStatus.success) {
+          // context.go('/');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Logging in...')),
+          );
+        } else if (state.status == LoginStatus.error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error ?? 'Login error')),
+          );
+        }
+      }
+    }
+
+    return loginState.status == LoginStatus.loading ?
+    Center(child: CircularProgressIndicator()) :
+    Form(
+      key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -47,10 +53,10 @@ class _LoginFormState extends State<LoginForm> {
 
           // Header
           Text('Login',
-            textAlign: TextAlign.center,
-            style: textTheme.headlineLarge?.copyWith(
-              color: colorScheme.onSurface,
-            )),
+              textAlign: TextAlign.center,
+              style: textTheme.headlineLarge?.copyWith(
+                color: colorScheme.onSurface,
+              )),
           const SizedBox(height: 8),
           Text(
             'Enter your email and password to log in',
@@ -65,7 +71,7 @@ class _LoginFormState extends State<LoginForm> {
             style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           ),
           TextFormField(
-            controller: _email,
+            controller: email,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               hintText: 'Enter your email',
@@ -84,17 +90,18 @@ class _LoginFormState extends State<LoginForm> {
             style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           ),
           TextFormField(
-            controller: _password,
-            obscureText: _obscure,
+            controller: password,
+            obscureText: obscure,
             decoration: InputDecoration(
               hintText: 'Enter your password',
               hintStyle: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
               suffixIcon: IconButton(
-                onPressed: () => setState(() => _obscure = !_obscure),
+                onPressed: () =>
+                ref.read(obscureProvider.notifier).state = !obscure,
                 icon: Icon(
-                  _obscure ? Icons.visibility_off : Icons.visibility,
+                  obscure ? Icons.visibility_off : Icons.visibility,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -129,7 +136,7 @@ class _LoginFormState extends State<LoginForm> {
           SizedBox(
             height: 56,
             child: FilledButton(
-              onPressed: _onLogin,
+              onPressed: loginState.status == LoginStatus.loading ? null : onLogin,
               style: FilledButton.styleFrom(
                 shape: const StadiumBorder(),
                 backgroundColor: colorScheme.primaryContainer,
@@ -191,8 +198,8 @@ class _LoginFormState extends State<LoginForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text("Don't have an account? ",
-                style: textTheme.bodyMedium
-                    ?.copyWith(color: colorScheme.onSurfaceVariant)),
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: colorScheme.onSurfaceVariant)),
               TextButton(
                 onPressed: () => context.go('/register'),
                 style: TextButton.styleFrom(padding: EdgeInsets.zero,),
