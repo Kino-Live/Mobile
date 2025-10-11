@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:kinolive_mobile/shared/network/dio_provider.dart';
+import 'package:kinolive_mobile/shared/auth/auth_provider.dart';
 
 final loginVmProvider = NotifierProvider<LoginVm, LoginState>(() => LoginVm());
 
@@ -42,16 +43,13 @@ class LoginVm extends Notifier<LoginState> {
         'password': password,
       });
 
-      final responseResult = (response.data?['json']?['email'] ?? '')
-          .toString()
-          .isNotEmpty;
+      final token = (response.data?['token'] as String?)?.trim();
 
-      if (!responseResult) {
+      if (token == null || token.isEmpty) {
         throw Exception('Invalid credentials');
       }
 
-      // TODO: secure storage
-      // await ref.read(tokenStorageProvider).save(token);
+      await ref.read(authTokenProvider.notifier).setToken(token);
 
       state = state.copyWith(status: LoginStatus.success);
     } catch (e) {
@@ -62,11 +60,19 @@ class LoginVm extends Notifier<LoginState> {
     }
   }
 
+  Future<void> logout() async {
+    await ref.read(authTokenProvider.notifier).clearToken();
+    state = const LoginState(status: LoginStatus.idle);
+  }
+
   String _handleError(Object e) {
     if (e is DioException) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
         return 'Network timeout';
+      }
+      if (e.response?.statusCode == 401) {
+        return 'Unauthorized';
       }
       return e.message ?? 'Network error';
     }
