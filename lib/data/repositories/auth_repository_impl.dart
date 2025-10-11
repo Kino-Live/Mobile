@@ -15,13 +15,35 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<String> login({required String email, required String password}) async {
-    final res = await _dio.post('/login', data: {'email': email, 'password': password});
-    final token = (res.data?['token'] as String?)?.trim();
-    if (token == null || token.isEmpty) {
-      throw const InvalidCredentialsException();
-    }
+    try {
+      final res = await _dio.post('/login', data: {
+        'email': email,
+        'password': password,
+      });
 
-    return token;
+      final code = res.statusCode ?? 0;
+      if (code == 401) {
+        throw const InvalidCredentialsException();
+      }
+      if (code >= 400) {
+        throw NetworkException('Server error ($code)');
+      }
+
+      final token = (res.data?['token'] as String?)?.trim();
+      if (token == null || token.isEmpty) {
+        throw const InvalidCredentialsException();
+      }
+      return token;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw const NetworkTimeoutException();
+      }
+      if (e.response?.statusCode == 401) {
+        throw const InvalidCredentialsException();
+      }
+      throw NetworkException(e.message ?? 'Network error');
+    }
   }
 
   @override
