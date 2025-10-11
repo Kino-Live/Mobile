@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:kinolive_mobile/presentation/screens/login/login_screen.dart';
@@ -12,51 +14,48 @@ import 'package:kinolive_mobile/presentation/screens/forgot_password/set_passwor
 import 'package:kinolive_mobile/presentation/screens/forgot_password/success/success_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_screen.dart';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kinolive_mobile/presentation/screens/splash/splash_screen.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 
 class GoRouterRefresh extends ChangeNotifier {
   GoRouterRefresh(this.ref) {
-    _sub = ref.listen<AuthState>(authStateProvider, (_, __) => notifyListeners());
+    _sub = ref.listen<AuthState>(
+      authStateProvider,
+          (_, __) => notifyListeners(),
+      fireImmediately: false,
+    );
   }
   final Ref ref;
   late final ProviderSubscription<AuthState> _sub;
   @override void dispose() { _sub.close(); super.dispose(); }
 }
 
+
 final appRouter = Provider<GoRouter>((ref) {
   final refresh = GoRouterRefresh(ref);
 
+  bool isPublic(String l) =>
+      l.startsWith('/login') ||
+      l.startsWith('/register') ||
+      l.startsWith('/forgot-password') ||
+      l == '/splash';
+
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/splash',
     refreshListenable: refresh,
-    redirect: (context, state) {
-      final auth = ref.read(authStateProvider);
-      final loggedIn = auth.isAuthenticated;
-      final loading  = auth.isLoading;
-
-      final location = state.matchedLocation;
-      final isAuthRoute = location == '/login' || location.startsWith('/register') || location.startsWith('/forgot-password');
-
-      if (loading) return null;
-      if (!loggedIn && !isAuthRoute) return '/login';
-      if (loggedIn && isAuthRoute) return '/';
-      return null;
-    },
     routes: [
-      GoRoute(path: '/', builder: (context, state) => const BillboardScreen()),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+      GoRoute(path: '/',       builder: (context, state) => const BillboardScreen()),
+      GoRoute(path: '/login',  builder: (context, state) => const LoginScreen()),
       GoRoute(
-          path: '/register',
-          builder: (context, state) => const RegisterScreen(),
-          routes: [
-            GoRoute(
-              path: 'complete-profile',
-              builder: (context, state) => const CompleteProfileScreen(),
-            )
-          ]
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+        routes: [
+          GoRoute(
+            path: 'complete-profile',
+            builder: (context, state) => const CompleteProfileScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/forgot-password',
@@ -84,5 +83,19 @@ final appRouter = Provider<GoRouter>((ref) {
         ],
       ),
     ],
+    redirect: (context, state) {
+      final auth = ref.read(authStateProvider);
+      final location  = state.matchedLocation;
+
+      if (auth.isLoading) return (location == '/splash') ? null : '/splash';
+
+      if (!auth.isAuthenticated) {
+        return isPublic(location) ? null : '/login';
+      }
+
+      if (isPublic(location)) return '/';
+
+      return null;
+    },
   );
 });

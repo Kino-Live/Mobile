@@ -3,4 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:kinolive_mobile/app/app.dart';
 
-void main() => runApp(ProviderScope(child: MyApp()));
+void main()
+{
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(ProviderScope(child: MyApp()));
+}
