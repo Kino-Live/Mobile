@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 import 'package:kinolive_mobile/shared/auth/auth_provider.dart';
-import 'package:kinolive_mobile/data/repositories/auth_repository_impl.dart';
+import 'package:kinolive_mobile/domain/usecases/login_user.dart';
 
 final loginVmProvider = NotifierProvider<LoginVm, LoginState>(LoginVm.new);
 
@@ -35,23 +35,23 @@ class LoginVm extends Notifier<LoginState> {
     state = state.copyWith(status: LoginStatus.loading, error: null);
 
     try {
-      final repo = ref.read(authRepositoryProvider);
-      final token = await repo.login(email: email, password: password);
-      await ref.read(authTokenProvider.notifier).setToken(token);
+      final LoginUser loginUser = ref.read(loginUserProvider);
+
+      await loginUser(email, password);
 
       state = state.copyWith(status: LoginStatus.success);
     } on AppException catch (e) {
       state = state.copyWith(status: LoginStatus.error, error: e.message);
     } catch (e) {
-      state = state.copyWith(
-        status: LoginStatus.error,
-        error: e.toString(),
-      );
+      state = state.copyWith(status: LoginStatus.error, error: e.toString());
     }
   }
 
   Future<void> logout() async {
-    await ref.read(authTokenProvider.notifier).clearToken();
+    try {
+      await ref.read(authRepositoryProvider).logout();
+    } catch (_) {
+    }
     state = const LoginState(status: LoginStatus.idle);
   }
 }

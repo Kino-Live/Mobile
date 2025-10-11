@@ -1,41 +1,26 @@
-import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kinolive_mobile/data/repositories/auth_repository_impl.dart';
 import 'package:kinolive_mobile/data/sources/local/auth_token_storage.dart';
+import 'package:kinolive_mobile/data/sources/remote/auth_api_service.dart';
+import 'package:kinolive_mobile/domain/repositories/auth_repository.dart';
+import 'package:kinolive_mobile/domain/usecases/login_user.dart';
+import 'package:kinolive_mobile/shared/network/dio_provider.dart';
 
-final secureStorageProvider = Provider<FlutterSecureStorage>(
-      (ref) => const FlutterSecureStorage(),
-);
+final authTokenStorageProvider =
+Provider<AuthTokenStorageService>((ref) => AuthTokenStorageService());
 
-final authTokenStorageProvider = Provider<AuthTokenStorage>(
-      (ref) => AuthTokenStorage(ref.read(secureStorageProvider)),
-);
+final authApiServiceProvider = Provider<AuthApiService>((ref) {
+  final dio = ref.read(dioProvider);
+  return AuthApiService(dio);
+});
 
-final authTokenProvider =
-NotifierProvider<AuthTokenController, String?>(() => AuthTokenController());
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  final api = ref.read(authApiServiceProvider);
+  final storage = ref.read(authTokenStorageProvider);
+  return AuthRepositoryImpl(api, storage);
+});
 
-class AuthTokenController extends Notifier<String?> {
-  @override
-  String? build() {
-    scheduleMicrotask(() async {
-      final saved = await ref.read(authTokenStorageProvider).read();
-      if (saved != state) state = saved;
-    });
-    return null;
-  }
-
-  Future<void> setToken(String token) async {
-    await ref.read(authTokenStorageProvider).save(token);
-    state = token;
-  }
-
-  Future<void> clearToken() async {
-    await ref.read(authTokenStorageProvider).clear();
-    state = null;
-  }
-}
-
-final isAuthenticatedProvider = Provider<bool>((ref) {
-  final token = ref.watch(authTokenProvider);
-  return token != null && token.isNotEmpty;
+final loginUserProvider = Provider<LoginUser>((ref) {
+  final repo = ref.read(authRepositoryProvider);
+  return LoginUser(repo);
 });

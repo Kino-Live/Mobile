@@ -5,7 +5,7 @@ import 'package:kinolive_mobile/shared/auth/auth_provider.dart';
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: 'http://192.168.0.77:8000', //https://postman-echo.com
+      baseUrl: 'http://192.168.0.77:8000',
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {
@@ -16,11 +16,15 @@ final dioProvider = Provider<Dio>((ref) {
   );
 
   dio.interceptors.add(InterceptorsWrapper(
-    onRequest: (options, handler) {
-      final token = ref.read(authTokenProvider);
+    onRequest: (options, handler) async {
+      final storage = ref.read(authTokenStorageProvider);
+
+      final token = await storage.read();
+
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
       }
+
       handler.next(options);
     },
   ));
