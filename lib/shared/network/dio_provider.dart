@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kinolive_mobile/shared/auth/auth_provider.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
@@ -13,6 +14,16 @@ final dioProvider = Provider<Dio>((ref) {
       },
     ),
   );
+
+  dio.interceptors.add(InterceptorsWrapper(
+    onRequest: (options, handler) {
+      final token = ref.read(authTokenProvider);
+      if (token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
+      handler.next(options);
+    },
+  ));
 
   dio.interceptors.add(LogInterceptor(responseBody: true));
 
