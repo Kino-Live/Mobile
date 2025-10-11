@@ -3,8 +3,8 @@ import 'package:kinolive_mobile/data/repositories/auth_repository_impl.dart';
 import 'package:kinolive_mobile/data/sources/local/auth_token_storage.dart';
 import 'package:kinolive_mobile/data/sources/remote/auth_api_service.dart';
 import 'package:kinolive_mobile/domain/repositories/auth_repository.dart';
-import 'package:kinolive_mobile/domain/usecases/login_user.dart';
-import 'package:kinolive_mobile/shared/network/dio_provider.dart';
+import 'package:kinolive_mobile/domain/usecases/login/login_user.dart';
+import 'package:kinolive_mobile/shared/providers/network/dio_provider.dart';
 
 final authTokenStorageProvider =
 Provider<AuthTokenStorageService>((ref) => AuthTokenStorageService());

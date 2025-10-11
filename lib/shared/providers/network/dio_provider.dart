@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kinolive_mobile/shared/auth/auth_provider.dart';
+import 'package:kinolive_mobile/shared/providers/auth_provider.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(

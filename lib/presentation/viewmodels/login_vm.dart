@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
-import 'package:kinolive_mobile/shared/auth/auth_provider.dart';
-import 'package:kinolive_mobile/domain/usecases/login_user.dart';
+import 'package:kinolive_mobile/domain/usecases/login/login_user.dart';
+import 'package:kinolive_mobile/shared/providers/auth_provider.dart';
 
 final loginVmProvider = NotifierProvider<LoginVm, LoginState>(LoginVm.new);
 

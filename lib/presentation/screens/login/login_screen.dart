@@ -18,7 +18,6 @@ class LoginScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Logged in', textAlign: TextAlign.center)),
         );
-        //context.go('/');
       }
     });
 

@@ -28,6 +28,7 @@ class LoginForm extends HookConsumerWidget {
           email.text.trim(),
           password.text.trim(),
         );
+        context.go('/');
       }
     }
 
