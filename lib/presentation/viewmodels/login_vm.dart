@@ -37,7 +37,7 @@ class LoginVm extends Notifier<LoginState> {
       // TODO: check for account
       final dio = ref.read(dioProvider);
 
-      final response = await dio.post('/post', data: {
+      final response = await dio.post('/login', data: {
         'email': email,
         'password': password,
       });
