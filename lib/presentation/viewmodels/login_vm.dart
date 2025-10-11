@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 import 'package:kinolive_mobile/shared/network/dio_provider.dart';
 import 'package:kinolive_mobile/shared/auth/auth_provider.dart';
 
-final loginVmProvider = NotifierProvider<LoginVm, LoginState>(() => LoginVm());
+final loginVmProvider = NotifierProvider<LoginVm, LoginState>(LoginVm.new);
 
 enum LoginStatus { idle, loading, success, error }
 
@@ -46,16 +47,23 @@ class LoginVm extends Notifier<LoginState> {
       final token = (response.data?['token'] as String?)?.trim();
 
       if (token == null || token.isEmpty) {
-        throw Exception('Invalid credentials');
+        throw const InvalidCredentialsException();
       }
 
       await ref.read(authTokenProvider.notifier).setToken(token);
 
       state = state.copyWith(status: LoginStatus.success);
+    } on AppException catch (e) {
+      state = state.copyWith(status: LoginStatus.error, error: e.message);
+    } on DioException catch (e) {
+      state = state.copyWith(
+        status: LoginStatus.error,
+        error: _handleDioError(e).message,
+      );
     } catch (e) {
       state = state.copyWith(
         status: LoginStatus.error,
-        error: _handleError(e),
+        error: e.toString(),
       );
     }
   }
@@ -65,17 +73,16 @@ class LoginVm extends Notifier<LoginState> {
     state = const LoginState(status: LoginStatus.idle);
   }
 
-  String _handleError(Object e) {
-    if (e is DioException) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout) {
-        return 'Network timeout';
-      }
-      if (e.response?.statusCode == 401) {
-        return 'Unauthorized';
-      }
-      return e.message ?? 'Network error';
+  AppException _handleDioError(DioException e) {
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return const NetworkTimeoutException();
     }
-    return e.toString();
+
+    if (e.response?.statusCode == 401) {
+      return const UnauthorizedException();
+    }
+
+    return NetworkException(e.message ?? 'Network error');
   }
 }
