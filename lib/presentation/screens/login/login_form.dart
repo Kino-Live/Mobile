@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'package:kinolive_mobile/app/colors_theme.dart';
+import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/login_vm.dart';
 
 class LoginForm extends HookConsumerWidget {
@@ -83,8 +84,7 @@ class LoginForm extends HookConsumerWidget {
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
-            validator: (v) =>
-            (v == null || v.isEmpty) ? 'Enter your email' : null,
+            validator: AuthValidators.email,
           ),
           const SizedBox(height: 30),
 
@@ -109,8 +109,7 @@ class LoginForm extends HookConsumerWidget {
                 ),
               ),
             ),
-            validator: (v) =>
-            (v == null || v.length < 6) ? 'Min 6 characters' : null,
+            validator: AuthValidators.passwordMin6,
           ),
           const SizedBox(height: 10),
           Align(
