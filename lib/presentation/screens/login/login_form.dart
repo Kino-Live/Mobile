@@ -28,23 +28,7 @@ class LoginForm extends HookConsumerWidget {
           email.text.trim(),
           password.text.trim(),
         );
-
-        final state = ref.read(loginVmProvider);
-        if (state.status == LoginStatus.success) {
-          // context.go('/');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Logging in...')),
-          );
-        } else if (state.status == LoginStatus.error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error ?? 'Login error')),
-          );
-        }
       }
-    }
-
-    if (loginState.status == LoginStatus.loading) {
-      return const Center(child: CircularProgressIndicator());
     }
 
     return Form(
