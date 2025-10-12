@@ -3,8 +3,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/app/colors_theme.dart';
+import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/register_vm.dart';
+import 'package:kinolive_mobile/shared/providers/network/google_provider.dart';
 
 class RegisterForm extends HookConsumerWidget {
   const RegisterForm({super.key});
@@ -30,6 +33,50 @@ class RegisterForm extends HookConsumerWidget {
         email.text.trim(),
         password.text,
       );
+    }
+
+    Future<void> onGoogle() async {
+      // TODO: register with Google
+      final googleSignIn = ref.read(googleSignInProvider);
+
+      try {
+        await googleSignIn.signOut();
+
+        final account = await googleSignIn.signIn();
+        if (account == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Google sign-in cancelled',
+                textAlign: TextAlign.center)),
+          );
+          return;
+        }
+
+        final auth = await account.authentication;
+        final idToken = auth.idToken;
+        final accessToken = auth.accessToken;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Signed in as ${account.email}',
+                textAlign: TextAlign.center),
+          ),
+        );
+
+        ref.read(authStateProvider.notifier).markAuthenticated(
+          AuthSession(accessToken: idToken ?? accessToken ?? 'google_fake_token'),
+        );
+
+        if (context.mounted) {
+          context.go('/register/complete-profile');
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google sign-in error: $e',
+                textAlign: TextAlign.center),
+          ),
+        );
+      }
     }
 
     return Form(
@@ -170,9 +217,7 @@ class RegisterForm extends HookConsumerWidget {
           SizedBox(
             height: 56,
             child: OutlinedButton(
-              onPressed: () {
-                // TODO: register with Google
-              },
+              onPressed: onGoogle,
               style: OutlinedButton.styleFrom(
                 shape: const StadiumBorder(),
                 side: BorderSide(color: colorScheme.onSurface),

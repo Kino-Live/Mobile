@@ -45,7 +45,8 @@ class LoginForm extends HookConsumerWidget {
 
         if (account == null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Google sign-in cancelled')),
+            const SnackBar(content: Text('Google sign-in cancelled',
+                textAlign: TextAlign.center)),
           );
           return;
         }
@@ -55,7 +56,8 @@ class LoginForm extends HookConsumerWidget {
         final accessToken = auth.accessToken;
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Signed in as ${account.email}', textAlign: TextAlign.center,)),
+          SnackBar(content: Text('Signed in as ${account.email}',
+            textAlign: TextAlign.center,)),
         );
 
         ref.read(authStateProvider.notifier).markAuthenticated(
@@ -64,7 +66,8 @@ class LoginForm extends HookConsumerWidget {
 
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Google sign-in error: $e', textAlign: TextAlign.center)),
+          SnackBar(content: Text('Google sign-in error: $e',
+              textAlign: TextAlign.center)),
         );
       }
     }
