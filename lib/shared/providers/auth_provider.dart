@@ -6,6 +6,7 @@ import 'package:kinolive_mobile/domain/repositories/auth_repository.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/get_saved_session.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/login_user.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/logout_user.dart';
+import 'package:kinolive_mobile/domain/usecases/auth/register_user.dart';
 import 'package:kinolive_mobile/shared/providers/network/dio_provider.dart';
 
 final authTokenStorageProvider =
@@ -35,4 +36,9 @@ final getSavedSessionProvider = Provider<GetSavedSession>((ref) {
 final logoutUserProvider = Provider<LogoutUser>((ref) {
   final repo = ref.watch(authRepositoryProvider);
   return LogoutUser(repo);
+});
+
+final registerUserProvider = Provider<RegisterUser>((ref) {
+  final repo = ref.watch(authRepositoryProvider);
+  return RegisterUser(repo);
 });
