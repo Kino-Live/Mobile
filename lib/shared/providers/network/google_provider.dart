@@ -4,6 +4,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 final googleSignInProvider = Provider<GoogleSignIn>((ref) {
   return GoogleSignIn(
     scopes: const ['email', 'profile'],
-    // serverClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
+    serverClientId: 'http://557435188455-kf4mmugvnmfgjb86cjrcrcgn9vqli7bq.apps.googleusercontent.com/',
   );
 });
