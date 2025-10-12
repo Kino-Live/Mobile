@@ -36,6 +36,23 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AuthSession> register({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final token = await _authApiService.register(email, password);
+      await _tokenStorage.save(token);
+      return AuthSession(accessToken: token);
+    } on AppException catch (e) {
+      rethrow;
+    } catch (e) {
+      throw NetworkException(e.toString());
+    }
+  }
+
+
+  @override
   Future<void> logout() async {
     await _tokenStorage.clear();
   }
