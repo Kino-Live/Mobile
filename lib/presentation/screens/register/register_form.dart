@@ -1,49 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/app/colors_theme.dart';
+import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/register_vm.dart';
 
-class RegisterForm extends StatefulWidget {
+class RegisterForm extends HookConsumerWidget {
   const RegisterForm({super.key});
 
   @override
-  State<RegisterForm> createState() => _RegisterFormState();
-}
-
-class _RegisterFormState extends State<RegisterForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController();
-  final _password = TextEditingController();
-  final _confirm = TextEditingController();
-
-  bool _obscure = true;
-  bool _obscureConfirm = true;
-
-  @override
-  void dispose() {
-    _email.dispose();
-    _password.dispose();
-    _confirm.dispose();
-    super.dispose();
-  }
-
-  void _onRegister() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Create account logic
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registering...')),
-      );
-      context.go('/register/complete-profile');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    final obscure = useState<bool>(true);
+    final obscureConfirm = useState<bool>(true);
+
+    final email = useTextEditingController();
+    final password = useTextEditingController();
+    final confirm = useTextEditingController();
+    final formKey = useMemoized(() => GlobalKey<FormState>());
+
+    final state = ref.watch(registerVmProvider);
+
+    Future<void> onRegister() async {
+      if (!formKey.currentState!.validate()) return;
+      await ref.read(registerVmProvider.notifier).register(
+        email.text.trim(),
+        password.text,
+      );
+    }
+
     return Form(
-      key: _formKey,
+      key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -74,7 +64,7 @@ class _RegisterFormState extends State<RegisterForm> {
             style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           ),
           TextFormField(
-            controller: _email,
+            controller: email,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               hintText: 'Enter your email',
@@ -82,8 +72,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
-            validator: (v) =>
-            (v == null || v.isEmpty) ? 'Enter your email' : null,
+            validator: AuthValidators.email,
           ),
           const SizedBox(height: 24),
 
@@ -93,23 +82,22 @@ class _RegisterFormState extends State<RegisterForm> {
             style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           ),
           TextFormField(
-            controller: _password,
-            obscureText: _obscure,
+            controller: password,
+            obscureText: obscure.value,
             decoration: InputDecoration(
               hintText: 'Enter your password',
               hintStyle: textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
               suffixIcon: IconButton(
-                onPressed: () => setState(() => _obscure = !_obscure),
+                onPressed: () => obscure.value = !obscure.value,
                 icon: Icon(
-                  _obscure ? Icons.visibility_off : Icons.visibility,
+                  obscure.value ? Icons.visibility_off : Icons.visibility,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            validator: (v) =>
-            (v == null || v.length < 6) ? 'Min 6 characters' : null,
+            validator: AuthValidators.passwordMin6,
           ),
           const SizedBox(height: 24),
 
@@ -119,8 +107,8 @@ class _RegisterFormState extends State<RegisterForm> {
             style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
           ),
           TextFormField(
-            controller: _confirm,
-            obscureText: _obscureConfirm,
+            controller: confirm,
+            obscureText: obscureConfirm.value,
             decoration: InputDecoration(
               hintText: 'Re-enter password',
               hintStyle: textTheme.bodyMedium?.copyWith(
@@ -128,16 +116,18 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               suffixIcon: IconButton(
                 onPressed: () =>
-                    setState(() => _obscureConfirm = !_obscureConfirm),
+                obscureConfirm.value = !obscureConfirm.value,
                 icon: Icon(
-                  _obscureConfirm ? Icons.visibility_off : Icons.visibility,
+                  obscureConfirm.value
+                      ? Icons.visibility_off
+                      : Icons.visibility,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
             validator: (v) {
               if (v == null || v.isEmpty) return 'Re-enter password';
-              if (v != _password.text) return 'Passwords do not match';
+              if (v != password.text) return 'Passwords do not match';
               return null;
             },
           ),
@@ -147,7 +137,7 @@ class _RegisterFormState extends State<RegisterForm> {
           SizedBox(
             height: 56,
             child: FilledButton(
-              onPressed: _onRegister,
+              onPressed: state.status == RegisterStatus.loading ? null : onRegister,
               style: FilledButton.styleFrom(
                 shape: const StadiumBorder(),
                 backgroundColor: colorScheme.primaryContainer,
