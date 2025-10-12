@@ -8,4 +8,9 @@ class AuthTokenStorageService {
   Future<void> save(String token) => _secure.write(key: _tokenKey, value: token);
   Future<String?> read() => _secure.read(key: _tokenKey);
   Future<void> clear() => _secure.delete(key: _tokenKey);
+
+  Future<bool> hasToken() async {
+    final token = await _secure.read(key: _tokenKey);
+    return token != null && token.isNotEmpty;
+  }
 }

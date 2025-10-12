@@ -7,4 +7,5 @@ abstract class AuthRepository {
   });
   Future<void> logout();
   Future<AuthSession?> getSavedSession();
+  Future<bool> isLoggedIn();
 }
