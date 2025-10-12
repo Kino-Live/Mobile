@@ -30,4 +30,29 @@ class AuthApiService {
       throw NetworkErrorMapper.map(e);
     }
   }
+
+  Future<String> register(String email, String password) async {
+    try {
+      final Response<Map<String, dynamic>> result = await _dio.post(
+        '/register',
+        data: {'email': email, 'password': password},
+      );
+
+      final data = result.data;
+      if (data == null) {
+        throw const NetworkException('Empty response from server');
+      }
+
+      final token = data['token'];
+      if (token is! String || token.isEmpty) {
+        throw const NetworkException('Token missing in response');
+      }
+
+      return token;
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } catch (e) {
+      throw NetworkErrorMapper.map(e);
+    }
+  }
 }
