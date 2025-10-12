@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
-import 'package:kinolive_mobile/domain/usecases/auth/login_user.dart';
 import 'package:kinolive_mobile/shared/providers/auth_provider.dart';
 
 final loginVmProvider = NotifierProvider<LoginVm, LoginState>(LoginVm.new);
@@ -35,9 +35,10 @@ class LoginVm extends Notifier<LoginState> {
     state = state.copyWith(status: LoginStatus.loading, error: null);
 
     try {
-      final LoginUser loginUser = ref.read(loginUserProvider);
+      final loginUser = ref.read(loginUserProvider);
+      final session = await loginUser(email, password);
 
-      await loginUser(email, password);
+      ref.read(authStateProvider.notifier).markAuthenticated(session);
 
       state = state.copyWith(status: LoginStatus.success);
     } on AppException catch (e) {

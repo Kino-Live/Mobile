@@ -12,27 +12,27 @@ final authTokenStorageProvider =
 Provider<AuthTokenStorageService>((ref) => AuthTokenStorageService());
 
 final authApiServiceProvider = Provider<AuthApiService>((ref) {
-  final dio = ref.read(dioProvider);
+  final dio = ref.watch(dioProvider);
   return AuthApiService(dio);
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final api = ref.read(authApiServiceProvider);
-  final storage = ref.read(authTokenStorageProvider);
+  final api = ref.watch(authApiServiceProvider);
+  final storage = ref.watch(authTokenStorageProvider);
   return AuthRepositoryImpl(api, storage);
 });
 
 final loginUserProvider = Provider<LoginUser>((ref) {
-  final repo = ref.read(authRepositoryProvider);
+  final repo = ref.watch(authRepositoryProvider);
   return LoginUser(repo);
 });
 
 final getSavedSessionProvider = Provider<GetSavedSession>((ref) {
-  final repo = ref.read(authRepositoryProvider);
+  final repo = ref.watch(authRepositoryProvider);
   return GetSavedSession(repo);
 });
 
 final logoutUserProvider = Provider<LogoutUser>((ref) {
-  final repo = ref.read(authRepositoryProvider);
+  final repo = ref.watch(authRepositoryProvider);
   return LogoutUser(repo);
 });

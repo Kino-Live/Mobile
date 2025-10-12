@@ -9,6 +9,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouter);
+
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'KinoLive',

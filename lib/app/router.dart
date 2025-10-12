@@ -30,15 +30,8 @@ class GoRouterRefresh extends ChangeNotifier {
   @override void dispose() { _sub.close(); super.dispose(); }
 }
 
-
 final appRouter = Provider<GoRouter>((ref) {
   final refresh = GoRouterRefresh(ref);
-
-  bool isPublic(String l) =>
-      l.startsWith('/login') ||
-      l.startsWith('/register') ||
-      l.startsWith('/forgot-password') ||
-      l == '/splash';
 
   return GoRouter(
     initialLocation: '/splash',
@@ -85,15 +78,23 @@ final appRouter = Provider<GoRouter>((ref) {
     ],
     redirect: (context, state) {
       final auth = ref.read(authStateProvider);
-      final location  = state.matchedLocation;
+      final loc = state.matchedLocation;
+      debugPrint('[Router] redirect from=$loc, status=${auth.status}');
 
-      if (auth.isLoading) return (location == '/splash') ? null : '/splash';
-
-      if (!auth.isAuthenticated) {
-        return isPublic(location) ? null : '/login';
+      if (auth.isLoading) {
+        return (loc == '/splash') ? null : '/splash';
       }
 
-      if (isPublic(location)) return '/';
+      if (!auth.isAuthenticated) {
+        if (loc == '/splash') return '/login';
+
+        final isPublic = loc.startsWith('/login') ||
+            loc.startsWith('/register') ||
+            loc.startsWith('/forgot-password');
+        return isPublic ? null : '/login';
+      }
+
+      if (loc == '/splash' || loc.startsWith('/login')) return '/';
 
       return null;
     },

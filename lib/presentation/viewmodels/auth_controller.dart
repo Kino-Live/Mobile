@@ -2,38 +2,77 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 import 'package:kinolive_mobile/shared/providers/auth_provider.dart';
 
-class AuthState {
-  final bool isAuthenticated;
-  final bool isLoading;
-  final AuthSession? session;
-  const AuthState({required this.isAuthenticated, required this.isLoading, this.session});
+final authStateProvider =
+NotifierProvider<AuthController, AuthState>(AuthController.new);
 
-  static const loading = AuthState(isAuthenticated: false, isLoading: true);
-  static const unauth  = AuthState(isAuthenticated: false, isLoading: false);
+enum AuthStatus { unknown, loading, authenticated, unauthenticated }
+
+class AuthState {
+  final AuthStatus status;
+  final AuthSession? session;
+
+  const AuthState({
+    required this.status,
+    this.session,
+  });
+
+  const AuthState.unknown() : this(status: AuthStatus.unknown);
+  const AuthState.loading() : this(status: AuthStatus.loading);
+  const AuthState.authenticated(AuthSession s)
+      : this(status: AuthStatus.authenticated, session: s);
+  const AuthState.unauthenticated() : this(status: AuthStatus.unauthenticated);
+
+  bool get isLoading =>
+      status == AuthStatus.loading || status == AuthStatus.unknown;
+
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && session != null;
+
+  AuthState copyWith({
+    AuthStatus? status,
+    AuthSession? session,
+  }) =>
+      AuthState(
+        status: status ?? this.status,
+        session: session ?? this.session,
+      );
 }
 
 class AuthController extends Notifier<AuthState> {
+  bool _inited = false;
+
   @override
   AuthState build() {
-    _init();
-    return AuthState.loading;
+    if (!_inited) {
+      _inited = true;
+      _bootstrap();
+    }
+    return const AuthState.loading();
   }
 
-  Future<void> _init() async {
-    final getSavedSession = ref.read(getSavedSessionProvider);
-    final session = await getSavedSession();
-    state = AuthState(isAuthenticated: session != null, isLoading: false, session: session);
+  Future<void> _bootstrap() async {
+    try {
+      final getSavedSession = ref.read(getSavedSessionProvider);
+      final saved = await getSavedSession();
+      state = saved == null
+          ? const AuthState.unauthenticated()
+          : AuthState.authenticated(saved);
+    } catch (_) {
+      state = const AuthState.unauthenticated();
+    }
   }
 
   void markAuthenticated(AuthSession session) {
-    state = AuthState(isAuthenticated: true, isLoading: false, session: session);
+    state = AuthState.authenticated(session);
+  }
+
+  void markUnauthenticated() {
+    state = AuthState.unauthenticated();
   }
 
   Future<void> logout() async {
     final logout = ref.read(logoutUserProvider);
     await logout();
-    state = AuthState.unauth;
+    state = AuthState.unauthenticated();
   }
 }
-
-final authStateProvider = NotifierProvider<AuthController, AuthState>(AuthController.new);
