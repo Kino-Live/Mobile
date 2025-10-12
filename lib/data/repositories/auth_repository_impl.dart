@@ -11,6 +11,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   AuthRepositoryImpl(this._authApiService, this.tokenStorage);
 
+  @override
   Future<bool> isLoggedIn() async => (await tokenStorage.hasToken());
 
   @override
