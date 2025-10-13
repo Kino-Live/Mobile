@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 
-class SetPasswordForm extends StatefulWidget {
+class SetPasswordForm extends ConsumerStatefulWidget {
   const SetPasswordForm({super.key});
 
   @override
-  State<SetPasswordForm> createState() => _SetPasswordFormState();
+  ConsumerState<SetPasswordForm> createState() => _SetPasswordFormState();
 }
 
-class _SetPasswordFormState extends State<SetPasswordForm> {
+class _SetPasswordFormState extends ConsumerState<SetPasswordForm> {
   final _formKey = GlobalKey<FormState>();
   final _password = TextEditingController();
   final _confirmPassword = TextEditingController();
@@ -23,13 +26,24 @@ class _SetPasswordFormState extends State<SetPasswordForm> {
     super.dispose();
   }
 
-  void _onUpdate() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Send a new password to the server
+  Future<void> _onUpdate() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final ok = await ref
+        .read(forgotPasswordVmProvider.notifier)
+        .setNewPassword(_password.text.trim());
+
+    final state = ref.read(forgotPasswordVmProvider);
+
+    if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password updated')),
+        const SnackBar(content: Text('Password updated', textAlign: TextAlign.center)),
       );
       context.go('/forgot-password/successful');
+    } else if (state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.error!, textAlign: TextAlign.center)),
+      );
     }
   }
 
@@ -37,6 +51,7 @@ class _SetPasswordFormState extends State<SetPasswordForm> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final loading = ref.watch(forgotPasswordVmProvider.select((s) => s.loading));
 
     InputDecoration _pwdDecoration({
       required String hint,
@@ -102,11 +117,7 @@ class _SetPasswordFormState extends State<SetPasswordForm> {
               obscure: _obscure1,
               onToggle: () => setState(() => _obscure1 = !_obscure1),
             ),
-            validator: (v) {
-              if (v == null || v.isEmpty) return 'Enter password';
-              if (v.length < 8) return 'At least 8 characters';
-              return null;
-            },
+            validator: AuthValidators.passwordMin6,
           ),
 
           const SizedBox(height: 24),
@@ -139,7 +150,7 @@ class _SetPasswordFormState extends State<SetPasswordForm> {
           SizedBox(
             height: 56,
             child: FilledButton(
-              onPressed: _onUpdate,
+              onPressed: loading ? null : _onUpdate,
               style: FilledButton.styleFrom(
                 shape: const StadiumBorder(),
                 backgroundColor: colorScheme.primaryContainer,

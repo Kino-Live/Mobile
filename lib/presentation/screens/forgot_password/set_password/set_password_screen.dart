@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/presentation/screens/forgot_password/set_password/set_password_form.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 
-class SetPasswordScreen extends StatefulWidget {
+class SetPasswordScreen extends ConsumerWidget {
   const SetPasswordScreen({super.key});
 
   @override
-  State<SetPasswordScreen> createState() => _SetPasswordScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loading = ref.watch(forgotPasswordVmProvider.select((s) => s.loading));
 
-class _SetPasswordScreenState extends State<SetPasswordScreen> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 72, 24, 24),
-          child: SetPasswordForm(),
+        child: Stack(
+          children: [
+            const SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(24, 72, 24, 24),
+              child: SetPasswordForm(),
+            ),
+            AnimatedOpacity(
+              opacity: loading ? 1 : 0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              child: IgnorePointer(
+                ignoring: !loading,
+                child: Container(
+                  color: Colors.black.withAlpha(51),
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
