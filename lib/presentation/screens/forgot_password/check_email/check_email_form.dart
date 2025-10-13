@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 
-class CheckEmailForm extends StatefulWidget {
+class CheckEmailForm extends ConsumerStatefulWidget {
   const CheckEmailForm({super.key, required this.email});
-
   final String email;
 
   @override
-  State<CheckEmailForm> createState() => _CheckEmailFormState();
+  ConsumerState<CheckEmailForm> createState() => _CheckEmailFormState();
 }
 
-class _CheckEmailFormState extends State<CheckEmailForm> {
+class _CheckEmailFormState extends ConsumerState<CheckEmailForm> {
   final _formKey = GlobalKey<FormState>();
 
   // 5 controllers and focuses for code entry
@@ -25,13 +26,24 @@ class _CheckEmailFormState extends State<CheckEmailForm> {
     super.dispose();
   }
 
-  void _verify() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: verify code here
+  Future<void> _verify() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final code = _otpControllers.map((c) => c.text.trim()).join();
+    if (code.length != 5) return;
+
+    final ok = await ref.read(forgotPasswordVmProvider.notifier).verifyCode(code);
+    final state = ref.read(forgotPasswordVmProvider);
+
+    if (ok) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Code verified')),
+        const SnackBar(content: Text('Code verified', textAlign: TextAlign.center)),
       );
       context.go('/forgot-password/password-reset');
+    } else if (state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.error!, textAlign: TextAlign.center)),
+      );
     }
   }
 
@@ -53,6 +65,7 @@ class _CheckEmailFormState extends State<CheckEmailForm> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final loading = ref.watch(forgotPasswordVmProvider.select((s) => s.loading));
 
     OutlineInputBorder _boxBorder(Color c) => OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
@@ -127,13 +140,11 @@ class _CheckEmailFormState extends State<CheckEmailForm> {
             TextSpan(
               children: [
                 TextSpan(
-                  text: 'We sent a reset link to ',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  text: 'We sent a reset code to ',
+                  style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                 ),
                 TextSpan(
-                  text: maskEmail(widget.email), //contact@dscode...com
+                  text: maskEmail(widget.email),
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
@@ -162,7 +173,7 @@ class _CheckEmailFormState extends State<CheckEmailForm> {
           SizedBox(
             height: 56,
             child: FilledButton(
-              onPressed: allFilled ? _verify : null,
+              onPressed: (!allFilled || loading) ? null : _verify,
               style: FilledButton.styleFrom(
                 shape: const StadiumBorder(),
                 backgroundColor: colorScheme.primaryContainer,
