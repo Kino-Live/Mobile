@@ -1,62 +1,102 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class BillboardForm extends StatefulWidget {
+import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
+import 'package:kinolive_mobile/domain/entities/movie.dart';
+
+class BillboardForm extends HookConsumerWidget {
   const BillboardForm({super.key});
 
   @override
-  State<BillboardForm> createState() => _BillboardFormState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
-class _BillboardFormState extends State<BillboardForm> {
-  // demo data
-  final nowShowing = [
-    (
-    title: 'Spiderman: No Way Home',
-    poster: 'https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg',
-    rating: 9.1,
-    ),
-    (
-    title: 'Eternals',
-    poster: 'https://image.tmdb.org/t/p/w500/b6qUu00iIIkXX13szFy7d0CyNcg.jpg',
-    rating: 9.5,
-    ),
-    (
-    title: 'Shang-Chi',
-    poster: 'https://image.tmdb.org/t/p/w500/1BIoJGKbXjdFDAqUEiA2VHqkK1Z.jpg',
-    rating: 8.1,
-    ),
-  ];
+    useEffect(() {
+      Future.microtask(() => ref.read(billboardVmProvider.notifier).load());
+      return null;
+    }, const []);
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+    ref.listen(billboardVmProvider, (prev, next) {
+      if (next.status == BillboardStatus.error && next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.error!, textAlign: TextAlign.center)),
+        );
+        ref.read(billboardVmProvider.notifier).clearError();
+      }
+    });
+
+    final state = ref.watch(billboardVmProvider);
+    final isLoading = state.isLoading;
+
+    Widget content() {
+      if (state.isLoading && state.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (state.hasError && state.isEmpty) {
+        return Center(
+          child: Text(
+            state.error ?? 'Error',
+            style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+          ),
+        );
+      }
+      if (state.isEmpty) {
+        return Center(
+          child: Text(
+            'No movies yet',
+            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+          ),
+        );
+      }
+
+      final List<Movie> movies = state.movies;
+
+      return ListView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        children: [
+          _SectionHeader(
+            title: 'Now Showing',
+            onSeeMore: () {},
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 350,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: movies.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemBuilder: (context, i) {
+                final m = movies[i];
+                return _PosterCard(
+                  title: m.title,
+                  rating: m.rating,
+                  imageUrl: m.posterUrl,
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      );
+    }
+
+    return Stack(
       children: [
-        // NOW SHOWING
-        _SectionHeader(
-          title: 'Now Showing',
-          onSeeMore: () {},
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          //ToDo: Сhange the height depending on the card height
-          height: 350,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: nowShowing.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 16),
-            itemBuilder: (context, i) {
-              final m = nowShowing[i];
-              return _PosterCard(
-                title: m.title,
-                rating: m.rating,
-                imageUrl: m.poster,
-              );
-            },
+        content(),
+        AnimatedOpacity(
+          opacity: isLoading ? 1 : 0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          child: IgnorePointer(
+            ignoring: !isLoading,
+            child: Container(
+              color: Colors.black.withAlpha(51),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
           ),
         ),
-
-        const SizedBox(height: 24),
       ],
     );
   }
@@ -77,9 +117,7 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: textTheme.titleLarge?.copyWith(
-            color: colorScheme.onSurface,
-          ),
+          style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface),
         ),
         const Spacer(),
         OutlinedButton(
@@ -119,7 +157,6 @@ class _PosterCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Poster
           AspectRatio(
             aspectRatio: 2 / 3,
             child: ClipRRect(
@@ -127,32 +164,27 @@ class _PosterCard extends StatelessWidget {
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 40),
+                errorBuilder: (_, __, ___) =>
+                const Icon(Icons.broken_image, size: 40),
               ),
             ),
           ),
           const SizedBox(height: 8),
-
-          //ToDo: (Maximum size of 3 lines of all)
-          //ToDo: Change the behavior for large text (so that it scrolls to the right and back automatically)
-          // Name
           Text(
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurface,
-            ),
+            style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
           ),
           const SizedBox(height: 4),
-          // Rate
           Row(
             children: [
-              Icon(Icons.star_rounded, size: 18, color: Colors.amber),
+              const Icon(Icons.star_rounded, size: 18, color: Colors.amber),
               const SizedBox(width: 4),
               Text(
                 '$rating/10 IMDb',
-                style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                style: textTheme.bodySmall
+                    ?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
             ],
           ),

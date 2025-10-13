@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
-import 'package:kinolive_mobile/shared/providers/auth_provider.dart';
 
 class BillboardScreen extends ConsumerStatefulWidget {
   const BillboardScreen({super.key});
@@ -25,7 +23,7 @@ class _BillboardScreenState extends ConsumerState<BillboardScreen> {
         final messenger = ScaffoldMessenger.of(context);
         messenger.hideCurrentSnackBar();
         messenger.showSnackBar(
-          const SnackBar(content: Text('Logged out', textAlign: TextAlign.center,)),
+          const SnackBar(content: Text('Logged out', textAlign: TextAlign.center)),
         );
       }
     });
