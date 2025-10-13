@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
-import 'package:kinolive_mobile/domain/entities/movie.dart';
 
 class BillboardForm extends HookConsumerWidget {
   const BillboardForm({super.key});
@@ -28,75 +26,54 @@ class BillboardForm extends HookConsumerWidget {
     });
 
     final state = ref.watch(billboardVmProvider);
-    final isLoading = state.isLoading;
 
-    Widget content() {
-      if (state.isLoading && state.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
-      }
-      if (state.hasError && state.isEmpty) {
-        return Center(
-          child: Text(
-            state.error ?? 'Error',
-            style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
-          ),
-        );
-      }
-      if (state.isEmpty) {
-        return Center(
-          child: Text(
-            'No movies yet',
-            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-          ),
-        );
-      }
-
-      final List<Movie> movies = state.movies;
-
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-        children: [
-          _SectionHeader(
-            title: 'Now Showing',
-            onSeeMore: () {},
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 350,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: movies.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (context, i) {
-                final m = movies[i];
-                return _PosterCard(
-                  title: m.title,
-                  rating: m.rating,
-                  imageUrl: m.posterUrl,
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
+    if (state.isLoading && state.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.hasError && state.isEmpty) {
+      return Center(
+        child: Text(
+          state.error ?? 'Error',
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+        ),
+      );
+    }
+    if (state.isEmpty) {
+      return Center(
+        child: Text(
+          'No movies yet',
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+        ),
       );
     }
 
-    return Stack(
+    final movies = state.movies;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       children: [
-        content(),
-        AnimatedOpacity(
-          opacity: isLoading ? 1 : 0,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          child: IgnorePointer(
-            ignoring: !isLoading,
-            child: Container(
-              color: Colors.black.withAlpha(51),
-              child: const Center(child: CircularProgressIndicator()),
-            ),
+        _SectionHeader(
+          title: 'Now Showing',
+          onSeeMore: () {},
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 350,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: movies.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 16),
+            itemBuilder: (context, i) {
+              final m = movies[i];
+              return _PosterCard(
+                title: m.title,
+                rating: m.rating,
+                imageUrl: m.posterUrl,
+              );
+            },
           ),
         ),
+        const SizedBox(height: 24),
       ],
     );
   }

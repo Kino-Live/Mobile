@@ -16,13 +16,12 @@ class _BillboardScreenState extends ConsumerState<BillboardScreen> {
   int _currentIndex = 0;
 
   Future<void> _onNavItemSelected(int index) async {
+    final prev = _currentIndex;
     setState(() => _currentIndex = index);
-
-    if (index == 0 && _currentIndex == 0) {
+    if (index == 0 && prev == 0) {
       await ref.read(billboardVmProvider.notifier).load();
       return;
     }
-
     switch (index) {
       case 0:
         break;
@@ -39,7 +38,6 @@ class _BillboardScreenState extends ConsumerState<BillboardScreen> {
     ref.listen(authStateProvider, (prev, next) {
       final wasAuthed = prev?.isAuthenticated == true;
       final nowAuthed = next.isAuthenticated;
-
       if (wasAuthed && !nowAuthed) {
         final messenger = ScaffoldMessenger.of(context);
         messenger.hideCurrentSnackBar();
@@ -51,6 +49,8 @@ class _BillboardScreenState extends ConsumerState<BillboardScreen> {
 
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final state = ref.watch(billboardVmProvider);
+    final isLoading = state.isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -76,10 +76,30 @@ class _BillboardScreenState extends ConsumerState<BillboardScreen> {
           ),
         ],
       ),
-      body: const SafeArea(child: BillboardForm()),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            const BillboardForm(),
+            AnimatedOpacity(
+              opacity: isLoading ? 1 : 0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              child: IgnorePointer(
+                ignoring: !isLoading,
+                child: Container(
+                  color: Colors.black.withAlpha(51),
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
-        onSelect: _onNavItemSelected
+        onSelect: _onNavItemSelected,
       ),
     );
   }
