@@ -5,7 +5,7 @@ import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 import 'package:kinolive_mobile/shared/providers/movies_provider.dart';
 
 final movieDetailsVmProvider =
-NotifierProvider<MovieDetailsVm, MovieDetailsState>(MovieDetailsVm.new);
+NotifierProvider.family<MovieDetailsVm, MovieDetailsState, int>((id) => MovieDetailsVm());
 
 enum MovieDetailsStatus { idle, loading, loaded, error }
 
@@ -39,8 +39,7 @@ class MovieDetailsState {
 
 class MovieDetailsVm extends Notifier<MovieDetailsState> {
   late final GetMovieDetails _getMovieDetails;
-
-  int? _id;
+  int? _currentId;
 
   @override
   MovieDetailsState build() {
@@ -48,16 +47,10 @@ class MovieDetailsVm extends Notifier<MovieDetailsState> {
     return const MovieDetailsState();
   }
 
-  void init(int id) {
-    if (_id == id) return;
-    _id = id;
-    load();
-  }
-
-  Future<void> load() async {
-    final id = _id;
-    if (id == null || state.isLoading) return;
-
+  Future<void> init(int id) async {
+    if (_currentId == id && state.isLoaded) return;
+    
+    _currentId = id;
     state = state.copyWith(status: MovieDetailsStatus.loading, error: null);
 
     try {

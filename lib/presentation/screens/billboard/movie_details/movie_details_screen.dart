@@ -16,14 +16,14 @@ class _MovieDetailsPageState extends ConsumerState<MovieDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(movieDetailsVmProvider.notifier).init(widget.id);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(movieDetailsVmProvider(widget.id).notifier).init(widget.id);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(movieDetailsVmProvider);
+    final state = ref.watch(movieDetailsVmProvider(widget.id));
 
     return Scaffold(
       body: SafeArea(
@@ -37,6 +37,7 @@ class _MovieDetailsPageState extends ConsumerState<MovieDetailsScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(state.error!, textAlign: TextAlign.center,)),
                   );
+                  ref.read(movieDetailsVmProvider(widget.id).notifier).clearError();
                 }
               });
               return const Center(child: Text('Loading error'));
