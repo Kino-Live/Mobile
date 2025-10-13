@@ -78,42 +78,106 @@ class _CheckEmailFormState extends ConsumerState<CheckEmailForm> {
       contentPadding: EdgeInsets.symmetric(vertical: 8),
       enabledBorder: _boxBorder(colorScheme.onSurfaceVariant),
       focusedBorder: _boxBorder(colorScheme.onSurface),
-      errorBorder: _boxBorder(Theme.of(context).colorScheme.error),
-      focusedErrorBorder: _boxBorder(Theme.of(context).colorScheme.error),
+      errorBorder: _boxBorder(colorScheme.error),
+      focusedErrorBorder: _boxBorder(colorScheme.error),
     );
 
     // otp (One-Time Password)
     Widget _otpBox(int i) {
+      void _focusPrev() {
+        if (i > 0) _otpNodes[i - 1].requestFocus();
+      }
+
+      void _focusNext() {
+        if (i < _otpNodes.length - 1) {
+          _otpNodes[i + 1].requestFocus();
+        } else {
+          _otpNodes.last.requestFocus();
+        }
+      }
+
+      void _spreadFrom(int index, String text) {
+        final digits = text.replaceAll(RegExp(r'\D'), '');
+        if (digits.isEmpty) return;
+
+        int dst = index;
+        int src = 0;
+        while (dst < _otpControllers.length && src < digits.length) {
+          _otpControllers[dst].text = digits[src];
+          dst++; src++;
+        }
+
+        final firstEmpty = _otpControllers.indexWhere((c) => c.text.isEmpty);
+        if (firstEmpty != -1) {
+          _otpNodes[firstEmpty].requestFocus();
+        } else {
+          _otpNodes.last.requestFocus();
+        }
+        setState(() {});
+      }
+
       return SizedBox(
         width: 56,
         height: 56,
-        child: TextFormField(
-          controller: _otpControllers[i],
-          focusNode: _otpNodes[i],
-          textAlign: TextAlign.center,
-          style: textTheme.headlineSmall?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
-          keyboardType: TextInputType.number,
-          maxLength: 1,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-          ],
-          decoration: _otpDecoration(context),
-          onChanged: (v) {
-            if (v.isNotEmpty) {
-              if (i < _otpNodes.length - 1) {
-                _otpNodes[i + 1].requestFocus();
-              } else {
-                _otpNodes[i].unfocus();
+        child: Focus(
+          onKeyEvent: (node, KeyEvent event) {
+            if (event is! KeyDownEvent) return KeyEventResult.ignored;
+            if (event.logicalKey == LogicalKeyboardKey.backspace) {
+              if (_otpControllers[i].text.isEmpty && i > 0) {
+                _otpControllers[i - 1].clear();
+                _otpNodes[i - 1].requestFocus();
+                setState(() {});
+                return KeyEventResult.handled;
               }
-            } else {
-              if (i > 0) _otpNodes[i - 1].requestFocus();
             }
-            setState(() {});
+            return KeyEventResult.ignored;
           },
-          validator: (v) => (v == null || v.isEmpty) ? '' : null,
+          child: TextFormField(
+            key: ValueKey('otp_$i'),
+            controller: _otpControllers[i],
+            focusNode: _otpNodes[i],
+            textInputAction:
+            i < _otpControllers.length - 1 ? TextInputAction.next : TextInputAction.done,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            decoration: _otpDecoration(context).copyWith(counterText: ''),
+            onChanged: (v) {
+              final digits = v.replaceAll(RegExp(r'\D'), '');
+
+              if (digits.isEmpty) {
+                _focusPrev();
+                setState(() {});
+                return;
+              }
+
+              if (digits.length == 1) {
+                if (_otpControllers[i].text != digits) {
+                  _otpControllers[i].text = digits;
+                }
+                _focusNext();
+                setState(() {});
+                return;
+              }
+
+              final first = digits[0];
+              final rest = digits.substring(1);
+
+              _otpControllers[i].value = TextEditingValue(
+                text: first,
+                selection: const TextSelection.collapsed(offset: 1),
+              );
+
+              _spreadFrom(i + 1, rest);
+            },
+            validator: (v) => (v == null || v.isEmpty) ? '' : null,
+          ),
         ),
       );
     }
@@ -126,7 +190,6 @@ class _CheckEmailFormState extends ConsumerState<CheckEmailForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 8),
-
           Text(
             'Check your email',
             textAlign: TextAlign.center,
@@ -135,13 +198,14 @@ class _CheckEmailFormState extends ConsumerState<CheckEmailForm> {
             ),
           ),
           const SizedBox(height: 8),
-
           Text.rich(
             TextSpan(
               children: [
                 TextSpan(
                   text: 'We sent a reset code to ',
-                  style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 TextSpan(
                   text: maskEmail(widget.email),
@@ -151,7 +215,7 @@ class _CheckEmailFormState extends ConsumerState<CheckEmailForm> {
                   ),
                 ),
                 TextSpan(
-                  text: '\nenter 5 digit code that mentioned in the email',
+                  text: '\nEnter the 5-digit code mentioned in the email.',
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -160,16 +224,12 @@ class _CheckEmailFormState extends ConsumerState<CheckEmailForm> {
             ),
             textAlign: TextAlign.center,
           ),
-
           const SizedBox(height: 40),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(5, (i) => _otpBox(i)),
           ),
-
           const SizedBox(height: 40),
-
           SizedBox(
             height: 56,
             child: FilledButton(
