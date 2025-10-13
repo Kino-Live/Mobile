@@ -50,8 +50,10 @@ class BillboardForm extends HookConsumerWidget {
 
     final movies = state.movies;
 
+    // --- NOW SHOWING
     final visibleNow = movies.take(4).toList();
 
+    // --- POPULAR
     //TODO: It must be at the server (or in another file)
     final popularMovies = [...movies]..sort((a, b) => b.rating.compareTo(a.rating));
     final visiblePopular = popularMovies.take(6).toList();
@@ -106,6 +108,7 @@ class BillboardForm extends HookConsumerWidget {
               runtime: '',
               tags: const <String>[],
               imageUrl: m.posterUrl,
+              onTap: () => context.push('/billboard/movie/${m.id}'),
             ),
           ),
         ),
@@ -249,6 +252,7 @@ class _PopularTile extends StatelessWidget {
     required this.runtime,
     required this.tags,
     required this.imageUrl,
+    this.onTap,
   });
 
   final String title;
@@ -256,87 +260,104 @@ class _PopularTile extends StatelessWidget {
   final String runtime;
   final List<String> tags;
   final String imageUrl;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            imageUrl,
-            width: 82,
-            height: 110,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 32),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        mouseCursor: SystemMouseCursors.click,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w800,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imageUrl,
+                  width: 82,
+                  height: 110,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.broken_image, size: 32),
                 ),
               ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Icon(Icons.star_rounded, size: 18, color: Colors.amber),
-                  const SizedBox(width: 4),
-                  Text(
-                    '$rating/10 IMDb',
-                    style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: tags
-                    .map((t) => Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Text(
-                    t,
-                    style: textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: tt.titleMedium?.copyWith(
+                        color: cs.onSurface,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                ))
-                    .toList(),
-              ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  //TODO: Add genres
-                  Icon(Icons.schedule_rounded,
-                      size: 18, color: colorScheme.onSurfaceVariant),
-                  const SizedBox(width: 6),
-                  Text(runtime,
-                      style:
-                      textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-                ],
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.star_rounded,
+                            size: 18, color: Colors.amber),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$rating/10 IMDb',
+                          style: tt.bodySmall
+                              ?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: tags
+                          .map((t) => Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color:
+                          Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Text(
+                          t,
+                          style: tt.labelLarge?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
+                        ),
+                      ))
+                          .toList(),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(Icons.schedule_rounded,
+                            size: 18, color: cs.onSurfaceVariant),
+                        const SizedBox(width: 6),
+                        Text(runtime,
+                            style: tt.bodySmall
+                                ?.copyWith(color: cs.onSurfaceVariant)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
