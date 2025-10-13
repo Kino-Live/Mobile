@@ -49,11 +49,17 @@ class BillboardForm extends HookConsumerWidget {
     }
 
     final movies = state.movies;
-    final visibleMovies = movies.take(4).toList();
+
+    final visibleNow = movies.take(4).toList();
+
+    //TODO: It must be at the server (or in another file)
+    final popularMovies = [...movies]..sort((a, b) => b.rating.compareTo(a.rating));
+    final visiblePopular = popularMovies.take(6).toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       children: [
+        // --- NOW SHOWING
         _SectionHeader(
           title: 'Now Showing',
           onSeeMore: () {
@@ -65,10 +71,10 @@ class BillboardForm extends HookConsumerWidget {
           height: 350,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: visibleMovies.length,
+            itemCount: visibleNow.length,
             separatorBuilder: (_, __) => const SizedBox(width: 16),
             itemBuilder: (context, i) {
-              final m = visibleMovies[i];
+              final m = visibleNow[i];
               return _PosterCard(
                 id: m.id,
                 title: m.title,
@@ -80,6 +86,29 @@ class BillboardForm extends HookConsumerWidget {
           ),
         ),
         const SizedBox(height: 24),
+
+        // --- POPULAR
+        _SectionHeader(
+          title: 'Popular',
+          onSeeMore: () {
+            context.push('/billboard/see-more-popular');
+          },
+        ),
+        const SizedBox(height: 12),
+        ...visiblePopular.map(
+              (m) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: _PopularTile(
+              title: m.title,
+              rating: m.rating,
+              // runtime: m.runtimeLabel ?? '${m.runtimeMinutes} min',
+              // tags: m.genres?.map((g) => g.name).toList() ?? const [],
+              runtime: '',
+              tags: const <String>[],
+              imageUrl: m.posterUrl,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -209,6 +238,105 @@ class _PosterCardState extends State<_PosterCard> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PopularTile extends StatelessWidget {
+  const _PopularTile({
+    required this.title,
+    required this.rating,
+    required this.runtime,
+    required this.tags,
+    required this.imageUrl,
+  });
+
+  final String title;
+  final double rating;
+  final String runtime;
+  final List<String> tags;
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            imageUrl,
+            width: 82,
+            height: 110,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, size: 32),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(Icons.star_rounded, size: 18, color: Colors.amber),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$rating/10 IMDb',
+                    style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: tags
+                    .map((t) => Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Text(
+                    t,
+                    style: textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ))
+                    .toList(),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  //TODO: Add genres
+                  Icon(Icons.schedule_rounded,
+                      size: 18, color: colorScheme.onSurfaceVariant),
+                  const SizedBox(width: 6),
+                  Text(runtime,
+                      style:
+                      textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
