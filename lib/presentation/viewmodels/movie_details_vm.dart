@@ -1,0 +1,78 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kinolive_mobile/domain/entities/movie_details.dart';
+import 'package:kinolive_mobile/domain/usecases/movie_details/get_movie_details.dart';
+import 'package:kinolive_mobile/shared/errors/app_exception.dart';
+import 'package:kinolive_mobile/shared/providers/movies_provider.dart';
+
+final movieDetailsVmProvider =
+NotifierProvider<MovieDetailsVm, MovieDetailsState>(MovieDetailsVm.new);
+
+enum MovieDetailsStatus { idle, loading, loaded, error }
+
+class MovieDetailsState {
+  final MovieDetailsStatus status;
+  final MovieDetails? movie;
+  final String? error;
+
+  const MovieDetailsState({
+    this.status = MovieDetailsStatus.idle,
+    this.movie,
+    this.error,
+  });
+
+  bool get isLoading => status == MovieDetailsStatus.loading;
+  bool get hasError  => status == MovieDetailsStatus.error;
+  bool get isLoaded  => status == MovieDetailsStatus.loaded;
+
+  MovieDetailsState copyWith({
+    MovieDetailsStatus? status,
+    MovieDetails? movie,
+    String? error,
+  }) {
+    return MovieDetailsState(
+      status: status ?? this.status,
+      movie: movie ?? this.movie,
+      error: error,
+    );
+  }
+}
+
+class MovieDetailsVm extends Notifier<MovieDetailsState> {
+  late final GetMovieDetails _getMovieDetails;
+
+  int? _id;
+
+  @override
+  MovieDetailsState build() {
+    _getMovieDetails = ref.read(getMovieDetailsProvider);
+    return const MovieDetailsState();
+  }
+
+  void init(int id) {
+    if (_id == id) return;
+    _id = id;
+    load();
+  }
+
+  Future<void> load() async {
+    final id = _id;
+    if (id == null || state.isLoading) return;
+
+    state = state.copyWith(status: MovieDetailsStatus.loading, error: null);
+
+    try {
+      final details = await _getMovieDetails(id);
+      state = state.copyWith(
+        status: MovieDetailsStatus.loaded,
+        movie: details,
+        error: null,
+      );
+    } on AppException catch (e) {
+      state = state.copyWith(status: MovieDetailsStatus.error, error: e.message);
+    } catch (e) {
+      state = state.copyWith(status: MovieDetailsStatus.error, error: e.toString());
+    }
+  }
+
+  void clearError() => state = state.copyWith(error: null);
+}
