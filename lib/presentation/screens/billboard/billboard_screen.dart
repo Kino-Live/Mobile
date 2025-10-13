@@ -18,6 +18,11 @@ class _BillboardScreenState extends ConsumerState<BillboardScreen> {
   Future<void> _onNavItemSelected(int index) async {
     setState(() => _currentIndex = index);
 
+    if (index == 0 && _currentIndex == 0) {
+      await ref.read(billboardVmProvider.notifier).load();
+      return;
+    }
+
     switch (index) {
       case 0:
         break;
