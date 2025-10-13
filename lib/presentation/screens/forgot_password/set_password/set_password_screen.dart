@@ -10,27 +10,30 @@ class SetPasswordScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final loading = ref.watch(forgotPasswordVmProvider.select((s) => s.loading));
 
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            const SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(24, 72, 24, 24),
-              child: SetPasswordForm(),
-            ),
-            AnimatedOpacity(
-              opacity: loading ? 1 : 0,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              child: IgnorePointer(
-                ignoring: !loading,
-                child: Container(
-                  color: Colors.black.withAlpha(51),
-                  child: const Center(child: CircularProgressIndicator()),
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: SafeArea(
+          child: Stack(
+            children: [
+              const SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(24, 72, 24, 24),
+                child: SetPasswordForm(),
+              ),
+              AnimatedOpacity(
+                opacity: loading ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                child: IgnorePointer(
+                  ignoring: !loading,
+                  child: Container(
+                    color: Colors.black.withAlpha(51),
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
