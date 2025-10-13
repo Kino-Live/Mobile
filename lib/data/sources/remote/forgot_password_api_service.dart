@@ -23,4 +23,25 @@ class ForgotPasswordApiService {
       throw NetworkErrorMapper.map(e);
     }
   }
+
+  Future<void> verifyResetCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final Response<Map<String, dynamic>> result = await _dio.post(
+        '/verify-reset-code',
+        data: {'email': email, 'code': code},
+      );
+
+      final data = result.data;
+      if (data == null || data['success'] != true) {
+        throw const NetworkException('Invalid or expired reset code');
+      }
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } catch (e) {
+      throw NetworkErrorMapper.map(e);
+    }
+  }
 }
