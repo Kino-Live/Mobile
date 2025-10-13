@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:kinolive_mobile/data/mappers/network_error_mapper.dart';
 import 'package:kinolive_mobile/data/models/movie_dto.dart';
+import 'package:kinolive_mobile/data/models/movie_details_dto.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
 class MoviesApiService {
@@ -26,8 +27,20 @@ class MoviesApiService {
     }
   }
 
-  //TODO: Implement getById
-  // Future<> getById(int id) async {
-  //
-  // }
+  Future<MovieDetailsDto> getById(int id) async {
+    try {
+      final Response<Map<String, dynamic>> res = await _dio.get('/movies/$id');
+
+      final data = res.data;
+      if (data == null) {
+        throw const NetworkException('Empty response from server');
+      }
+
+      return MovieDetailsDto.fromJson(data);
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } catch (e) {
+      throw NetworkErrorMapper.map(e);
+    }
+  }
 }
