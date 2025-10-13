@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 
-class ForgotPasswordForm extends StatefulWidget {
+class ForgotPasswordForm extends ConsumerStatefulWidget {
   const ForgotPasswordForm({super.key});
 
   @override
-  State<ForgotPasswordForm> createState() => _ForgotPasswordFormState();
+  ConsumerState<ForgotPasswordForm> createState() => _ForgotPasswordFormState();
 }
 
-class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
+class _ForgotPasswordFormState extends ConsumerState<ForgotPasswordForm> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
 
@@ -18,13 +20,19 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
     super.dispose();
   }
 
-  void _onReset() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: send an email to reset your password
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Reset link sent to email')),
-      );
-      context.push('/forgot-password/check-email', extra: _email.text);
+  Future<void> _onReset() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final ok = await ref
+        .read(forgotPasswordVmProvider.notifier)
+        .sendCode(_email.text.trim());
+
+    final vm = ref.read(forgotPasswordVmProvider);
+    if (ok) {
+      context.push('/forgot-password/check-email', extra: _email.text.trim());
+    } else if (vm.error != null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(vm.error!, textAlign: TextAlign.center)));
     }
   }
 
@@ -32,6 +40,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final loading = ref.watch(forgotPasswordVmProvider.select((s) => s.loading));
 
     return Form(
       key: _formKey,
@@ -82,7 +91,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           SizedBox(
             height: 56,
             child: FilledButton(
-              onPressed: _onReset,
+              onPressed: loading ? null : _onReset,
               style: FilledButton.styleFrom(
                 shape: const StadiumBorder(),
                 backgroundColor: colorScheme.primaryContainer,
