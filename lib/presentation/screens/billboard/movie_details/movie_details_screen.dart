@@ -205,6 +205,14 @@ class _ContentState extends State<_Content> {
                     _InfoPill(title: 'Rating', value: m.ageRestrictions),
                   ],
                 ),
+
+                const SizedBox(height: 20),
+                const Text('Description',
+                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                _ExpandableText(text: m.description),
+
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -239,6 +247,45 @@ class _InfoPill extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ExpandableText extends StatefulWidget {
+  const _ExpandableText({required this.text, this.trimLines = 3});
+  final String text;
+  final int trimLines;
+
+  @override
+  State<_ExpandableText> createState() => _ExpandableTextState();
+}
+
+class _ExpandableTextState extends State<_ExpandableText> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = const TextStyle(color: Colors.white70, height: 1.35);
+    final text = Text(
+      widget.text,
+      maxLines: _expanded ? null : widget.trimLines,
+      overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+      style: style,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        text,
+        const SizedBox(height: 4),
+        GestureDetector(
+          onTap: () => setState(() => _expanded = !_expanded),
+          child: Text(
+            _expanded ? 'Collapse' : 'Read more',
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
     );
   }
 }
