@@ -145,6 +145,38 @@ class _ContentState extends State<_Content> {
             ),
           ),
         ),
+
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title & rating
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        m.title,
+                        style: textTheme.titleLarge,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+                    const SizedBox(width: 4),
+                    Text('${m.rating.toStringAsFixed(1)}/10 IMDb',
+                        style: const TextStyle(color: Colors.white70)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
