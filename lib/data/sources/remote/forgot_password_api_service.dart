@@ -44,4 +44,24 @@ class ForgotPasswordApiService {
       throw NetworkErrorMapper.map(e);
     }
   }
+
+  Future<void> resetPassword({
+    required String email,
+    required String newPassword,
+  }) async {
+    try {
+      final Response<Map<String, dynamic>> res = await _dio.post(
+        '/reset-password',
+        data: {'email': email, 'new_password': newPassword},
+      );
+      final data = res.data;
+      if (data == null || data['success'] != true) {
+        throw const NetworkException('Failed to reset password');
+      }
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } catch (e) {
+      throw NetworkErrorMapper.map(e);
+    }
+  }
 }
