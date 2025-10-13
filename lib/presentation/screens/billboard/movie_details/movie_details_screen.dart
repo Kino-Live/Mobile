@@ -173,11 +173,72 @@ class _ContentState extends State<_Content> {
                         style: const TextStyle(color: Colors.white70)),
                   ],
                 ),
+
+                const SizedBox(height: 12),
+                // Genres chips
+                Wrap(
+                  spacing: 8,
+                  runSpacing: -8,
+                  children: m.genres
+                      .map(
+                        (g) => Chip(
+                      label: Text(g),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      backgroundColor: const Color(0xFF1B1D22),
+                      labelStyle: const TextStyle(color: Colors.white70),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  )
+                      .toList(),
+                ),
+
+                const SizedBox(height: 16),
+                // Info row (Length, Language, Rating)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _InfoPill(title: 'Length', value: m.duration),
+                    _InfoPill(title: 'Language', value: m.language),
+                    _InfoPill(title: 'Rating', value: m.ageRestrictions),
+                  ],
+                ),
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _InfoPill extends StatelessWidget {
+  const _InfoPill({required this.title, required this.value});
+  final String title;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Text(title, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+            const SizedBox(height: 6),
+            Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
     );
   }
 }
