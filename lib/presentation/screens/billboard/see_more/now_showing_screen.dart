@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
@@ -75,9 +76,11 @@ class NowShowingScreen extends HookConsumerWidget {
             itemBuilder: (context, i) {
               final m = movies[i];
               return _MovieGridTile(
+                id: m.id,
                 title: m.title,
                 imageUrl: m.posterUrl,
                 rating: m.rating,
+                onTap: () => context.push('/billboard/movie/${m.id}'),
               );
             },
           );
@@ -87,57 +90,94 @@ class NowShowingScreen extends HookConsumerWidget {
   }
 }
 
-class _MovieGridTile extends StatelessWidget {
+class _MovieGridTile extends StatefulWidget {
   const _MovieGridTile({
+    required this.id,
     required this.title,
     required this.imageUrl,
     required this.rating,
+    this.onTap,
   });
 
+  final int id;
   final String title;
   final String imageUrl;
   final double rating;
+  final VoidCallback? onTap;
+
+  @override
+  State<_MovieGridTile> createState() => _MovieGridTileState();
+}
+
+class _MovieGridTileState extends State<_MovieGridTile> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AspectRatio(
-          aspectRatio: 2 / 3,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-              const Icon(Icons.broken_image, size: 40),
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap?.call();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AspectRatio(
+            aspectRatio: 2 / 3,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Hero(
+                    tag: 'poster_${widget.id}',
+                    child: Image.network(
+                      widget.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.broken_image, size: 40),
+                    ),
+                  ),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    color: _pressed
+                        ? Colors.black.withOpacity(0.25)
+                        : Colors.transparent,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            const Icon(Icons.star_rounded, size: 18, color: Colors.amber),
-            const SizedBox(width: 4),
-            Text(
-              '$rating/10 IMDb',
-              style:
-              textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+          const SizedBox(height: 8),
+          Text(
+            widget.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurface,
             ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(Icons.star_rounded, size: 18, color: Colors.amber),
+              const SizedBox(width: 4),
+              Text(
+                '${widget.rating}/10 IMDb',
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
+

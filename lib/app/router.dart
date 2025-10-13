@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/presentation/screens/billboard/movie_details/movie_details_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/now_showing_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/login/login_screen.dart';
@@ -47,6 +48,14 @@ final appRouter = Provider<GoRouter>((ref) {
             GoRoute(
               path: 'see-more-now-showing',
               builder: (context, state) => const NowShowingScreen(),
+            ),
+            GoRoute(
+              path: 'movie/:id',
+              name: 'movie-details',
+              builder: (context, state) {
+                final id = int.parse(state.pathParameters['id']!);
+                return MovieDetailsScreen(id: id);
+              },
             ),
           ],
       ),
