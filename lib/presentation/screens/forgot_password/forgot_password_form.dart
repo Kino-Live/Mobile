@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 
 class ForgotPasswordForm extends ConsumerStatefulWidget {
@@ -81,8 +82,7 @@ class _ForgotPasswordFormState extends ConsumerState<ForgotPasswordForm> {
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
-            validator: (v) =>
-            (v == null || v.isEmpty) ? 'Enter your email' : null,
+            validator: AuthValidators.email,
           ),
 
           const SizedBox(height: 40),
