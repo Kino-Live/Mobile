@@ -28,7 +28,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Saving profile...')),
       );
-      context.go('/');
+      context.go('/billboard');
     }
   }
 
@@ -126,7 +126,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
             height: 56,
             child: FilledButton(
               onPressed: () {
-                context.go('/');
+                context.go('/billboard');
               },
               style: FilledButton.styleFrom(
                 shape: const StadiumBorder(),
