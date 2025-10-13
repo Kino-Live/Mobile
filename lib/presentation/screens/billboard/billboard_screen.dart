@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
+import 'package:kinolive_mobile/presentation/widgets/bottom_nav_bar.dart';
 
 class BillboardScreen extends ConsumerStatefulWidget {
   const BillboardScreen({super.key});
@@ -12,6 +14,20 @@ class BillboardScreen extends ConsumerStatefulWidget {
 
 class _BillboardScreenState extends ConsumerState<BillboardScreen> {
   int _currentIndex = 0;
+
+  Future<void> _onNavItemSelected(int index) async {
+    setState(() => _currentIndex = index);
+
+    switch (index) {
+      case 0:
+        break;
+      case 1:
+        break;
+      case 2:
+        await ref.read(authStateProvider.notifier).logout();
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,39 +72,9 @@ class _BillboardScreenState extends ConsumerState<BillboardScreen> {
         ],
       ),
       body: const SafeArea(child: BillboardForm()),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
-        onTap: (index) async {
-          setState(() => _currentIndex = index);
-
-          switch (index) {
-            case 0:
-              break;
-            case 1:
-              break;
-            case 2:
-              await ref.read(authStateProvider.notifier).logout();
-              break;
-          }
-        },
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        selectedItemColor: colorScheme.primary,
-        unselectedItemColor: colorScheme.onSurfaceVariant,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.movie_creation_outlined),
-            label: 'Billboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event_outlined),
-            label: 'Coming soon',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
+        onSelect: _onNavItemSelected
       ),
     );
   }
