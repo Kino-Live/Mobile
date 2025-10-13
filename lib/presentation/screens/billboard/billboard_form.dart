@@ -49,6 +49,7 @@ class BillboardForm extends HookConsumerWidget {
     }
 
     final movies = state.movies;
+    final visibleMovies = movies.take(4).toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -64,10 +65,10 @@ class BillboardForm extends HookConsumerWidget {
           height: 350,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: movies.length,
+            itemCount: visibleMovies.length,
             separatorBuilder: (_, __) => const SizedBox(width: 16),
             itemBuilder: (context, i) {
-              final m = movies[i];
+              final m = visibleMovies[i];
               return _PosterCard(
                 title: m.title,
                 rating: m.rating,
