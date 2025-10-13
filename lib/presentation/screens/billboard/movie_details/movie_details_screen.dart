@@ -212,7 +212,33 @@ class _ContentState extends State<_Content> {
                 const SizedBox(height: 8),
                 _ExpandableText(text: m.description),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 25),
+                Row(
+                  children: [
+                    const Text('Cast',
+                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                    const Spacer(),
+                    if (m.cast.length > 5)
+                      TextButton(
+                        onPressed: () {},
+                        child: const Text('More', style: TextStyle(color: Colors.white70)),
+                      ),
+                  ],
+                ),
+                SizedBox(
+                  height: 120,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (_, i) {
+                      final name = m.cast[i];
+                      return _CastCard(name: name);
+                    },
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemCount: m.cast.length,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -247,6 +273,38 @@ class _InfoPill extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CastCard extends StatelessWidget {
+  const _CastCard({required this.name});
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = name.isNotEmpty
+        ? name.trim().split(RegExp(r'\s+')).take(2).map((e) => e.characters.first).join()
+        : '?';
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 28,
+          backgroundColor: const Color(0xFF23262B),
+          child: Text(initials, style: const TextStyle(color: Colors.white)),
+        ),
+        const SizedBox(height: 6),
+        SizedBox(
+          width: 84,
+          child: Text(
+            name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        ),
+      ],
     );
   }
 }
