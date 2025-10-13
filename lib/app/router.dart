@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/presentation/screens/billboard/see_more/now_showing_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/login/login_screen.dart';
 
@@ -38,8 +39,17 @@ final appRouter = Provider<GoRouter>((ref) {
     refreshListenable: refresh,
     routes: [
       GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
-      GoRoute(path: '/',       builder: (context, state) => const BillboardScreen()),
       GoRoute(path: '/login',  builder: (context, state) => const LoginScreen()),
+      GoRoute(
+          path: '/billboard',
+          builder: (context, state) => const BillboardScreen(),
+          routes: [
+            GoRoute(
+              path: 'see-more-now-showing',
+              builder: (context, state) => const NowShowingScreen(),
+            ),
+          ],
+      ),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
@@ -94,7 +104,7 @@ final appRouter = Provider<GoRouter>((ref) {
         return isPublic ? null : '/login';
       }
 
-      if (loc == '/splash' || loc.startsWith('/login')) return '/';
+      if (loc == '/splash' || loc.startsWith('/login')) return '/billboard';
 
       return null;
     },
