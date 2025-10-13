@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/movie_details_vm.dart';
+import 'package:kinolive_mobile/domain/entities/movie_details.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MovieDetailsScreen extends ConsumerStatefulWidget {
   const MovieDetailsScreen({super.key, required this.id});
@@ -21,8 +23,129 @@ class _MovieDetailsPageState extends ConsumerState<MovieDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(movieDetailsVmProvider);
+
     return Scaffold(
-      body: Center(child: Text(widget.id.toString()),),
+      body: SafeArea(
+        bottom: false,
+        child: switch (state.status) {
+          MovieDetailsStatus.loading => const _LoadingView(),
+          MovieDetailsStatus.error => Builder(
+            builder: (context) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (state.error != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.error!, textAlign: TextAlign.center,)),
+                  );
+                }
+              });
+              return const Center(child: Text('Loading error'));
+            },
+          ),
+          MovieDetailsStatus.loaded => _Content(movie: state.movie!, onPlayTrailer: _openTrailer),
+          _ => const SizedBox.shrink(),
+        },
+      ),
+    );
+  }
+
+  Future<void> _openTrailer(MovieDetails m) async {
+    final uri = Uri.tryParse(m.trailerUrl);
+    if (uri == null) return;
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to open trailer')),
+        );
+      }
+    }
+  }
+}
+
+class _LoadingView extends StatelessWidget {
+  const _LoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: CircularProgressIndicator());
+  }
+}
+
+class _Content extends StatefulWidget {
+  const _Content({required this.movie, required this.onPlayTrailer});
+  final MovieDetails movie;
+  final Future<void> Function(MovieDetails) onPlayTrailer;
+
+  @override
+  State<_Content> createState() => _ContentState();
+}
+
+class _ContentState extends State<_Content> {
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    final m = widget.movie;
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          pinned: true,
+          floating: false,
+          expandedHeight: 320,
+          elevation: 0,
+          flexibleSpace: FlexibleSpaceBar(
+            background: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Poster
+                Hero(
+                  tag: 'poster_${m.id}',
+                  child: Image.network(
+                    m.posterUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(color: Colors.black26),
+                  ),
+                ),
+                // Gradient bottom fade
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: const [
+                          Colors.transparent,
+                          Colors.transparent,
+                          Color(0xAA0E0F12),
+                          Color(0xFF0E0F12),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Play button
+                Align(
+                  alignment: Alignment.center,
+                  child: InkWell(
+                    onTap: () => widget.onPlayTrailer(m),
+                    borderRadius: BorderRadius.circular(48),
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: const Icon(Icons.play_arrow, size: 36, color: Colors.black),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
