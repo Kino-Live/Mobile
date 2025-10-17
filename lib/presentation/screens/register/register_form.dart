@@ -63,9 +63,10 @@ class RegisterForm extends HookConsumerWidget {
         );
 
         ref.read(authStateProvider.notifier).markAuthenticated(
-          AuthSession(accessToken: idToken ?? accessToken ?? 'google_fake_token'),
+          AuthSession(accessToken: idToken ?? accessToken ?? 'fake_token'),
         );
 
+        //TODO: This is different part from login
         if (context.mounted) {
           context.go('/register/complete-profile');
         }
