@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:kinolive_mobile/app/router_path.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/movie_details/movie_details_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/now_showing_screen.dart';
@@ -36,64 +39,34 @@ final appRouter = Provider<GoRouter>((ref) {
   final refresh = GoRouterRefresh(ref);
 
   return GoRouter(
-    initialLocation: '/splash',
+    initialLocation: splashPath,
     refreshListenable: refresh,
     routes: [
-      GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
-      GoRoute(path: '/login',  builder: (context, state) => const LoginScreen()),
+      GoRoute(path: splashPath, builder: (context, state) => const SplashScreen()),
+      GoRoute(path: loginPath,  builder: (context, state) => const LoginScreen()),
+      GoRoute(path: billboardPath, builder: (context, state) => const BillboardScreen()),
+      GoRoute(path: seeMoreNowShowingPath, builder: (context, state) => const NowShowingScreen()),
       GoRoute(
-          path: '/billboard',
-          builder: (context, state) => const BillboardScreen(),
-          routes: [
-            GoRoute(
-              path: 'see-more-now-showing',
-              builder: (context, state) => const NowShowingScreen(),
-            ),
-            GoRoute(
-              path: 'movie/:id',
-              name: 'movie-details',
-              builder: (context, state) {
-                final id = int.parse(state.pathParameters['id']!);
-                return MovieDetailsScreen(id: id);
-              },
-            ),
-          ],
+        path: movieByIdPath,
+        name: 'movie-details',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return MovieDetailsScreen(id: id);
+        },
       ),
+      GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),
+      GoRoute(path: completeProfilePath, builder: (context, state) => const CompleteProfileScreen()),
+      GoRoute(path: forgotPasswordPath, builder: (context, state) => const ForgotPasswordScreen()),
       GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterScreen(),
-        routes: [
-          GoRoute(
-            path: 'complete-profile',
-            builder: (context, state) => const CompleteProfileScreen(),
-          ),
-        ],
+        path: checkEmailPath,
+        builder: (context, state) {
+          final email = state.extra as String;
+          return CheckEmailScreen(email: email);
+        },
       ),
-      GoRoute(
-        path: '/forgot-password',
-        builder: (context, state) => const ForgotPasswordScreen(),
-        routes: [
-          GoRoute(
-            path: 'check-email',
-            builder: (context, state) {
-              final email = state.extra as String;
-              return CheckEmailScreen(email: email);
-            },
-          ),
-          GoRoute(
-            path: 'password-reset',
-            builder: (context, state) => const PasswordResetScreen(),
-          ),
-          GoRoute(
-            path: 'set-password',
-            builder: (context, state) => const SetPasswordScreen(),
-          ),
-          GoRoute(
-            path: 'successful',
-            builder: (context, state) => const SuccessScreen(),
-          ),
-        ],
-      ),
+      GoRoute(path: passwordResetPath, builder: (context, state) => const PasswordResetScreen()),
+      GoRoute(path: setPasswordPath, builder: (context, state) => const SetPasswordScreen()),
+      GoRoute(path: successfulPath, builder: (context, state) => const SuccessScreen()),
     ],
     redirect: (context, state) {
       final auth = ref.read(authStateProvider);
@@ -101,19 +74,19 @@ final appRouter = Provider<GoRouter>((ref) {
       debugPrint('[Router] redirect from=$loc, status=${auth.status}');
 
       if (auth.isLoading) {
-        return (loc == '/splash') ? null : '/splash';
+        return (loc == splashPath) ? null : splashPath;
       }
 
       if (!auth.isAuthenticated) {
-        if (loc == '/splash') return '/login';
+        if (loc == splashPath) return loginPath;
 
-        final isPublic = loc.startsWith('/login') ||
-            loc.startsWith('/register') ||
-            loc.startsWith('/forgot-password');
-        return isPublic ? null : '/login';
+        final isPublic = loc.startsWith(loginPath) ||
+            loc.startsWith(registerPath) ||
+            loc.startsWith(forgotPasswordPath);
+        return isPublic ? null : loginPath;
       }
 
-      if (loc == '/splash' || loc.startsWith('/login')) return '/billboard';
+      if (loc == splashPath || loc.startsWith(loginPath)) return billboardPath;
 
       return null;
     },
