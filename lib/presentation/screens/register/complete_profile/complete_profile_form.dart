@@ -27,7 +27,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
     if (_formKey.currentState!.validate()) {
       // TODO: save name/phone number
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Saving profile...')),
+        const SnackBar(content: Text('Saving profile...', textAlign: TextAlign.center,)),
       );
       context.go(billboardPath);
     }
