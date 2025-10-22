@@ -105,10 +105,8 @@ class BillboardForm extends HookConsumerWidget {
             child: _PopularTile(
               title: m.title,
               rating: m.rating,
-              // runtime: m.runtimeLabel ?? '${m.runtimeMinutes} min',
-              // tags: m.genres?.map((g) => g.name).toList() ?? const [],
-              runtime: '',
-              tags: const <String>[],
+              runtime: m.duration,
+              tags: m.genres,
               imageUrl: m.posterUrl,
               onTap: () => context.pushNamed(movieDetailsName, pathParameters: {'id': m.id.toString()}),
             ),
@@ -277,86 +275,119 @@ class _PopularTile extends StatelessWidget {
         mouseCursor: SystemMouseCursors.click,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl,
-                  width: 82,
-                  height: 110,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.broken_image, size: 32),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // === POSTER ===
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: SizedBox(
+                    width: 100,
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.broken_image, size: 32),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: tt.titleMedium?.copyWith(
-                        color: cs.onSurface,
-                        fontWeight: FontWeight.w800,
+                const SizedBox(width: 12),
+
+                // === RIGHT SIDE (INFO) ===
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // --- Title ---
+                      Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: tt.titleMedium?.copyWith(
+                          color: cs.onSurface,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(Icons.star_rounded,
-                            size: 18, color: Colors.amber),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$rating/10 IMDb',
-                          style: tt.bodySmall
-                              ?.copyWith(color: cs.onSurfaceVariant),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: tags
-                          .map((t) => Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color:
-                          Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: Text(
-                          t,
-                          style: tt.labelLarge?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
-                          ),
-                        ),
-                      ))
-                          .toList(),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(Icons.schedule_rounded,
-                            size: 18, color: cs.onSurfaceVariant),
-                        const SizedBox(width: 6),
-                        Text(runtime,
+                      const SizedBox(height: 6),
+
+                      // --- Rating ---
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star_rounded,
+                              size: 18, color: Colors.amber),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$rating/10 IMDb',
                             style: tt.bodySmall
-                                ?.copyWith(color: cs.onSurfaceVariant)),
-                      ],
-                    ),
-                  ],
+                                ?.copyWith(color: cs.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+
+                      // --- Genres ---
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        alignment: WrapAlignment.start,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          for (var i = 0; i < tags.length && i < 3; i++)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: cs.primaryContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                tags[i],
+                                style: tt.labelSmall?.copyWith(
+                                  color: cs.onPrimaryContainer,
+                                ),
+                              ),
+                            ),
+                          if (tags.length > 3)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: cs.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                '+${tags.length - 3}',
+                                style: tt.labelSmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+
+                      // --- Runtime ---
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.schedule_rounded,
+                              size: 18, color: cs.onSurfaceVariant),
+                          const SizedBox(width: 6),
+                          Text(
+                            runtime,
+                            style: tt.bodySmall
+                                ?.copyWith(color: cs.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
