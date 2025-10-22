@@ -47,9 +47,9 @@ class MovieDetailsVm extends Notifier<MovieDetailsState> {
     return const MovieDetailsState();
   }
 
-  Future<void> init(int id) async {
-    if (_currentId == id && state.isLoaded) return;
-    
+  Future<void> init(int id, {bool force = false}) async {
+    if (!force && _currentId == id && state.isLoaded) return;
+
     _currentId = id;
     state = state.copyWith(status: MovieDetailsStatus.loading, error: null);
 

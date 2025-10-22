@@ -19,7 +19,8 @@ class _MovieDetailsPageState extends ConsumerState<MovieDetailsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(movieDetailsVmProvider(widget.id).notifier).init(widget.id);
+      await Future.delayed(const Duration(milliseconds: 30));
+      await ref.read(movieDetailsVmProvider(widget.id).notifier).init(widget.id, force: true);
     });
   }
 
@@ -242,11 +243,6 @@ class _ContentState extends State<_Content> {
                     const Text('Cast',
                         style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
                     const Spacer(),
-                    if (m.cast.length > 5)
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text('More', style: TextStyle(color: Colors.white70)),
-                      ),
                   ],
                 ),
                 SizedBox(
