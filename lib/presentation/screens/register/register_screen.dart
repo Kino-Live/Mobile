@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/register_vm.dart';
 import 'package:kinolive_mobile/presentation/screens/register/register_form.dart';
+import 'package:kinolive_mobile/presentation/widgets/auth.dart';
 
 class RegisterScreen extends ConsumerWidget {
   const RegisterScreen({super.key});
@@ -25,25 +26,12 @@ class RegisterScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            const SingleChildScrollView(
-              padding: EdgeInsets.all(24),
-              child: RegisterForm(),
-            ),
-            AnimatedOpacity(
-              opacity: isLoading ? 1 : 0,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              child: IgnorePointer(
-                ignoring: !isLoading,
-                child: Container(
-                  color: Colors.black.withAlpha(51),
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
-              ),
-            ),
-          ],
+        child: LoadingOverlay(
+          loading: isLoading,
+          child: const SingleChildScrollView(
+            padding: EdgeInsets.all(24),
+            child: RegisterForm(),
+          ),
         ),
       ),
     );
