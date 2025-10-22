@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/screens/forgot_password/forgot_password_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 
@@ -29,7 +30,7 @@ class ForgotPasswordScreen extends ConsumerWidget {
           style: IconButton.styleFrom(
             backgroundColor: colorScheme.surfaceContainerHighest,
           ),
-          onPressed: () => context.go('/login'),
+          onPressed: () => context.go(loginPath),
           icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.primary),
         ),
       ),

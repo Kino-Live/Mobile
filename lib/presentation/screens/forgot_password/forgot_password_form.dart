@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 
@@ -30,7 +31,7 @@ class _ForgotPasswordFormState extends ConsumerState<ForgotPasswordForm> {
 
     final vm = ref.read(forgotPasswordVmProvider);
     if (ok) {
-      context.push('/forgot-password/check-email', extra: _email.text.trim());
+      context.push(checkEmailPath, extra: _email.text.trim());
     } else if (vm.error != null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(vm.error!, textAlign: TextAlign.center)));

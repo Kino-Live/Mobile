@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/app/colors_theme.dart';
 import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
@@ -101,7 +102,7 @@ class LoginForm extends HookConsumerWidget {
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
-              onPressed: () => context.push('/forgot-password'),
+              onPressed: () => context.push(forgotPasswordPath),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
               ),
@@ -135,7 +136,7 @@ class LoginForm extends HookConsumerWidget {
             leading: "Don't have an account? ",
             action: 'Sign up',
             actionColor: myBlue,
-            onTap: () => context.go('/register'),
+            onTap: () => context.go(registerPath),
           ),
         ],
       ),

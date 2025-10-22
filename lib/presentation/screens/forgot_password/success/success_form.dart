@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router_path.dart';
 
 class SuccessForm extends StatefulWidget {
   const SuccessForm({super.key});
@@ -67,7 +68,7 @@ class _SuccessFormState extends State<SuccessForm> {
           height: 56,
           child: FilledButton(
             onPressed: () {
-              context.go('/login');
+              context.go(loginPath);
             },
             style: FilledButton.styleFrom(
               shape: const StadiumBorder(),

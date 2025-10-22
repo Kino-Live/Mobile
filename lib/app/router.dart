@@ -22,6 +22,18 @@ import 'package:kinolive_mobile/presentation/screens/billboard/billboard_screen.
 import 'package:kinolive_mobile/presentation/screens/splash/splash_screen.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 
+const List<String> publicPaths = <String>[
+  splashPath,
+  loginPath,
+  registerPath,
+  completeProfilePath,
+  forgotPasswordPath,
+  checkEmailPath,
+  passwordResetPath,
+  setPasswordPath,
+  successfulPath,
+];
+
 class GoRouterRefresh extends ChangeNotifier {
   GoRouterRefresh(this.ref) {
     _sub = ref.listen<AuthState>(
@@ -48,7 +60,7 @@ final appRouter = Provider<GoRouter>((ref) {
       GoRoute(path: seeMoreNowShowingPath, builder: (context, state) => const NowShowingScreen()),
       GoRoute(
         path: movieByIdPath,
-        name: 'movie-details',
+        name: movieDetailsName,
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
           return MovieDetailsScreen(id: id);
@@ -80,9 +92,7 @@ final appRouter = Provider<GoRouter>((ref) {
       if (!auth.isAuthenticated) {
         if (loc == splashPath) return loginPath;
 
-        final isPublic = loc.startsWith(loginPath) ||
-            loc.startsWith(registerPath) ||
-            loc.startsWith(forgotPasswordPath);
+        final isPublic = publicPaths.any((p) => loc.startsWith(p));
         return isPublic ? null : loginPath;
       }
 

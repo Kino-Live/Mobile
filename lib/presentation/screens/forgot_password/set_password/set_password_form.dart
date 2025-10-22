@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 
@@ -39,7 +40,7 @@ class _SetPasswordFormState extends ConsumerState<SetPasswordForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password updated', textAlign: TextAlign.center)),
       );
-      context.go('/forgot-password/successful');
+      context.go(successfulPath);
     } else if (state.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(state.error!, textAlign: TextAlign.center)),

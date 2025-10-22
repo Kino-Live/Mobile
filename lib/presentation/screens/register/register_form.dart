@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/app/colors_theme.dart';
 import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
@@ -60,7 +62,7 @@ class RegisterForm extends HookConsumerWidget {
         );
 
         if (context.mounted) {
-          context.go('/register/complete-profile');
+          context.go(completeProfilePath);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -131,7 +133,7 @@ class RegisterForm extends HookConsumerWidget {
             leading: 'Already have an account? ',
             action: 'Login',
             actionColor: myBlue,
-            onTap: () => context.go('/login'),
+            onTap: () => context.go(loginPath),
           ),
         ],
       ),

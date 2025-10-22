@@ -15,3 +15,6 @@ const String successfulPath = '/successful';
 const String billboardPath = '/billboard';
 const String seeMoreNowShowingPath = '/see-more-now-showing';
 const String movieByIdPath = '/movie/:id';
+const String movieDetailsName = 'movie-details';
+
+const String seeMorePopularPath = '/see-more-popular';

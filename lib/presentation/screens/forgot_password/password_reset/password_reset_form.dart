@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router_path.dart';
 
 class PasswordResetForm extends StatefulWidget {
   const PasswordResetForm({super.key});
@@ -53,7 +54,7 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
           height: 56,
           child: FilledButton(
             onPressed: () {
-              context.go('/forgot-password/set-password');
+              context.go(setPasswordPath);
             },
             style: FilledButton.styleFrom(
               shape: const StadiumBorder(),

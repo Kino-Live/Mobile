@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/register_vm.dart';
 import 'package:kinolive_mobile/presentation/screens/register/register_form.dart';
 import 'package:kinolive_mobile/presentation/widgets/auth.dart';
@@ -17,7 +18,7 @@ class RegisterScreen extends ConsumerWidget {
         );
       }
       if (next.status == RegisterStatus.success) {
-        context.go('/register/complete-profile');
+        context.go(completeProfilePath);
       }
     });
 

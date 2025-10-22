@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 
 class CheckEmailForm extends ConsumerStatefulWidget {
@@ -39,7 +40,7 @@ class _CheckEmailFormState extends ConsumerState<CheckEmailForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Code verified', textAlign: TextAlign.center)),
       );
-      context.go('/forgot-password/password-reset');
+      context.go(passwordResetPath);
     } else if (state.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(state.error!, textAlign: TextAlign.center)),

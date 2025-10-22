@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/app/colors_theme.dart';
 
 class CompleteProfileForm extends StatefulWidget {
@@ -28,7 +29,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Saving profile...')),
       );
-      context.go('/billboard');
+      context.go(billboardPath);
     }
   }
 
@@ -126,7 +127,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
             height: 56,
             child: FilledButton(
               onPressed: () {
-                context.go('/billboard');
+                context.go(billboardPath);
               },
               style: FilledButton.styleFrom(
                 shape: const StadiumBorder(),

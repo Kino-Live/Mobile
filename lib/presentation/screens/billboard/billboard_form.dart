@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
 
 class BillboardForm extends HookConsumerWidget {
@@ -65,7 +66,7 @@ class BillboardForm extends HookConsumerWidget {
         _SectionHeader(
           title: 'Now Showing',
           onSeeMore: () {
-            context.push('/billboard/see-more-now-showing');
+            context.push(seeMoreNowShowingPath);
           },
         ),
         const SizedBox(height: 12),
@@ -82,7 +83,7 @@ class BillboardForm extends HookConsumerWidget {
                 title: m.title,
                 rating: m.rating,
                 imageUrl: m.posterUrl,
-                onTap: () => context.push('/billboard/movie/${m.id}'),
+                onTap: () => context.pushNamed(movieDetailsName, pathParameters: {'id': m.id.toString()}),
               );
             },
           ),
@@ -93,7 +94,8 @@ class BillboardForm extends HookConsumerWidget {
         _SectionHeader(
           title: 'Popular',
           onSeeMore: () {
-            context.push('/billboard/see-more-popular');
+            //TODO: Need to add Page
+            context.push(seeMorePopularPath);
           },
         ),
         const SizedBox(height: 12),
@@ -108,7 +110,7 @@ class BillboardForm extends HookConsumerWidget {
               runtime: '',
               tags: const <String>[],
               imageUrl: m.posterUrl,
-              onTap: () => context.push('/billboard/movie/${m.id}'),
+              onTap: () => context.pushNamed(movieDetailsName, pathParameters: {'id': m.id.toString()}),
             ),
           ),
         ),
