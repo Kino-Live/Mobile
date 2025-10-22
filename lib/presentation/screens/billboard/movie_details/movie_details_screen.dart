@@ -202,7 +202,7 @@ class _ContentState extends State<_Content> {
                 // Genres
                 Wrap(
                   spacing: 8,
-                  runSpacing: -8,
+                  runSpacing: 8,
                   children: m.genres
                       .map(
                         (g) => Chip(
