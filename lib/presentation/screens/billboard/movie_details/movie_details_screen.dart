@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kinolive_mobile/domain/entities/movie.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/movie_details_vm.dart';
-import 'package:kinolive_mobile/domain/entities/movie_details.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MovieDetailsScreen extends ConsumerStatefulWidget {
@@ -50,7 +50,7 @@ class _MovieDetailsPageState extends ConsumerState<MovieDetailsScreen> {
     );
   }
 
-  Future<void> _openTrailer(MovieDetails m) async {
+  Future<void> _openTrailer(Movie m) async {
     final uri = Uri.tryParse(m.trailerUrl);
     if (uri == null) return;
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
@@ -74,8 +74,8 @@ class _LoadingView extends StatelessWidget {
 
 class _Content extends StatefulWidget {
   const _Content({required this.movie, required this.onPlayTrailer});
-  final MovieDetails movie;
-  final Future<void> Function(MovieDetails) onPlayTrailer;
+  final Movie movie;
+  final Future<void> Function(Movie) onPlayTrailer;
 
   @override
   State<_Content> createState() => _ContentState();

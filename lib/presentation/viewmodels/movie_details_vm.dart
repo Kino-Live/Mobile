@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:kinolive_mobile/domain/entities/movie_details.dart';
+import 'package:kinolive_mobile/domain/entities/movie.dart';
 import 'package:kinolive_mobile/domain/usecases/movie_details/get_movie_details.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 import 'package:kinolive_mobile/shared/providers/movies_provider.dart';
@@ -11,7 +11,7 @@ enum MovieDetailsStatus { idle, loading, loaded, error }
 
 class MovieDetailsState {
   final MovieDetailsStatus status;
-  final MovieDetails? movie;
+  final Movie? movie;
   final String? error;
 
   const MovieDetailsState({
@@ -26,7 +26,7 @@ class MovieDetailsState {
 
   MovieDetailsState copyWith({
     MovieDetailsStatus? status,
-    MovieDetails? movie,
+    Movie? movie,
     String? error,
   }) {
     return MovieDetailsState(

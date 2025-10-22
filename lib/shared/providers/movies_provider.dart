@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/data/repositories/movies_repository_impl.dart';
 import 'package:kinolive_mobile/data/sources/remote/movie_api_service.dart';
-import 'package:kinolive_mobile/domain/entities/movie_details.dart';
+import 'package:kinolive_mobile/domain/entities/movie.dart';
 import 'package:kinolive_mobile/domain/repositories/movies_repository.dart';
 import 'package:kinolive_mobile/domain/usecases/billboard/get_now_showing_movies.dart';
 import 'package:kinolive_mobile/domain/usecases/movie_details/get_movie_details.dart';
@@ -24,7 +24,7 @@ final getMovieDetailsProvider = Provider<GetMovieDetails>((ref) {
 });
 
 final movieDetailsFutureProvider =
-FutureProvider.family<MovieDetails, int>((ref, id) {
+FutureProvider.family<Movie, int>((ref, id) {
   final usecase = ref.read(getMovieDetailsProvider);
   return usecase(id);
 });
