@@ -86,7 +86,7 @@ class NowShowingScreen extends HookConsumerWidget {
             },
           );
         },
-      ),
+      )
     );
   }
 }
@@ -135,14 +135,11 @@ class _MovieGridTileState extends State<_MovieGridTile> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Hero(
-                    tag: 'poster_${widget.id}',
-                    child: Image.network(
-                      widget.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.broken_image, size: 40),
-                    ),
+                  Image.network(
+                    widget.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.broken_image, size: 40),
                   ),
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 150),

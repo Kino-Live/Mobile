@@ -83,7 +83,11 @@ class BillboardForm extends HookConsumerWidget {
                 title: m.title,
                 rating: m.rating,
                 imageUrl: m.posterUrl,
-                onTap: () => context.pushNamed(movieDetailsName, pathParameters: {'id': m.id.toString()}),
+                onTap: () => context.pushNamed(
+                  movieDetailsName,
+                  pathParameters: {'id': m.id.toString()},
+                  extra: {'heroPrefix': 'now'},
+                ),
               );
             },
           ),
@@ -103,12 +107,17 @@ class BillboardForm extends HookConsumerWidget {
               (m) => Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: _PopularTile(
+              id: m.id,
               title: m.title,
               rating: m.rating,
               runtime: m.duration,
               tags: m.genres,
               imageUrl: m.posterUrl,
-              onTap: () => context.pushNamed(movieDetailsName, pathParameters: {'id': m.id.toString()}),
+              onTap: () => context.pushNamed(
+                movieDetailsName,
+                pathParameters: {'id': m.id.toString()},
+                extra: {'heroPrefix': 'popular'},
+              ),
             ),
           ),
         ),
@@ -198,7 +207,7 @@ class _PosterCardState extends State<_PosterCard> {
                   fit: StackFit.expand,
                   children: [
                     Hero(
-                      tag: 'poster_${widget.id}',
+                      tag: 'now_poster_${widget.id}',
                       child: Image.network(
                         widget.imageUrl,
                         fit: BoxFit.cover,
@@ -247,6 +256,7 @@ class _PosterCardState extends State<_PosterCard> {
 
 class _PopularTile extends StatelessWidget {
   const _PopularTile({
+    required this.id,
     required this.title,
     required this.rating,
     required this.runtime,
@@ -255,6 +265,7 @@ class _PopularTile extends StatelessWidget {
     this.onTap,
   });
 
+  final int id;
   final String title;
   final double rating;
   final String runtime;
@@ -284,11 +295,14 @@ class _PopularTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: SizedBox(
                     width: 100,
-                    child: Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.broken_image, size: 32),
+                    child: Hero(
+                      tag: 'popular_poster_${id}',
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.broken_image, size: 32),
+                      ),
                     ),
                   ),
                 ),

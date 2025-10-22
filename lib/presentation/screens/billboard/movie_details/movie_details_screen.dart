@@ -5,8 +5,10 @@ import 'package:kinolive_mobile/presentation/viewmodels/movie_details_vm.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MovieDetailsScreen extends ConsumerStatefulWidget {
-  const MovieDetailsScreen({super.key, required this.id});
+  const MovieDetailsScreen({super.key, required this.id, this.heroPrefix});
+
   final int id;
+  final String? heroPrefix;
 
   @override
   ConsumerState<MovieDetailsScreen> createState() => _MovieDetailsPageState();
@@ -35,7 +37,7 @@ class _MovieDetailsPageState extends ConsumerState<MovieDetailsScreen> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (state.error != null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.error!, textAlign: TextAlign.center,)),
+                    SnackBar(content: Text(state.error!, textAlign: TextAlign.center)),
                   );
                   ref.read(movieDetailsVmProvider(widget.id).notifier).clearError();
                 }
@@ -43,7 +45,11 @@ class _MovieDetailsPageState extends ConsumerState<MovieDetailsScreen> {
               return const Center(child: Text('Loading error'));
             },
           ),
-          MovieDetailsStatus.loaded => _Content(movie: state.movie!, onPlayTrailer: _openTrailer),
+          MovieDetailsStatus.loaded => _Content(
+            movie: state.movie!,
+            heroPrefix: widget.heroPrefix,
+            onPlayTrailer: _openTrailer,
+          ),
           _ => const SizedBox.shrink(),
         },
       ),
@@ -73,9 +79,15 @@ class _LoadingView extends StatelessWidget {
 }
 
 class _Content extends StatefulWidget {
-  const _Content({required this.movie, required this.onPlayTrailer});
+  const _Content({
+    required this.movie,
+    required this.onPlayTrailer,
+    this.heroPrefix,
+  });
+
   final Movie movie;
   final Future<void> Function(Movie) onPlayTrailer;
+  final String? heroPrefix;
 
   @override
   State<_Content> createState() => _ContentState();
@@ -88,6 +100,7 @@ class _ContentState extends State<_Content> {
     final textTheme = Theme.of(context).textTheme;
 
     final m = widget.movie;
+
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -99,16 +112,24 @@ class _ContentState extends State<_Content> {
             background: Stack(
               fit: StackFit.expand,
               children: [
-                // Poster
-                Hero(
-                  tag: 'poster_${m.id}',
-                  child: Image.network(
+                // === Poster (Hero logic here) ===
+                if (widget.heroPrefix == 'now' || widget.heroPrefix == 'popular')
+                  Hero(
+                    tag: '${widget.heroPrefix}_poster_${m.id}',
+                    child: Image.network(
+                      m.posterUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(color: Colors.black26),
+                    ),
+                  )
+                else
+                  Image.network(
                     m.posterUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(color: Colors.black26),
                   ),
-                ),
-                // Gradient bottom fade
+
+                // === Gradient bottom fade ===
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -125,7 +146,8 @@ class _ContentState extends State<_Content> {
                     ),
                   ),
                 ),
-                // Play button
+
+                // === Play button ===
                 Align(
                   alignment: Alignment.center,
                   child: InkWell(
@@ -147,6 +169,7 @@ class _ContentState extends State<_Content> {
           ),
         ),
 
+        // === Body content ===
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -176,7 +199,7 @@ class _ContentState extends State<_Content> {
                 ),
 
                 const SizedBox(height: 12),
-                // Genres chips
+                // Genres
                 Wrap(
                   spacing: 8,
                   runSpacing: -8,
@@ -197,7 +220,7 @@ class _ContentState extends State<_Content> {
                 ),
 
                 const SizedBox(height: 16),
-                // Info row (Length, Language, Rating)
+                // Info row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -244,9 +267,7 @@ class _ContentState extends State<_Content> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () {
-                          // TODO: go to the date
-                        },
+                        onPressed: () {},
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
                           side: const BorderSide(color: Colors.white24),
@@ -259,9 +280,7 @@ class _ContentState extends State<_Content> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: FilledButton(
-                        onPressed: () {
-                          // TODO: go to the player
-                        },
+                        onPressed: () {},
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
