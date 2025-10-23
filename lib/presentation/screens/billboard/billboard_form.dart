@@ -86,7 +86,6 @@ class BillboardForm extends HookConsumerWidget {
                 onTap: () => context.pushNamed(
                   movieDetailsName,
                   pathParameters: {'id': m.id.toString()},
-                  extra: {'heroPrefix': 'now'},
                 ),
               );
             },
@@ -116,7 +115,6 @@ class BillboardForm extends HookConsumerWidget {
               onTap: () => context.pushNamed(
                 movieDetailsName,
                 pathParameters: {'id': m.id.toString()},
-                extra: {'heroPrefix': 'popular'},
               ),
             ),
           ),
@@ -206,14 +204,11 @@ class _PosterCardState extends State<_PosterCard> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Hero(
-                      tag: 'now_poster_${widget.id}',
-                      child: Image.network(
-                        widget.imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                        const Icon(Icons.broken_image, size: 40),
-                      ),
+                    Image.network(
+                      widget.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.broken_image, size: 40),
                     ),
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
@@ -295,14 +290,11 @@ class _PopularTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: SizedBox(
                     width: 100,
-                    child: Hero(
-                      tag: 'popular_poster_${id}',
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                        const Icon(Icons.broken_image, size: 32),
-                      ),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.broken_image, size: 32),
                     ),
                   ),
                 ),
@@ -361,21 +353,6 @@ class _PopularTile extends StatelessWidget {
                                 tags[i],
                                 style: tt.labelSmall?.copyWith(
                                   color: cs.onPrimaryContainer,
-                                ),
-                              ),
-                            ),
-                          if (tags.length > 3)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: cs.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                '+${tags.length - 3}',
-                                style: tt.labelSmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
                                 ),
                               ),
                             ),

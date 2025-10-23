@@ -63,8 +63,7 @@ final appRouter = Provider<GoRouter>((ref) {
         name: movieDetailsName,
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
-          final heroPrefix = (state.extra as Map?)?['heroPrefix'] as String?;
-          return MovieDetailsScreen(id: id, heroPrefix: heroPrefix);
+          return MovieDetailsScreen(id: id);
         },
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),
