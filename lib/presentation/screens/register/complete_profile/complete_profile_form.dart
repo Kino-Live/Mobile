@@ -1,124 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:kinolive_mobile/app/router_path.dart';
-import 'package:kinolive_mobile/app/colors_theme.dart';
+import 'package:kinolive_mobile/presentation/widgets/auth.dart';
+import 'package:kinolive_mobile/presentation/validators/profile_validators.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/complete_profile_vm.dart';
 
-class CompleteProfileForm extends StatefulWidget {
+class CompleteProfileForm extends HookConsumerWidget {
   const CompleteProfileForm({super.key});
 
   @override
-  State<CompleteProfileForm> createState() => _CompleteProfileFormState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final name = useTextEditingController();
+    final phone = useTextEditingController();
+    final formKey = useMemoized(() => GlobalKey<FormState>());
 
-class _CompleteProfileFormState extends State<CompleteProfileForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _name = TextEditingController();
-  final _phone = TextEditingController();
+    final state = ref.watch(completeProfileVmProvider);
 
-  @override
-  void dispose() {
-    _name.dispose();
-    _phone.dispose();
-    super.dispose();
-  }
-
-  void _onContinue() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: save name/phone number
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Saving profile...', textAlign: TextAlign.center,)),
+    Future<void> onContinue() async {
+      if (!formKey.currentState!.validate()) return;
+      await ref.read(completeProfileVmProvider.notifier).saveProfile(
+        name: name.text.trim(),
+        phone: phone.text.trim(),
       );
-      context.go(billboardPath);
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    void onSkip() => context.go(billboardPath);
 
     return Form(
-      key: _formKey,
+      key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 24),
+          const AuthHeader(
+            title: 'Complete your profile',
+            subtitle: 'Enter your name and phone number',
+            topSpacing: 24,
+            bottomSpacing: 40,
+          ),
 
-          // Header
-          Text(
-            'Complete your profile',
-            textAlign: TextAlign.center,
-            style: textTheme.headlineLarge?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
+          LabeledTextField(
+            label: 'Name',
+            controller: name,
+            hint: 'Enter your name',
+            validator: ProfileValidators.name,
+            bottomSpacing: 24,
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Enter your name and phone number',
-            textAlign: TextAlign.center,
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 60),
 
-          // Name
-          Text(
-            'Name',
-            style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
-          ),
-          TextFormField(
-            controller: _name,
-            textCapitalization: TextCapitalization.words,
-            decoration: InputDecoration(
-              hintText: 'Enter your name',
-              hintStyle: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            validator: (v) =>
-            (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
-          ),
-          const SizedBox(height: 30),
-
-          // Phone number
-          Text(
-            'Phone number',
-            style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurface),
-          ),
-          TextFormField(
-            controller: _phone,
+          LabeledTextField(
+            label: 'Phone number',
+            controller: phone,
+            hint: 'Enter your phone number',
             keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              hintText: 'Enter your phone number',
-              hintStyle: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Enter your phone';
-              if (v.replaceAll(RegExp(r'\D'), '').length < 7) {
-                return 'Phone looks too short';
-              }
-              return null;
-            },
+            validator: ProfileValidators.phone,
+            bottomSpacing: 40,
           ),
 
-          const SizedBox(height: 105),
-
-          SizedBox(
-            height: 56,
-            child: FilledButton(
-              onPressed: _onContinue,
-              style: FilledButton.styleFrom(
-                shape: const StadiumBorder(),
-                backgroundColor: colorScheme.primaryContainer,
-                foregroundColor: colorScheme.onPrimaryContainer,
-              ),
-              child: const Text('Continue'),
-            ),
+          PrimaryButton(
+            text: 'Continue',
+            onPressed: state.status == CompleteProfileStatus.loading ? null : onContinue,
+            loading: state.status == CompleteProfileStatus.loading,
           ),
 
           const SizedBox(height: 16),
@@ -126,13 +69,11 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
           SizedBox(
             height: 56,
             child: FilledButton(
-              onPressed: () {
-                context.go(billboardPath);
-              },
+              onPressed: onSkip,
               style: FilledButton.styleFrom(
                 shape: const StadiumBorder(),
-                backgroundColor: colorScheme.surfaceContainer,
-                foregroundColor: myBlue,
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                foregroundColor: Theme.of(context).colorScheme.primary,
               ),
               child: const Text('Skip'),
             ),
