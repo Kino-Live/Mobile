@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/screens/forgot_password/forgot_password_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
+import 'package:kinolive_mobile/presentation/widgets/auth.dart';
 
 class ForgotPasswordScreen extends ConsumerWidget {
   const ForgotPasswordScreen({super.key});
@@ -11,15 +13,18 @@ class ForgotPasswordScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(forgotPasswordVmProvider, (prev, next) {
-      if (next.error != null) {
+      if (next.error != null && next.error!.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.error!, textAlign: TextAlign.center)),
         );
       }
     });
 
+    final loading = ref.watch(
+      forgotPasswordVmProvider.select((s) => s.loading),
+    );
+
     final colorScheme = Theme.of(context).colorScheme;
-    final loading = ref.watch(forgotPasswordVmProvider.select((s) => s.loading));
 
     return Scaffold(
       appBar: AppBar(
@@ -30,31 +35,17 @@ class ForgotPasswordScreen extends ConsumerWidget {
           style: IconButton.styleFrom(
             backgroundColor: colorScheme.surfaceContainerHighest,
           ),
-          onPressed: () => context.go(loginPath),
+          onPressed: () => context.canPop() ? context.pop() : context.go(loginPath),
           icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.primary),
         ),
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            const SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
-              child: ForgotPasswordForm(),
-            ),
-            // loading overlay как в LoginScreen
-            AnimatedOpacity(
-              opacity: loading ? 1 : 0,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              child: IgnorePointer(
-                ignoring: !loading,
-                child: Container(
-                  color: Colors.black.withAlpha(51),
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
-              ),
-            ),
-          ],
+        child: LoadingOverlay(
+          loading: loading,
+          child: const SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(24, 0, 24, 24),
+            child: ForgotPasswordForm(),
+          ),
         ),
       ),
     );
