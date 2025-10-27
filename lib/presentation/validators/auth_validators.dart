@@ -11,3 +11,15 @@ class AuthValidators {
     return null;
   }
 }
+
+String maskEmail(String email) {
+  final atIndex = email.indexOf('@');
+  if (atIndex <= 1) return email;
+
+  final name = email.substring(0, atIndex);
+  final domain = email.substring(atIndex);
+
+  return name.length <= 4
+      ? '${name[0]}...$domain'
+      : '${name.substring(0, 4)}...$domain';
+}
