@@ -64,21 +64,14 @@ class CompleteProfileForm extends HookConsumerWidget {
             text: 'Continue',
             onPressed: state.status == CompleteProfileStatus.loading ? null : onContinue,
             loading: state.status == CompleteProfileStatus.loading,
+            bottomSpacing: 16,
           ),
 
-          const SizedBox(height: 16),
-
-          SizedBox(
-            height: 56,
-            child: FilledButton(
-              onPressed: onSkip,
-              style: FilledButton.styleFrom(
-                shape: const StadiumBorder(),
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                foregroundColor: Theme.of(context).colorScheme.primary,
-              ),
-              child: const Text('Skip'),
-            ),
+          PrimaryButton(
+            text: 'Skip',
+            onPressed: onSkip,
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+            foregroundColor: Theme.of(context).colorScheme.primary,
           ),
         ],
       ),
