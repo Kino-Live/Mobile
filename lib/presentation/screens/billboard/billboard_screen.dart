@@ -1,56 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/bottom_nav_bar.dart';
+import 'package:kinolive_mobile/presentation/widgets/loading_overlay.dart';
 
-class BillboardScreen extends ConsumerStatefulWidget {
+class BillboardScreen extends HookConsumerWidget {
   const BillboardScreen({super.key});
 
   @override
-  ConsumerState<BillboardScreen> createState() => _BillboardScreenState();
-}
-
-class _BillboardScreenState extends ConsumerState<BillboardScreen> {
-  int _currentIndex = 0;
-
-  Future<void> _onNavItemSelected(int index) async {
-    final prev = _currentIndex;
-    setState(() => _currentIndex = index);
-    if (index == 0 && prev == 0) {
-      await ref.read(billboardVmProvider.notifier).load();
-      return;
-    }
-    switch (index) {
-      case 0:
-        break;
-      case 1:
-        break;
-      case 2:
-        await ref.read(authStateProvider.notifier).logout();
-        break;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(authStateProvider, (prev, next) {
       final wasAuthed = prev?.isAuthenticated == true;
       final nowAuthed = next.isAuthenticated;
       if (wasAuthed && !nowAuthed) {
-        final messenger = ScaffoldMessenger.of(context);
-        messenger.hideCurrentSnackBar();
-        messenger.showSnackBar(
+        final m = ScaffoldMessenger.of(context);
+        m.hideCurrentSnackBar();
+        m.showSnackBar(
           const SnackBar(content: Text('Logged out', textAlign: TextAlign.center)),
         );
       }
     });
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final state = ref.watch(billboardVmProvider);
     final isLoading = state.isLoading;
+
+    final index = useState(0);
+
+    Future<void> onNavigation(int i) async {
+      final prev = index.value;
+      index.value = i;
+      if (i == 0 && prev == 0) {
+        await ref.read(billboardVmProvider.notifier).load();
+        return;
+      }
+      switch (i) {
+        case 0:
+          break;
+        case 1:
+          break;
+        case 2:
+          await ref.read(authStateProvider.notifier).logout();
+          break;
+      }
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -77,29 +75,14 @@ class _BillboardScreenState extends ConsumerState<BillboardScreen> {
         ],
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            const BillboardForm(),
-            AnimatedOpacity(
-              opacity: isLoading ? 1 : 0,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              child: IgnorePointer(
-                ignoring: !isLoading,
-                child: Container(
-                  color: Colors.black.withAlpha(51),
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              ),
-            ),
-          ],
+        child: LoadingOverlay(
+          loading: isLoading,
+          child: const BillboardForm(),
         ),
       ),
       bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onSelect: _onNavItemSelected,
+        currentIndex: index.value,
+        onSelect: onNavigation,
       ),
     );
   }
