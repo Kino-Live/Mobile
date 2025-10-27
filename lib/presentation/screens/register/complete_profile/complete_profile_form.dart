@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:kinolive_mobile/app/router_path.dart';
-import 'package:kinolive_mobile/presentation/widgets/auth.dart';
 import 'package:kinolive_mobile/presentation/validators/profile_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/complete_profile_vm.dart';
+import 'package:kinolive_mobile/presentation/widgets/header.dart';
+import 'package:kinolive_mobile/presentation/widgets/labeled_text_field.dart';
+import 'package:kinolive_mobile/presentation/widgets/primary_button.dart';
 
 class CompleteProfileForm extends HookConsumerWidget {
   const CompleteProfileForm({super.key});
@@ -34,7 +36,7 @@ class CompleteProfileForm extends HookConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AuthHeader(
+          const Header(
             title: 'Complete your profile',
             subtitle: 'Enter your name and phone number',
             topSpacing: 24,

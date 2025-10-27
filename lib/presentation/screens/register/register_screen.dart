@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/register_vm.dart';
 import 'package:kinolive_mobile/presentation/screens/register/register_form.dart';
-import 'package:kinolive_mobile/presentation/widgets/auth.dart';
+import 'package:kinolive_mobile/presentation/widgets/loading_overlay.dart';
 
 class RegisterScreen extends ConsumerWidget {
   const RegisterScreen({super.key});

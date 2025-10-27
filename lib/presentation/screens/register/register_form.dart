@@ -9,7 +9,14 @@ import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/register_vm.dart';
-import 'package:kinolive_mobile/presentation/widgets/auth.dart';
+
+import 'package:kinolive_mobile/presentation/widgets/footer_text_link.dart';
+import 'package:kinolive_mobile/presentation/widgets/google_button.dart';
+import 'package:kinolive_mobile/presentation/widgets/header.dart';
+import 'package:kinolive_mobile/presentation/widgets/labeled_text_field.dart';
+import 'package:kinolive_mobile/presentation/widgets/or_divider.dart';
+import 'package:kinolive_mobile/presentation/widgets/password_field.dart';
+import 'package:kinolive_mobile/presentation/widgets/primary_button.dart';
 import 'package:kinolive_mobile/shared/providers/network/google_provider.dart';
 
 class RegisterForm extends HookConsumerWidget {
@@ -79,7 +86,7 @@ class RegisterForm extends HookConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AuthHeader(
+          const Header(
             title: 'Register',
             subtitle: 'Create an account to continue',
             topSpacing: 24,

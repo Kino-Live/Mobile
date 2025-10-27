@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
-import 'package:kinolive_mobile/presentation/widgets/auth.dart';
+import 'package:kinolive_mobile/presentation/widgets/header.dart';
+import 'package:kinolive_mobile/presentation/widgets/labeled_text_field.dart';
+import 'package:kinolive_mobile/presentation/widgets/primary_button.dart';
 
 class ForgotPasswordForm extends HookConsumerWidget {
   const ForgotPasswordForm({super.key});
@@ -35,7 +37,7 @@ class ForgotPasswordForm extends HookConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AuthHeader(
+          const Header(
             title: 'Forgot password',
             subtitle: 'Please enter your email to reset the password',
             topSpacing: 8,
