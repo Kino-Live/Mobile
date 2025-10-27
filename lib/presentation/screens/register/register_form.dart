@@ -86,7 +86,7 @@ class RegisterForm extends HookConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Header(
+          Header(
             title: 'Register',
             subtitle: 'Create an account to continue',
             topSpacing: 24,
@@ -127,14 +127,18 @@ class RegisterForm extends HookConsumerWidget {
             onPressed:
             state.status == RegisterStatus.loading ? null : onRegister,
             loading: state.status == RegisterStatus.loading,
+            bottomSpacing: 30,
           ),
 
-          const SizedBox(height: 30),
-          const OrDivider(),
-          const SizedBox(height: 28),
+          OrDivider(
+              bottomSpacing: 28
+          ),
 
-          GoogleButton(text: 'Register with Google', onPressed: onGoogle),
-          const SizedBox(height: 16),
+          GoogleButton(
+            text: 'Register with Google',
+            onPressed: onGoogle,
+            bottomSpacing: 16,
+          ),
 
           FooterTextLink(
             leading: 'Already have an account? ',

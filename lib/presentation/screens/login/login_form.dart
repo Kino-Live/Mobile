@@ -129,14 +129,18 @@ class LoginForm extends HookConsumerWidget {
             onPressed:
             loginState.status == LoginStatus.loading ? null : onLogin,
             loading: loginState.status == LoginStatus.loading,
+            bottomSpacing: 30,
           ),
 
-          const SizedBox(height: 30),
-          const OrDivider(),
-          const SizedBox(height: 28),
+          const OrDivider(
+            bottomSpacing: 28,
+          ),
 
-          GoogleButton(text: 'Login with Google', onPressed: onGoogle),
-          const SizedBox(height: 16),
+          GoogleButton(
+            text: 'Login with Google',
+            onPressed: onGoogle,
+            bottomSpacing: 16,
+          ),
 
           FooterTextLink(
             leading: "Don't have an account? ",

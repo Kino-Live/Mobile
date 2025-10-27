@@ -37,12 +37,13 @@ class ForgotPasswordForm extends HookConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Header(
+          Header(
             title: 'Forgot password',
             subtitle: 'Please enter your email to reset the password',
             topSpacing: 8,
             bottomSpacing: 40,
           ),
+
           LabeledTextField(
             label: 'Email',
             controller: email,
@@ -51,6 +52,7 @@ class ForgotPasswordForm extends HookConsumerWidget {
             validator: AuthValidators.email,
             bottomSpacing: 40,
           ),
+
           PrimaryButton(
             text: 'Reset Password',
             onPressed: loading ? null : onReset,
