@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:kinolive_mobile/app/router_path.dart';
+import 'package:kinolive_mobile/presentation/widgets/header.dart';
+import 'package:kinolive_mobile/presentation/widgets/primary_button.dart';
 
-class PasswordResetForm extends StatefulWidget {
+class PasswordResetForm extends StatelessWidget {
   const PasswordResetForm({super.key});
-
-  @override
-  State<PasswordResetForm> createState() => _PasswordResetFormState();
-}
-
-class _PasswordResetFormState extends State<PasswordResetForm> {
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,45 +16,18 @@ class _PasswordResetFormState extends State<PasswordResetForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 8),
-
-        // Header
-        Text(
-          'Password reset',
-          textAlign: TextAlign.center,
-          style: textTheme.headlineLarge?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 8),
-
-        // Description
-        Text(
-          'Your password has been successfully reset.\n'
-              'click confirm to set a new password',
-          textAlign: TextAlign.center,
-          style: textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
+        const Header(
+          title: 'Password reset',
+          subtitle: 'Your password has been successfully reset.\nClick Confirm to set a new password',
+          topSpacing: 8,
+          bottomSpacing: 40,
         ),
 
-        const SizedBox(height: 40),
-
-        // Confirm Button
-        SizedBox(
-          height: 56,
-          child: FilledButton(
-            onPressed: () {
-              context.go(setPasswordPath);
-            },
-            style: FilledButton.styleFrom(
-              shape: const StadiumBorder(),
-              backgroundColor: colorScheme.primaryContainer,
-              foregroundColor: colorScheme.onPrimaryContainer,
-            ),
-            child: const Text('Confirm'),
-          ),
+        PrimaryButton(
+          text: 'Confirm',
+          onPressed: () => context.go(setPasswordPath),
+          backgroundColor: colorScheme.primaryContainer,
+          foregroundColor: colorScheme.onPrimaryContainer,
         ),
       ],
     );
