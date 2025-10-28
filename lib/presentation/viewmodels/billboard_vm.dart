@@ -14,25 +14,49 @@ class BillboardState {
   final List<Movie> movies;
   final String? error;
 
+  final String query;
+
   const BillboardState({
     this.status = BillboardStatus.idle,
     this.movies = const [],
     this.error,
+    this.query = '',
   });
 
   bool get isLoading => status == BillboardStatus.loading;
   bool get hasError => status == BillboardStatus.error;
   bool get isEmpty => movies.isEmpty;
 
+  List<Movie> get filteredMovies {
+    Iterable<Movie> res = movies;
+
+    final q = query.trim().toLowerCase();
+    if (q.isNotEmpty) {
+      res = res.where((m) {
+        final inTitle = m.title.toLowerCase().contains(q);
+        final inGenres = m.genres.any((g) => g.toLowerCase().contains(q));
+        return inTitle || inGenres;
+      });
+    }
+
+    return res.toList();
+  }
+
   BillboardState copyWith({
     BillboardStatus? status,
     List<Movie>? movies,
     String? error,
+
+    String? query,
+    Set<String>? selectedGenres,
+    double? minRating,
   }) {
     return BillboardState(
       status: status ?? this.status,
       movies: movies ?? this.movies,
       error: error,
+
+      query: query ?? this.query,
     );
   }
 }
@@ -65,4 +89,9 @@ class BillboardVm extends Notifier<BillboardState> {
   }
 
   void clearError() => state = state.copyWith(error: null);
+
+  void setQuery(String v) => state = state.copyWith(query: v);
+
+  void clearQuery() => state = state.copyWith(query: '');
+
 }

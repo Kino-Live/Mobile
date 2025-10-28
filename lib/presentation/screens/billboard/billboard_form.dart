@@ -9,7 +9,9 @@ import 'package:kinolive_mobile/presentation/widgets/billboard/section_header.da
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
 
 class BillboardForm extends HookConsumerWidget {
-  const BillboardForm({super.key});
+  const BillboardForm({super.key, this.onRefresh});
+
+  final Future<void> Function()? onRefresh;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,7 +45,10 @@ class BillboardForm extends HookConsumerWidget {
         ),
       );
     }
-    if (state.isEmpty) {
+
+    final movies = state.filteredMovies;
+
+    if (state.isEmpty && movies.isEmpty) {
       return Center(
         child: Text(
           'No movies yet',
@@ -52,17 +57,25 @@ class BillboardForm extends HookConsumerWidget {
       );
     }
 
-    final movies = state.movies;
+    final hasActiveFilters = state.query.isNotEmpty;
+    if (movies.isEmpty && hasActiveFilters) {
+      return Center(
+        child: Text(
+          'Nothing found',
+          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+        ),
+      );
+    }
 
-    // --- NOW SHOWING
     final visibleNow = movies.take(4).toList();
     final popular = [...movies]..sort((a, b) => b.rating.compareTo(a.rating));
     final visiblePopular = popular.take(6).toList();
 
-    Future<void> onRefresh() => ref.read(billboardVmProvider.notifier).load();
+    Future<void> _defaultRefresh() =>
+        ref.read(billboardVmProvider.notifier).load();
 
     return RefreshIndicator(
-      onRefresh: onRefresh,
+      onRefresh: onRefresh ?? _defaultRefresh,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         children: [
@@ -101,7 +114,7 @@ class BillboardForm extends HookConsumerWidget {
             title: 'Popular',
             actionText: 'See more',
             onAction: () {
-              //TODO: Need to add Page
+              // TODO: Need to add Page
               // context.push(seeMorePopularPath);
             },
           ),
