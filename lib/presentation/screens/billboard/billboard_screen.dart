@@ -4,8 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
-import 'package:kinolive_mobile/presentation/widgets/bottom_nav_bar.dart';
-import 'package:kinolive_mobile/presentation/widgets/loading_overlay.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/bottom_nav_bar.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';
 
 class BillboardScreen extends HookConsumerWidget {
   const BillboardScreen({super.key});

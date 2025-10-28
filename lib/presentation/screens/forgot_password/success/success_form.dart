@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/app/router_path.dart';
-import 'package:kinolive_mobile/presentation/screens/forgot_password/success/success_icon.dart';
-import 'package:kinolive_mobile/presentation/widgets/header.dart';
-import 'package:kinolive_mobile/presentation/widgets/primary_button.dart';
+import 'package:kinolive_mobile/presentation/widgets/success/success_icon.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/header.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';
 
 class SuccessForm extends StatelessWidget {
   const SuccessForm({super.key});

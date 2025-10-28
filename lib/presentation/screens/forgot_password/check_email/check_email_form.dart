@@ -5,9 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
-import 'package:kinolive_mobile/presentation/widgets/header.dart';
-import 'package:kinolive_mobile/presentation/widgets/primary_button.dart';
-import 'package:kinolive_mobile/presentation/screens/forgot_password/check_email/otp_input.dart';
+import 'package:kinolive_mobile/presentation/widgets/check_email/row_otp_boxes.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/header.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';
 
 class CheckEmailForm extends ConsumerStatefulWidget {
   const CheckEmailForm({super.key, required this.email});
@@ -79,7 +79,7 @@ class _CheckEmailFormState extends ConsumerState<CheckEmailForm> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          OtpInput(
+          RowOtpBoxes(
             length: 5,
             onChanged: (v) => setState(() => _code = v),
             onCompleted: (v) {

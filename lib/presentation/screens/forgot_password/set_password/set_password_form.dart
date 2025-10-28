@@ -5,9 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
-import 'package:kinolive_mobile/presentation/widgets/header.dart';
-import 'package:kinolive_mobile/presentation/widgets/password_field.dart';
-import 'package:kinolive_mobile/presentation/widgets/primary_button.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/header.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/password_field.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';
 
 class SetPasswordForm extends HookConsumerWidget {
   const SetPasswordForm({super.key});

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:kinolive_mobile/app/router_path.dart';
-import 'package:kinolive_mobile/presentation/widgets/header.dart';
-import 'package:kinolive_mobile/presentation/widgets/primary_button.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/header.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';
 
 class PasswordResetForm extends StatelessWidget {
   const PasswordResetForm({super.key});

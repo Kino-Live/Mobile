@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/presentation/screens/login/login_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/login_vm.dart';
-import 'package:kinolive_mobile/presentation/widgets/loading_overlay.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});

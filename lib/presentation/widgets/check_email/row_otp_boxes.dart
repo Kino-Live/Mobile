@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class OtpInput extends StatefulWidget {
+class RowOtpBoxes extends StatefulWidget {
   final int length;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onCompleted;
   final double boxSize;
 
-  const OtpInput({
+  const RowOtpBoxes({
     super.key,
     this.length = 5,
     this.onChanged,
@@ -16,10 +16,10 @@ class OtpInput extends StatefulWidget {
   });
 
   @override
-  State<OtpInput> createState() => _OtpInputState();
+  State<RowOtpBoxes> createState() => _RowOtpBoxesState();
 }
 
-class _OtpInputState extends State<OtpInput> {
+class _RowOtpBoxesState extends State<RowOtpBoxes> {
   late final List<TextEditingController> _controllers;
   late final List<FocusNode> _nodes;
 

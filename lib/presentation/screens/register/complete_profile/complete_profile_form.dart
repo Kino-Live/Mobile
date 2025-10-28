@@ -6,9 +6,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/validators/profile_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/complete_profile_vm.dart';
-import 'package:kinolive_mobile/presentation/widgets/header.dart';
-import 'package:kinolive_mobile/presentation/widgets/labeled_text_field.dart';
-import 'package:kinolive_mobile/presentation/widgets/primary_button.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/header.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/labeled_text_field.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';
 
 class CompleteProfileForm extends HookConsumerWidget {
   const CompleteProfileForm({super.key});

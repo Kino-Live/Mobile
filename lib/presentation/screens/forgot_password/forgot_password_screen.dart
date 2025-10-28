@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/presentation/screens/forgot_password/forgot_password_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
-import 'package:kinolive_mobile/presentation/widgets/loading_overlay.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';
 
 class ForgotPasswordScreen extends ConsumerWidget {
   const ForgotPasswordScreen({super.key});
