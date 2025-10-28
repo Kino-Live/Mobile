@@ -39,9 +39,9 @@ class BillboardForm extends HookConsumerWidget {
     final hasActiveFilters = state.query.isNotEmpty || state.selectedGenres.isNotEmpty || state.minRating > 0;
 
     //TODO: Move this block?
-    final visibleNow = movies.take(4).toList();
-    final popular = [...movies]..sort((a, b) => b.rating.compareTo(a.rating));
-    final visiblePopular = popular.take(6).toList();
+    final visibleNowMovies = movies.take(4).toList();
+    final popularMovies = [...movies]..sort((a, b) => b.rating.compareTo(a.rating));
+    final visiblePopularMovies = popularMovies.take(6).toList();
 
     Future<void> defaultRefresh() => ref.read(billboardVmProvider.notifier).load();
 
@@ -102,10 +102,10 @@ class BillboardForm extends HookConsumerWidget {
                   height: 350,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemCount: visibleNow.length,
+                    itemCount: visibleNowMovies.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 16),
                     itemBuilder: (context, i) {
-                      final m = visibleNow[i];
+                      final m = visibleNowMovies[i];
                       return PosterCard(
                         title: m.title,
                         rating: m.rating,
@@ -125,12 +125,10 @@ class BillboardForm extends HookConsumerWidget {
                   SectionHeader(
                     title: 'Popular',
                     actionText: 'See more',
-                    onAction: () {
-                      // TODO: add Popular page
-                    },
+                    onAction: () => context.push(seeMorePopularPath),
                   ),
                   const SizedBox(height: 12),
-                  ...visiblePopular.map(
+                  ...visiblePopularMovies.map(
                     (m) => Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: PopularTile(

@@ -6,6 +6,7 @@ import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/movie_details/movie_details_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/now_showing_screen.dart';
+import 'package:kinolive_mobile/presentation/screens/billboard/see_more/popular_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/login/login_screen.dart';
 
@@ -58,6 +59,7 @@ final appRouter = Provider<GoRouter>((ref) {
       GoRoute(path: loginPath,  builder: (context, state) => const LoginScreen()),
       GoRoute(path: billboardPath, builder: (context, state) => const BillboardScreen()),
       GoRoute(path: seeMoreNowShowingPath, builder: (context, state) => const NowShowingScreen()),
+      GoRoute(path: seeMorePopularPath, builder: (context, state) => const PopularScreen()),
       GoRoute(
         path: movieByIdPath,
         name: movieDetailsName,
