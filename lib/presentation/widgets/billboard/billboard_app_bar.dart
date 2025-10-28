@@ -114,15 +114,6 @@ class BillboardAppBar extends HookConsumerWidget implements PreferredSizeWidget 
                                   : Icons.filter_alt,
                             ),
                           ),
-                          if (state.query.isNotEmpty)
-                            IconButton(
-                              tooltip: 'Clear',
-                              onPressed: () {
-                                controller.clear();
-                                onClearQuery();
-                              },
-                              icon: const Icon(Icons.close),
-                            ),
                         ],
                       ),
                     ),
