@@ -4,6 +4,7 @@ import 'package:kinolive_mobile/domain/entities/movie.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/movie_details/movie_details_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/movie_details_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/retry_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MovieDetailsScreen extends ConsumerStatefulWidget {
@@ -69,18 +70,8 @@ class _MovieDetailsScreenState extends ConsumerState<MovieDetailsScreen> {
                     onPlayTrailer: _openTrailer,
                   );
                 case MovieDetailsStatus.error:
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('Loading error'),
-                        const SizedBox(height: 12),
-                        FilledButton(
-                          onPressed: _retry,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
+                  return RetryView(
+                    onRetry: _retry,
                   );
                 case MovieDetailsStatus.loading:
                   return const SizedBox.shrink();

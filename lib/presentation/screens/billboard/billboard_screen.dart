@@ -8,6 +8,7 @@ import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/bottom_nav_bar.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/retry_view.dart';
 
 class BillboardScreen extends HookConsumerWidget {
   const BillboardScreen({super.key});
@@ -43,6 +44,11 @@ class BillboardScreen extends HookConsumerWidget {
       FocusScope.of(context).unfocus();
     }
 
+    Future<void> _retry() async {
+      resetSearchAndFilters();
+      await vm.load();
+    }
+
     return Scaffold(
       appBar: BillboardAppBar(
         controller: controller,
@@ -74,11 +80,13 @@ class BillboardScreen extends HookConsumerWidget {
             Expanded(
               child: LoadingOverlay(
                 loading: isLoading,
-                child: BillboardForm(
-                  onRefresh: () async {
-                    resetSearchAndFilters();
-                    await vm.load();
-                  },
+                child: state.hasError && state.isEmpty
+                    ? RetryView(
+                  message: state.error ?? 'Loading error',
+                  onRetry: _retry,
+                )
+                    : BillboardForm(
+                  onRefresh: _retry,
                 ),
               ),
             ),

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/now_showing_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/retry_view.dart';
 
 class NowShowingScreen extends HookConsumerWidget {
   const NowShowingScreen({super.key});
@@ -19,8 +21,14 @@ class NowShowingScreen extends HookConsumerWidget {
       return null;
     }, const []);
 
+    // локальный ретрай
+    Future<void> _retry() async {
+      await ref.read(billboardVmProvider.notifier).load();
+    }
+
+    // показываем toasts, если нужно — можно оставить или убрать
     ref.listen(billboardVmProvider, (prev, next) {
-      if (next.error != null && next.error != prev?.error) {
+      if (next.error != null && next.error != prev?.error && !next.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.error!, textAlign: TextAlign.center)),
         );
@@ -32,18 +40,23 @@ class NowShowingScreen extends HookConsumerWidget {
 
     Widget child;
     if (state.isEmpty) {
-      child = Center(
-        child: Text(
-          state.hasError ? (state.error ?? 'Error') : 'No movies yet',
-          style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
+      if (state.hasError) {
+        child = RetryView(
+          message: state.error ?? 'Loading error',
+          onRetry: _retry,
+        );
+      } else {
+        child = Center(
+          child: Text(
+            'No movies yet',
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
-        ),
-      );
+        );
+      }
     } else {
-      child = NowShowingForm(
-        onRefresh: () => ref.read(billboardVmProvider.notifier).load(),
-      );
+      child = NowShowingForm(onRefresh: _retry);
     }
 
     return Scaffold(
