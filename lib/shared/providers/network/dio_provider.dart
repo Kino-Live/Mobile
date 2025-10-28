@@ -17,7 +17,7 @@ final dioProvider = Provider<Dio>((ref) {
 
   dio.interceptors.add(InterceptorsWrapper(
     onRequest: (options, handler) async {
-      final storage = ref.read(authTokenStorageProvider);
+      final storage = ref.read(accessTokenStorageProvider);
 
       final token = await storage.read();
 

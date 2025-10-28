@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/data/repositories/auth_repository_impl.dart';
 import 'package:kinolive_mobile/data/sources/local/auth_token_storage.dart';
+import 'package:kinolive_mobile/data/sources/local/secure_key_value_storage.dart';
 import 'package:kinolive_mobile/data/sources/remote/auth_api_service.dart';
 import 'package:kinolive_mobile/domain/repositories/auth_repository.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/get_saved_session.dart';
@@ -9,8 +10,14 @@ import 'package:kinolive_mobile/domain/usecases/auth/logout_user.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/register_user.dart';
 import 'package:kinolive_mobile/shared/providers/network/dio_provider.dart';
 
-final authTokenStorageProvider =
-Provider<AuthTokenStorageService>((ref) => AuthTokenStorageService());
+final keyValueStorageProvider = Provider<SecureKeyValueStorage>((ref) {
+  return SecureKeyValueStorage();
+});
+
+final accessTokenStorageProvider = Provider<AccessTokenStorage>((ref) {
+  final kv = ref.watch(keyValueStorageProvider);
+  return AccessTokenStorage(kv);
+});
 
 final authApiServiceProvider = Provider<AuthApiService>((ref) {
   final dio = ref.watch(dioProvider);
@@ -19,7 +26,7 @@ final authApiServiceProvider = Provider<AuthApiService>((ref) {
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final api = ref.watch(authApiServiceProvider);
-  final storage = ref.watch(authTokenStorageProvider);
+  final storage = ref.watch(accessTokenStorageProvider);
   return AuthRepositoryImpl(api, storage);
 });
 

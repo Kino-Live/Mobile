@@ -6,7 +6,7 @@ import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthApiService _authApiService;
-  final AuthTokenStorageService _tokenStorage;
+  final AccessTokenStorage _tokenStorage;
 
   AuthRepositoryImpl(this._authApiService, this._tokenStorage);
 

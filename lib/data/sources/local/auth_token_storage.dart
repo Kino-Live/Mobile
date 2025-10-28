@@ -1,11 +1,23 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kinolive_mobile/data/sources/local/secure_key_value_storage.dart';
 
-class AuthTokenStorageService {
-  final FlutterSecureStorage _secure = const FlutterSecureStorage();
+class AccessTokenStorage {
+  static const _key = 'access_token';
 
-  static const _tokenKey = 'auth_token';
+  final SecureKeyValueStorage _storage;
+  const AccessTokenStorage(this._storage);
 
-  Future<void> save(String token) => _secure.write(key: _tokenKey, value: token);
-  Future<String?> read() => _secure.read(key: _tokenKey);
-  Future<void> clear() => _secure.delete(key: _tokenKey);
+  Future<void> save(String token) => _storage.save(_key, token);
+  Future<String?> read() => _storage.read(_key);
+  Future<void> clear() => _storage.clear(_key);
 }
+
+// class RefreshTokenStorage {
+//   static const _key = 'refresh_token';
+//
+//   final SecureKeyValueStorage _storage;
+//   const RefreshTokenStorage(this._storage);
+//
+//   Future<void> save(String token) => _storage.save(_key, token);
+//   Future<String?> read() => _storage.read(_key);
+//   Future<void> clear() => _storage.clear(_key);
+// }
