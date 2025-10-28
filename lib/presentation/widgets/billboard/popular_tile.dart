@@ -20,8 +20,8 @@ class PopularTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Material(
       color: Colors.transparent,
@@ -56,8 +56,8 @@ class PopularTile extends StatelessWidget {
                         title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: tt.titleMedium?.copyWith(
-                          color: cs.onSurface,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -68,7 +68,7 @@ class PopularTile extends StatelessWidget {
                           const Icon(Icons.star_rounded, size: 18, color: Colors.amber),
                           const SizedBox(width: 4),
                           Text('$rating/10 IMDb',
-                              style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                              style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -82,12 +82,12 @@ class PopularTile extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: cs.primaryContainer,
+                                color: colorScheme.primaryContainer,
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Text(
                                 tags[i],
-                                style: tt.labelSmall?.copyWith(color: cs.onPrimaryContainer),
+                                style: textTheme.labelSmall?.copyWith(color: colorScheme.onPrimaryContainer),
                               ),
                             ),
                         ],
@@ -96,9 +96,9 @@ class PopularTile extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.schedule_rounded, size: 18, color: cs.onSurfaceVariant),
+                          Icon(Icons.schedule_rounded, size: 18, color: colorScheme.onSurfaceVariant),
                           const SizedBox(width: 6),
-                          Text(runtime, style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                          Text(runtime, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
                         ],
                       ),
                     ],
