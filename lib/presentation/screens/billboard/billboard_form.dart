@@ -34,39 +34,9 @@ class BillboardForm extends HookConsumerWidget {
 
     final state = ref.watch(billboardVmProvider);
 
-    if (state.isLoading && state.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (state.hasError && state.isEmpty) {
-      return Center(
-        child: Text(
-          state.error ?? 'Error',
-          style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
-        ),
-      );
-    }
-
     final movies = state.filteredMovies;
-
-    if (state.isEmpty && movies.isEmpty) {
-      return Center(
-        child: Text(
-          'No movies yet',
-          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-        ),
-      );
-    }
-
     final hasActiveFilters =
         state.query.isNotEmpty || state.selectedGenres.isNotEmpty || state.minRating > 0;
-    if (movies.isEmpty && hasActiveFilters) {
-      return Center(
-        child: Text(
-          'Nothing found',
-          style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-        ),
-      );
-    }
 
     final visibleNow = movies.take(4).toList();
     final popular = [...movies]..sort((a, b) => b.rating.compareTo(a.rating));
@@ -75,67 +45,121 @@ class BillboardForm extends HookConsumerWidget {
     Future<void> _defaultRefresh() =>
         ref.read(billboardVmProvider.notifier).load();
 
-    return RefreshIndicator(
-      onRefresh: onRefresh ?? _defaultRefresh,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-        children: [
-          // --- NOW SHOWING
-          SectionHeader(
-            title: 'Now Showing',
-            actionText: 'See more',
-            onAction: () => context.push(seeMoreNowShowingPath),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 350,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: visibleNow.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 16),
-              itemBuilder: (context, i) {
-                final m = visibleNow[i];
-                return PosterCard(
-                  title: m.title,
-                  rating: m.rating,
-                  imageUrl: m.posterUrl,
-                  width: 170,
-                  onTap: () => context.pushNamed(
-                    movieDetailsName,
-                    pathParameters: {'id': m.id.toString()},
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 24),
+    Future<void> _instantRefresh() async {
+      final run = onRefresh ?? _defaultRefresh;
+      run();
+    }
 
-          // --- POPULAR
-          SectionHeader(
-            title: 'Popular',
-            actionText: 'See more',
-            onAction: () {
-              // TODO: Need to add Page
-              // context.push(seeMorePopularPath);
-            },
-          ),
-          const SizedBox(height: 12),
-          ...visiblePopular.map(
-                (m) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: PopularTile(
-                title: m.title,
-                rating: m.rating,
-                runtime: m.duration,
-                tags: m.genres,
-                imageUrl: m.posterUrl,
-                onTap: () => context.pushNamed(
-                  movieDetailsName,
-                  pathParameters: {'id': m.id.toString()},
+    return RefreshIndicator(
+      onRefresh: _instantRefresh,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          if (state.isLoading && state.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: SizedBox.shrink(),
+            )
+          else if (state.hasError && state.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Text(
+                  'Error loading movies',
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: colorScheme.onSurfaceVariant),
+                ),
+              ),
+            )
+          else if (state.isEmpty && movies.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Text(
+                  'No movies yet',
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: colorScheme.onSurfaceVariant),
+                ),
+              ),
+            )
+          else if (movies.isEmpty && hasActiveFilters)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Text(
+                  'Nothing found',
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: colorScheme.onSurfaceVariant),
+                ),
+              ),
+            )
+          else ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // --- NOW SHOWING ---
+                    SectionHeader(
+                      title: 'Now Showing',
+                      actionText: 'See more',
+                      onAction: () => context.push(seeMoreNowShowingPath),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 350,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: visibleNow.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 16),
+                        itemBuilder: (context, i) {
+                          final m = visibleNow[i];
+                          return PosterCard(
+                            title: m.title,
+                            rating: m.rating,
+                            imageUrl: m.posterUrl,
+                            width: 170,
+                            onTap: () => context.pushNamed(
+                              movieDetailsName,
+                              pathParameters: {'id': m.id.toString()},
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // --- POPULAR ---
+                    SectionHeader(
+                      title: 'Popular',
+                      actionText: 'See more',
+                      onAction: () {
+                        // TODO: add Popular page
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    ...visiblePopular.map(
+                          (m) => Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: PopularTile(
+                          title: m.title,
+                          rating: m.rating,
+                          runtime: m.duration,
+                          tags: m.genres,
+                          imageUrl: m.posterUrl,
+                          onTap: () => context.pushNamed(
+                            movieDetailsName,
+                            pathParameters: {'id': m.id.toString()},
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
