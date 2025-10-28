@@ -26,7 +26,7 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    final m = widget.movie;
+    final movie = widget.movie;
 
     return InstantRefreshScrollView(
       onRefresh: widget.onRefresh,
@@ -42,7 +42,7 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
               children: [
                 // === Poster ===
                 Image.network(
-                  m.posterUrl,
+                  movie.posterUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(color: Colors.black26),
                 ),
@@ -69,7 +69,7 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                 Align(
                   alignment: Alignment.center,
                   child: InkWell(
-                    onTap: () => widget.onPlayTrailer(m),
+                    onTap: () => widget.onPlayTrailer(movie),
                     borderRadius: BorderRadius.circular(48),
                     child: Container(
                       width: 64,
@@ -100,7 +100,7 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                   children: [
                     Expanded(
                       child: Text(
-                        m.title,
+                        movie.title,
                         style: textTheme.titleLarge,
                       ),
                     ),
@@ -111,7 +111,7 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                   children: [
                     const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
                     const SizedBox(width: 4),
-                    Text('${m.rating.toStringAsFixed(1)}/10 IMDb',
+                    Text('${movie.rating.toStringAsFixed(1)}/10 IMDb',
                         style: const TextStyle(color: Colors.white70)),
                   ],
                 ),
@@ -121,7 +121,7 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: m.genres
+                  children: movie.genres
                       .map(
                         (g) => Chip(
                       label: Text(g),
@@ -142,9 +142,9 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    InfoPill(title: 'Length', value: m.duration),
-                    InfoPill(title: 'Language', value: m.language),
-                    InfoPill(title: 'Rating', value: m.ageRestrictions),
+                    InfoPill(title: 'Length', value: movie.duration),
+                    InfoPill(title: 'Language', value: movie.language),
+                    InfoPill(title: 'Rating', value: movie.ageRestrictions),
                   ],
                 ),
 
@@ -152,7 +152,7 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                 const Text('Description',
                     style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
-                ExpandableText(text: m.description),
+                ExpandableText(text: movie.description),
 
                 const SizedBox(height: 25),
                 Row(
@@ -167,11 +167,11 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (_, i) {
-                      final name = m.cast[i];
+                      final name = movie.cast[i];
                       return CastCard(name: name);
                     },
                     separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemCount: m.cast.length,
+                    itemCount: movie.cast.length,
                   ),
                 ),
 

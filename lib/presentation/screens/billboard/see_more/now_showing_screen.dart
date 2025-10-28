@@ -13,7 +13,7 @@ class NowShowingScreen extends HookConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    Future<void> _refresh() async {
+    Future<void> refresh() async {
       await ref.read(billboardVmProvider.notifier).load();
     }
 
@@ -40,7 +40,7 @@ class NowShowingScreen extends HookConsumerWidget {
         child: LoadingOverlay(
           loading: isLoading,
           child: NowShowingForm(
-            onRefresh: _refresh,
+            onRefresh: refresh,
           ),
         ),
       ),

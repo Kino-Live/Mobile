@@ -50,10 +50,8 @@ class _MovieDetailsScreenState extends ConsumerState<MovieDetailsScreen> {
       });
     }
 
-    Future<void> _retry() async {
-      await ref
-        .read(movieDetailsVmProvider(widget.id).notifier)
-        .init(widget.id, force: true);
+    Future<void> retry() async {
+      await ref.read(movieDetailsVmProvider(widget.id).notifier).init(widget.id);
     }
 
     return Scaffold(
@@ -68,11 +66,11 @@ class _MovieDetailsScreenState extends ConsumerState<MovieDetailsScreen> {
                   return MovieDetailsForm(
                     movie: movie!,
                     onPlayTrailer: _openTrailer,
-                    onRefresh: _retry,
+                    onRefresh: retry,
                   );
                 case MovieDetailsStatus.error:
                   return RetryView(
-                    onRetry: _retry,
+                    onRetry: retry,
                   );
                 case MovieDetailsStatus.loading:
                   return const SizedBox.shrink();

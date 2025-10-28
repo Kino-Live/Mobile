@@ -39,7 +39,6 @@ class MovieDetailsState {
 
 class MovieDetailsVm extends Notifier<MovieDetailsState> {
   late final GetMovieDetails _getMovieDetails;
-  int? _currentId;
 
   @override
   MovieDetailsState build() {
@@ -48,9 +47,6 @@ class MovieDetailsVm extends Notifier<MovieDetailsState> {
   }
 
   Future<void> init(int id, {bool force = false}) async {
-    if (!force && _currentId == id && state.isLoaded) return;
-
-    _currentId = id;
     state = state.copyWith(status: MovieDetailsStatus.loading, error: null);
 
     try {

@@ -44,7 +44,7 @@ class BillboardScreen extends HookConsumerWidget {
       FocusScope.of(context).unfocus();
     }
 
-    Future<void> _retry() async {
+    Future<void> retry() async {
       resetSearchAndFilters();
       await vm.load();
     }
@@ -83,10 +83,10 @@ class BillboardScreen extends HookConsumerWidget {
                 child: state.hasError && state.isEmpty
                     ? RetryView(
                   message: state.error ?? 'Loading error',
-                  onRetry: _retry,
+                  onRetry: retry,
                 )
                     : BillboardForm(
-                  onRefresh: _retry,
+                  onRefresh: retry,
                 ),
               ),
             ),
