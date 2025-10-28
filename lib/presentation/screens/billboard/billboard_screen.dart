@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_form.dart';
+import 'package:kinolive_mobile/presentation/widgets/billboard/search_filter_bar.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/bottom_nav_bar.dart';
@@ -31,6 +32,7 @@ class BillboardScreen extends HookConsumerWidget {
     final index = useState(0);
 
     final searchOpen = useState(false);
+    final filtersOpen = useState(false);
     final controller = useTextEditingController(text: state.query);
 
     useEffect(() {
@@ -41,7 +43,9 @@ class BillboardScreen extends HookConsumerWidget {
     void resetSearchAndFilters() {
       controller.clear();
       vm.clearQuery();
+      vm.clearFilters();
       searchOpen.value = false;
+      filtersOpen.value = false;
       FocusScope.of(context).unfocus();
     }
 
@@ -135,7 +139,24 @@ class BillboardScreen extends HookConsumerWidget {
                         suffixIcon: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-
+                            IconButton(
+                              tooltip: 'Filters',
+                              onPressed: () => filtersOpen.value = !filtersOpen.value,
+                              icon: Icon(
+                                filtersOpen.value
+                                    ? Icons.filter_alt_off
+                                    : Icons.filter_alt,
+                              ),
+                            ),
+                            if (state.query.isNotEmpty)
+                              IconButton(
+                                tooltip: 'Clear',
+                                onPressed: () {
+                                  controller.clear();
+                                  vm.clearQuery();
+                                },
+                                icon: const Icon(Icons.close),
+                              ),
                           ],
                         ),
                       ),
@@ -159,6 +180,7 @@ class BillboardScreen extends HookConsumerWidget {
                       if (searchOpen.value) {
                         controller.clear();
                         vm.clearQuery();
+                        filtersOpen.value = false;
                         FocusScope.of(context).unfocus();
                       }
                       searchOpen.value = !searchOpen.value;
@@ -179,11 +201,11 @@ class BillboardScreen extends HookConsumerWidget {
           children: [
             AnimatedCrossFade(
               duration: const Duration(milliseconds: 200),
-              crossFadeState: (searchOpen.value)
+              crossFadeState: (searchOpen.value && filtersOpen.value)
                   ? CrossFadeState.showSecond
                   : CrossFadeState.showFirst,
               firstChild: const SizedBox.shrink(),
-              secondChild: const SizedBox.shrink(),
+              secondChild: const SearchFiltersBar(),
             ),
             Expanded(
               child: LoadingOverlay(
@@ -206,3 +228,4 @@ class BillboardScreen extends HookConsumerWidget {
     );
   }
 }
+

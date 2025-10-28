@@ -57,7 +57,8 @@ class BillboardForm extends HookConsumerWidget {
       );
     }
 
-    final hasActiveFilters = state.query.isNotEmpty;
+    final hasActiveFilters =
+        state.query.isNotEmpty || state.selectedGenres.isNotEmpty || state.minRating > 0;
     if (movies.isEmpty && hasActiveFilters) {
       return Center(
         child: Text(

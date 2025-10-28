@@ -15,12 +15,16 @@ class BillboardState {
   final String? error;
 
   final String query;
+  final Set<String> selectedGenres;
+  final double minRating;
 
   const BillboardState({
     this.status = BillboardStatus.idle,
     this.movies = const [],
     this.error,
     this.query = '',
+    this.selectedGenres = const {},
+    this.minRating = 0,
   });
 
   bool get isLoading => status == BillboardStatus.loading;
@@ -37,6 +41,14 @@ class BillboardState {
         final inGenres = m.genres.any((g) => g.toLowerCase().contains(q));
         return inTitle || inGenres;
       });
+    }
+
+    if (selectedGenres.isNotEmpty) {
+      res = res.where((m) => m.genres.any(selectedGenres.contains));
+    }
+
+    if (minRating > 0) {
+      res = res.where((m) => (m.rating) >= minRating);
     }
 
     return res.toList();
@@ -57,6 +69,8 @@ class BillboardState {
       error: error,
 
       query: query ?? this.query,
+      selectedGenres: selectedGenres ?? this.selectedGenres,
+      minRating: minRating ?? this.minRating,
     );
   }
 }
@@ -94,4 +108,19 @@ class BillboardVm extends Notifier<BillboardState> {
 
   void clearQuery() => state = state.copyWith(query: '');
 
+  void toggleGenre(String genre) {
+    final set = {...state.selectedGenres};
+    if (set.contains(genre)) {
+      set.remove(genre);
+    } else {
+      set.add(genre);
+    }
+    state = state.copyWith(selectedGenres: set);
+  }
+
+  void setMinRating(double value) =>
+      state = state.copyWith(minRating: value.clamp(0, 10));
+
+  void clearFilters() =>
+      state = state.copyWith(selectedGenres: {}, minRating: 0);
 }
