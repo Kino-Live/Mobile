@@ -86,7 +86,12 @@ class BillboardVm extends Notifier<BillboardState> {
 
   Future<void> load() async {
     if (state.isLoading) return;
-    state = state.copyWith(status: BillboardStatus.loading, error: null);
+
+    state = state.copyWith(
+      status: BillboardStatus.loading,
+      error: null,
+      movies: const <Movie>[],
+    );
 
     try {
       final movies = await _getNowShowing();
