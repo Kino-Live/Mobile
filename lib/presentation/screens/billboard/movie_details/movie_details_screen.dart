@@ -68,6 +68,7 @@ class _MovieDetailsScreenState extends ConsumerState<MovieDetailsScreen> {
                   return MovieDetailsForm(
                     movie: movie!,
                     onPlayTrailer: _openTrailer,
+                    onRefresh: _retry,
                   );
                 case MovieDetailsStatus.error:
                   return RetryView(

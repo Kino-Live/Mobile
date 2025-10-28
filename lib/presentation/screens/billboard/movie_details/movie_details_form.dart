@@ -3,16 +3,19 @@ import 'package:kinolive_mobile/domain/entities/movie.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/cast_card.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/expandable_text.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/info_pill.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/instant_refresh_scroll_view.dart';
 
 class MovieDetailsForm extends StatefulWidget {
   const MovieDetailsForm({
     super.key,
     required this.movie,
     required this.onPlayTrailer,
+    this.onRefresh,
   });
 
   final Movie movie;
   final Future<void> Function(Movie) onPlayTrailer;
+  final Future<void> Function()? onRefresh;
 
   @override
   State<MovieDetailsForm> createState() => _MovieDetailsFormState();
@@ -25,7 +28,8 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
 
     final m = widget.movie;
 
-    return CustomScrollView(
+    return InstantRefreshScrollView(
+      onRefresh: widget.onRefresh,
       slivers: [
         SliverAppBar(
           pinned: true,
