@@ -85,7 +85,6 @@ class _MovieDetailsScreenState extends ConsumerState<MovieDetailsScreen> {
                 case MovieDetailsStatus.loading:
                   return const SizedBox.shrink();
                 case MovieDetailsStatus.idle:
-                default:
                   return const SizedBox.shrink();
               }
             },
