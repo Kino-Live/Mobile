@@ -150,7 +150,7 @@ class ScheduleForm extends StatelessWidget {
                         _ArrowStrip(
                           onPrev: actions.onPrevDay,
                           onNext: actions.onNextDay,
-                          child: _DayChips(
+                          child: DayChips(
                             days: data.availableDays,
                             selectedIndex: data.selectedDayIndex,
                             onSelect: actions.onSelectDay,
@@ -163,7 +163,7 @@ class ScheduleForm extends StatelessWidget {
                         _ArrowStrip(
                           onPrev: actions.onPrevTime,
                           onNext: actions.onNextTime,
-                          child: _TimeChips(
+                          child: TimeChips(
                             isoList: data.timesIso,
                             selectedIndex: data.selectedTimeIndex,
                             onSelect: actions.onSelectTime,
@@ -173,7 +173,7 @@ class ScheduleForm extends StatelessWidget {
                         const SizedBox(height: 30),
                         _SectionTitle('Select Quality', color: colorScheme.onSurface, textTheme: textTheme),
                         const SizedBox(height: 12),
-                        _QualityChips(
+                        QualityChips(
                           selectedQuality: data.quality,
                           onSelect2D: data.is2DAvailableForSelectedTime ? actions.onSet2D : () {},
                           onSelect3D: data.is3DAvailableForSelectedTime ? actions.onSet3D : () {},
@@ -259,8 +259,8 @@ class _ArrowStrip extends StatelessWidget {
   );
 }
 
-class _PillChip extends StatelessWidget {
-  const _PillChip({
+class PillChip extends StatelessWidget {
+  const PillChip({
     required this.child,
     required this.onTap,
     required this.selected,
@@ -300,12 +300,13 @@ class _PillChip extends StatelessWidget {
   }
 }
 
-class _DayChips extends StatelessWidget {
-  const _DayChips({
+class DayChips extends StatefulWidget {
+  const DayChips({
     required this.days,
     required this.selectedIndex,
     required this.onSelect,
     required this.colorScheme,
+    super.key,
   });
 
   final List<String> days;
@@ -314,50 +315,120 @@ class _DayChips extends StatelessWidget {
   final ColorScheme colorScheme;
 
   @override
+  State<DayChips> createState() => _DayChipsState();
+}
+
+class _DayChipsState extends State<DayChips> {
+  final _scrollController = ScrollController();
+  late List<GlobalKey> _itemKeys;
+
+  @override
+  void initState() {
+    super.initState();
+    _itemKeys = List.generate(widget.days.length, (_) => GlobalKey());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected(animated: false));
+  }
+
+  @override
+  void didUpdateWidget(covariant DayChips old) {
+    super.didUpdateWidget(old);
+    if (old.days.length != widget.days.length) {
+      _itemKeys = List.generate(widget.days.length, (_) => GlobalKey());
+    }
+    if (old.selectedIndex != widget.selectedIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+    }
+  }
+
+  void _scrollToSelected({bool animated = true}) {
+    if (!_scrollController.hasClients ||
+        widget.selectedIndex < 0 ||
+        widget.selectedIndex >= _itemKeys.length) return;
+
+    final ctx = _itemKeys[widget.selectedIndex].currentContext;
+    if (ctx == null) return;
+
+    final box = ctx.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    final listBox = context.findRenderObject() as RenderBox?;
+    if (listBox == null) return;
+
+    final listWidth = listBox.size.width;
+    final itemOffset = box.localToGlobal(Offset.zero, ancestor: listBox).dx;
+    final itemWidth = box.size.width;
+
+    final targetOffset =
+        _scrollController.offset + (itemOffset + itemWidth / 2 - listWidth / 2);
+
+    final safeOffset = targetOffset.clamp(
+      _scrollController.position.minScrollExtent,
+      _scrollController.position.maxScrollExtent,
+    );
+
+    if (animated) {
+      _scrollController.animateTo(
+        safeOffset,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    } else {
+      _scrollController.jumpTo(safeOffset);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) => SizedBox(
     height: 64,
     child: ListView.separated(
+      controller: _scrollController,
       scrollDirection: Axis.horizontal,
-      itemCount: days.length,
+      itemCount: widget.days.length,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       separatorBuilder: (_, __) => const SizedBox(width: 10),
       itemBuilder: (ctx, i) {
-        final d = DateTime.tryParse(days[i]);
+        final d = DateTime.tryParse(widget.days[i]);
         final month = d != null ? _monthShort(d) : '';
-        final day = d != null ? '${d.day}' : days[i];
-        final sel = i == selectedIndex;
+        final day = d != null ? '${d.day}' : widget.days[i];
+        final sel = i == widget.selectedIndex;
 
-        final topColor = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
-        final mainColor = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
+        final topColor = sel ? widget.colorScheme.onPrimaryContainer : widget.colorScheme.onSurface;
+        final mainColor = sel ? widget.colorScheme.onPrimaryContainer : widget.colorScheme.onSurface;
 
-        return _PillChip(
-          selected: sel,
-          colors: colorScheme,
-          height: 56,
-          minWidth: 68,
-          radius: 14,
-          onTap: () => onSelect(i),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(month, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, height: 1.0, color: topColor)),
-              const SizedBox(height: 2),
-              Text(day, textAlign: TextAlign.center, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, height: 1.0, color: mainColor)),
-            ],
+        return Container(
+          key: _itemKeys[i],
+          child: PillChip(
+            selected: sel,
+            colors: widget.colorScheme,
+            height: 56,
+            minWidth: 68,
+            radius: 14,
+            onTap: () => widget.onSelect(i),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(month, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, height: 1.0, color: topColor)),
+                const SizedBox(height: 2),
+                Text(day, textAlign: TextAlign.center, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, height: 1.0, color: mainColor)),
+              ],
+            ),
           ),
         );
       },
     ),
   );
 
-  String _monthShort(DateTime d) => const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1];
+  String _monthShort(DateTime d) =>
+      const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1];
 }
 
-class _TimeChips extends StatelessWidget {
-  const _TimeChips({
+class TimeChips extends StatefulWidget {
+  const TimeChips({
     required this.isoList,
     required this.selectedIndex,
     required this.onSelect,
     required this.colorScheme,
+    super.key,
   });
 
   final List<String> isoList;
@@ -366,32 +437,99 @@ class _TimeChips extends StatelessWidget {
   final ColorScheme colorScheme;
 
   @override
+  State<TimeChips> createState() => _TimeChipsState();
+}
+
+class _TimeChipsState extends State<TimeChips> {
+  final _scrollController = ScrollController();
+  late List<GlobalKey> _itemKeys;
+
+  @override
+  void initState() {
+    super.initState();
+    _itemKeys = List.generate(widget.isoList.length, (_) => GlobalKey());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected(animated: false));
+  }
+
+  @override
+  void didUpdateWidget(covariant TimeChips old) {
+    super.didUpdateWidget(old);
+    if (old.isoList.length != widget.isoList.length) {
+      _itemKeys = List.generate(widget.isoList.length, (_) => GlobalKey());
+    }
+    if (old.selectedIndex != widget.selectedIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToSelected());
+    }
+  }
+
+  void _scrollToSelected({bool animated = true}) {
+    if (!_scrollController.hasClients ||
+        widget.selectedIndex < 0 ||
+        widget.selectedIndex >= _itemKeys.length) return;
+
+    final ctx = _itemKeys[widget.selectedIndex].currentContext;
+    if (ctx == null) return;
+
+    final box = ctx.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    final listBox = context.findRenderObject() as RenderBox?;
+    if (listBox == null) return;
+
+    final listWidth = listBox.size.width;
+    final itemOffset = box.localToGlobal(Offset.zero, ancestor: listBox).dx;
+    final itemWidth = box.size.width;
+
+    final targetOffset =
+        _scrollController.offset + (itemOffset + itemWidth / 2 - listWidth / 2);
+
+    final safeOffset = targetOffset.clamp(
+      _scrollController.position.minScrollExtent,
+      _scrollController.position.maxScrollExtent,
+    );
+
+    if (animated) {
+      _scrollController.animateTo(
+        safeOffset,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    } else {
+      _scrollController.jumpTo(safeOffset);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) => SizedBox(
     height: 54,
     child: ListView.separated(
+      controller: _scrollController,
       scrollDirection: Axis.horizontal,
-      itemCount: isoList.length,
+      itemCount: widget.isoList.length,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       separatorBuilder: (_, __) => const SizedBox(width: 10),
       itemBuilder: (ctx, i) {
-        final dt = DateTime.tryParse(isoList[i])?.toLocal();
+        final dt = DateTime.tryParse(widget.isoList[i])?.toLocal();
         final label = dt == null
-            ? isoList[i]
+            ? widget.isoList[i]
             : '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+        final sel = i == widget.selectedIndex;
+        final fg = sel ? widget.colorScheme.onPrimaryContainer : widget.colorScheme.onSurface;
 
-        final sel = i == selectedIndex;
-        final fg = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
-
-        return _PillChip(
-          selected: sel,
-          colors: colorScheme,
-          height: 48,
-          minWidth: 78,
-          radius: 14,
-          onTap: () => onSelect(i),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.0, color: fg),
+        return Container(
+          key: _itemKeys[i],
+          child: PillChip(
+            selected: sel,
+            colors: widget.colorScheme,
+            height: 48,
+            minWidth: 78,
+            radius: 14,
+            onTap: () => widget.onSelect(i),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.0, color: fg),
+            ),
           ),
         );
       },
@@ -399,8 +537,8 @@ class _TimeChips extends StatelessWidget {
   );
 }
 
-class _QualityChips extends StatelessWidget {
-  const _QualityChips({
+class QualityChips extends StatelessWidget {
+  const QualityChips({
     required this.selectedQuality,
     required this.onSelect2D,
     required this.onSelect3D,
@@ -418,12 +556,18 @@ class _QualityChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final is2D = selectedQuality == '2D';
-    final is3D = selectedQuality == '3D';
+    final is2DSelected = selectedQuality == '2D';
+    final is3DSelected = selectedQuality == '3D';
 
-    Color fg(bool selected, bool available) {
+    Color background(bool selected, bool available) {
+      if (!available) return colorScheme.surfaceContainerHigh.withOpacity(0.3);
+      if (selected) return colorScheme.primary;
+      return colorScheme.surfaceContainerHigh;
+    }
+
+    Color textColor(bool selected, bool available) {
+      if (!available) return colorScheme.onSurface.withOpacity(0.35);
       if (selected) return colorScheme.onPrimaryContainer;
-      if (!available) return colorScheme.onSurface.withOpacity(0.4);
       return colorScheme.onSurface;
     }
 
@@ -431,36 +575,66 @@ class _QualityChips extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _PillChip(
-            selected: is2D,
-            colors: colorScheme,
-            height: 46,
-            minWidth: 72,
-            radius: 14,
-            horizontalPadding: 20,
-            onTap: is2DAvailable ? onSelect2D : () {},
-            child: Text(
-              '2D',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.0, color: fg(is2D, is2DAvailable)),
-            ),
+          _qualityChip(
+            label: '2D',
+            selected: is2DSelected,
+            available: is2DAvailable,
+            onTap: is2DAvailable ? onSelect2D : null,
+            bg: background(is2DSelected, is2DAvailable),
+            fg: textColor(is2DSelected, is2DAvailable),
           ),
           const SizedBox(width: 12),
-          _PillChip(
-            selected: is3D,
-            colors: colorScheme,
-            height: 46,
-            minWidth: 72,
-            radius: 14,
-            horizontalPadding: 20,
-            onTap: is3DAvailable ? onSelect3D : () {},
-            child: Text(
-              '3D',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.0, color: fg(is3D, is3DAvailable)),
-            ),
+          _qualityChip(
+            label: '3D',
+            selected: is3DSelected,
+            available: is3DAvailable,
+            onTap: is3DAvailable ? onSelect3D : null,
+            bg: background(is3DSelected, is3DAvailable),
+            fg: textColor(is3DSelected, is3DAvailable),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _qualityChip({
+    required String label,
+    required bool selected,
+    required bool available,
+    required Color bg,
+    required Color fg,
+    required VoidCallback? onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected
+                ? fg.withOpacity(0.9)
+                : available
+                ? Colors.transparent
+                : fg.withOpacity(0.1),
+            width: selected ? 1.2 : 1.0,
+          ),
+        ),
+        constraints: const BoxConstraints(minWidth: 72, minHeight: 46),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              height: 1.0,
+              color: fg,
+            ),
+          ),
+        ),
       ),
     );
   }
