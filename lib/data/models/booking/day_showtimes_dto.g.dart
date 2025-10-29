@@ -8,10 +8,6 @@ part of 'day_showtimes_dto.dart';
 
 DayShowtimesDto _$DayShowtimesDtoFromJson(Map<String, dynamic> json) =>
     DayShowtimesDto(
-      twoD: (json['2D'] as List<dynamic>)
-          .map((e) => ShowtimeSlotDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      threeD: (json['3D'] as List<dynamic>)
-          .map((e) => ShowtimeSlotDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      twoD: DayShowtimesDto._slotsFromJson(json['2D']),
+      threeD: DayShowtimesDto._slotsFromJson(json['3D']),
     );

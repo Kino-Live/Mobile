@@ -10,10 +10,10 @@ MovieShowtimesAllDto _$MovieShowtimesAllDtoFromJson(
   Map<String, dynamic> json,
 ) => MovieShowtimesAllDto(
   movieId: (json['movie_id'] as num).toInt(),
-  days: (json['days'] as Map<String, dynamic>).map(
-    (k, e) => MapEntry(k, DayShowtimesDto.fromJson(e as Map<String, dynamic>)),
-  ),
-  availableDays: (json['available_days'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  days: MovieShowtimesAllDto._daysFromJson(json['days']),
+  availableDays:
+      (json['available_days'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      [],
 );
