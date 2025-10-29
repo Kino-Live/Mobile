@@ -7,8 +7,8 @@ import 'package:kinolive_mobile/domain/entities/booking/showtime.dart';
 import 'package:kinolive_mobile/domain/usecases/booking/get_movie_schedule.dart';
 import 'package:kinolive_mobile/domain/usecases/booking/get_movie_schedule_for_date.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
+import 'package:kinolive_mobile/shared/providers/booking_provider.dart';
 
-import '../../../shared/providers/booking_provider.dart' show getMovieScheduleProvider, getMovieScheduleForDateProvider;
 
 final scheduleVmProvider = NotifierProvider.family<ScheduleVm, ScheduleState, int>(
       (id) => ScheduleVm(),
@@ -93,8 +93,6 @@ class ScheduleVm extends Notifier<ScheduleState> {
     return const ScheduleState();
   }
 
-  /// call from initState:
-  /// ref.read(scheduleVmProvider(movieId).notifier).init(movieId);
   Future<void> init(int movieId, {bool force = false}) async {
     if (state.isLoading && !force) return;
 
