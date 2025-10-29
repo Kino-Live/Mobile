@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/instant_refresh_scroll_view.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';
 
 class ScheduleFormData {
   final String title;
@@ -120,76 +121,78 @@ class ScheduleForm extends StatelessWidget {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1B1D22),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const _SectionTitle('Select Day'),
-                  const SizedBox(height: 12),
-                  _ArrowStrip(
-                    onPrev: actions.onPrevDay,
-                    onNext: actions.onNextDay,
-                    child: _DayChips(
-                      days: data.availableDays,
-                      selectedIndex: data.selectedDayIndex,
-                      onSelect: actions.onSelectDay,
-                    ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1B1D22),
+                    borderRadius: BorderRadius.circular(24),
                   ),
-                  const SizedBox(height: 20),
-
-                  const _SectionTitle('Select Time'),
-                  const SizedBox(height: 12),
-                  _ArrowStrip(
-                    onPrev: actions.onPrevTime,
-                    onNext: actions.onNextTime,
-                    child: _TimeChips(
-                      isoList: data.timesIso,
-                      selectedIndex: data.selectedTimeIndex,
-                      onSelect: actions.onSelectTime,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  const _SectionTitle('Select Quality'),
-                  const SizedBox(height: 12),
-                  Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('2D'),
-                          selected: data.quality == '2D',
-                          onSelected: (_) => actions.onSet2D(),
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      const _SectionTitle('Select Day'),
+                      const SizedBox(height: 12),
+                      _ArrowStrip(
+                        onPrev: actions.onPrevDay,
+                        onNext: actions.onNextDay,
+                        child: _DayChips(
+                          days: data.availableDays,
+                          selectedIndex: data.selectedDayIndex,
+                          onSelect: actions.onSelectDay,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Text('3D'),
-                          selected: data.quality == '3D',
-                          onSelected: (_) => actions.onSet3D(),
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      const SizedBox(height: 20),
+
+                      const _SectionTitle('Select Time'),
+                      const SizedBox(height: 12),
+                      _ArrowStrip(
+                        onPrev: actions.onPrevTime,
+                        onNext: actions.onNextTime,
+                        child: _TimeChips(
+                          isoList: data.timesIso,
+                          selectedIndex: data.selectedTimeIndex,
+                          onSelect: actions.onSelectTime,
                         ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      const _SectionTitle('Select Quality'),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ChoiceChip(
+                              label: const Text('2D'),
+                              selected: data.quality == '2D',
+                              onSelected: (_) => actions.onSet2D(),
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ChoiceChip(
+                              label: const Text('3D'),
+                              selected: data.quality == '3D',
+                              onSelected: (_) => actions.onSet3D(),
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                ),
 
-                  const SizedBox(height: 20),
-                  FilledButton(
-                    onPressed: actions.onContinue,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    ),
-                    child: const Text('Continue'),
-                  ),
-                ],
-              ),
+                const SizedBox(height: 24),
+                PrimaryButton(
+                  text: 'Continue',
+                  onPressed: actions.onContinue,
+                  bottomSpacing: 16,
+                ),
+              ],
             ),
           ),
         ),
