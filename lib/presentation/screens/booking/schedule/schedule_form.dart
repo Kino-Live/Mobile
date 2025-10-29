@@ -86,9 +86,9 @@ class ScheduleForm extends StatelessWidget {
                   Image.network(
                     data.posterUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        Container(color: Colors.black26),
+                    errorBuilder: (_, __, ___) => Container(color: Colors.black26),
                   ),
+
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -98,10 +98,29 @@ class ScheduleForm extends StatelessWidget {
                           colors: [
                             Colors.transparent,
                             Colors.transparent,
-                            colorScheme.surface.withOpacity(0.9),
-                            colorScheme.surface,
+                            colorScheme.surface.withOpacity(0.0),
+                            colorScheme.surface.withOpacity(0.85),
                           ],
                         ),
+                      ),
+                    ),
+                  ),
+
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      color: Colors.black.withOpacity(0.35),
+                      child: Text(
+                        data.title,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
@@ -112,23 +131,7 @@ class ScheduleForm extends StatelessWidget {
 
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-              child: Center(
-                child: Text(
-                  data.title,
-                  style: textTheme.titleLarge?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 30, 16, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -144,6 +147,7 @@ class ScheduleForm extends StatelessWidget {
                         _SectionTitle(
                           'Select Day',
                           color: colorScheme.onSurface,
+                          textTheme: textTheme
                         ),
                         const SizedBox(height: 12),
                         _ArrowStrip(
@@ -156,11 +160,12 @@ class ScheduleForm extends StatelessWidget {
                             colorScheme: colorScheme,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 30),
 
                         _SectionTitle(
                           'Select Time',
                           color: colorScheme.onSurface,
+                          textTheme: textTheme
                         ),
                         const SizedBox(height: 12),
                         _ArrowStrip(
@@ -173,11 +178,12 @@ class ScheduleForm extends StatelessWidget {
                             colorScheme: colorScheme,
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 30),
 
                         _SectionTitle(
                           'Select Quality',
                           color: colorScheme.onSurface,
+                          textTheme: textTheme
                         ),
                         const SizedBox(height: 12),
                         _QualityChips(
@@ -212,19 +218,16 @@ class ScheduleForm extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text, {required this.color});
+  const _SectionTitle(this.text, {required this.textTheme, required this.color});
   final String text;
   final Color color;
+  final TextTheme textTheme;
 
   @override
   Widget build(BuildContext context) => Text(
     text,
     textAlign: TextAlign.center,
-    style: TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w700,
-      color: color,
-    ),
+    style: textTheme.titleMedium,
   );
 }
 
