@@ -376,7 +376,7 @@ class _TimeChips extends StatelessWidget {
         final dt = DateTime.tryParse(isoList[i])?.toLocal();
         final label = dt == null
             ? isoList[i]
-            : '${(dt.hour % 12 == 0 ? 12 : dt.hour % 12)}:${dt.minute.toString().padLeft(2, '0')} ${dt.hour >= 12 ? 'pm' : 'am'}';
+            : '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
         final sel = i == selectedIndex;
         final fg = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
