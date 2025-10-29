@@ -66,11 +66,10 @@ class ScheduleForm extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      color: colorScheme.surface, // общий фон
+      color: colorScheme.surface,
       child: InstantRefreshScrollView(
         onRefresh: onRefresh,
         slivers: [
-          // --- Верхний постер ---
           SliverAppBar(
             pinned: true,
             expandedHeight: 260,
@@ -111,7 +110,6 @@ class ScheduleForm extends StatelessWidget {
             ),
           ),
 
-          // --- Название фильма ---
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
@@ -128,7 +126,6 @@ class ScheduleForm extends StatelessWidget {
             ),
           ),
 
-          // --- Основная панель ---
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -183,54 +180,16 @@ class ScheduleForm extends StatelessWidget {
                           color: colorScheme.onSurface,
                         ),
                         const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ChoiceChip(
-                                label: const Text('2D'),
-                                selected: data.quality == '2D',
-                                onSelected: (_) => actions.onSet2D(),
-                                selectedColor: colorScheme.primary,
-                                backgroundColor: colorScheme.surfaceContainer,
-                                labelStyle: TextStyle(
-                                  color: data.quality == '2D'
-                                      ? colorScheme.onPrimaryContainer
-                                      : colorScheme.onSurface,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ChoiceChip(
-                                label: const Text('3D'),
-                                selected: data.quality == '3D',
-                                onSelected: (_) => actions.onSet3D(),
-                                selectedColor: colorScheme.primary,
-                                backgroundColor: colorScheme.surfaceContainer,
-                                labelStyle: TextStyle(
-                                  color: data.quality == '3D'
-                                      ? colorScheme.onPrimaryContainer
-                                      : colorScheme.onSurface,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                              ),
-                            ),
-                          ],
+                        _QualityChips(
+                          selectedQuality: data.quality,
+                          onSelect2D: actions.onSet2D,
+                          onSelect3D: actions.onSet3D,
+                          colorScheme: colorScheme,
                         ),
                       ],
                     ),
                   ),
 
-                  // --- Кнопка Continue ---
                   const SizedBox(height: 24),
                   PrimaryButton(
                     text: 'Continue',
@@ -260,6 +219,7 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text,
+    textAlign: TextAlign.center,
     style: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w700,
@@ -309,6 +269,47 @@ class _ArrowStrip extends StatelessWidget {
       );
 }
 
+class _PillChip extends StatelessWidget {
+  const _PillChip({
+    required this.child,
+    required this.onTap,
+    required this.selected,
+    required this.colors,
+    this.height = 56,
+    this.minWidth = 64,
+    this.horizontalPadding = 16,
+    this.radius = 16,
+  });
+
+  final Widget child;
+  final VoidCallback onTap;
+  final bool selected;
+  final ColorScheme colors;
+  final double height;
+  final double minWidth;
+  final double horizontalPadding;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor = selected ? colors.primary : colors.surfaceContainerHigh;
+    final borderRadius = BorderRadius.circular(radius);
+
+    return InkWell(
+      borderRadius: borderRadius,
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: height, minWidth: minWidth),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          decoration: BoxDecoration(color: backgroundColor, borderRadius: borderRadius),
+          child: Center(child: child),
+        ),
+      ),
+    );
+  }
+}
+
 class _DayChips extends StatelessWidget {
   const _DayChips({
     required this.days,
@@ -324,51 +325,47 @@ class _DayChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 56,
+    height: 64,
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       itemCount: days.length,
-      separatorBuilder: (_, __) => const SizedBox(width: 8),
+      separatorBuilder: (_, __) => const SizedBox(width: 10),
       itemBuilder: (ctx, i) {
         final d = DateTime.tryParse(days[i]);
-        final top = d != null ? _monthShort(d) : '';
-        final bottom = d != null ? '${d.day}' : days[i];
-        final selected = i == selectedIndex;
+        final month = d != null ? _monthShort(d) : '';
+        final day   = d != null ? '${d.day}' : days[i];
+        final sel   = i == selectedIndex;
 
-        return ChoiceChip(
-          selected: selected,
-          onSelected: (_) => onSelect(i),
-          label: Column(
+        final topColor = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
+        final mainColor = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
+
+        return _PillChip(
+          selected: sel,
+          colors: colorScheme,
+          height: 56,
+          minWidth: 68,
+          radius: 14,
+          onTap: () => onSelect(i),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(top, style: const TextStyle(fontSize: 12)),
-              Text(bottom),
+              Text(month,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, height: 1.0, color: topColor)),
+              const SizedBox(height: 2),
+              Text(day,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, height: 1.0, color: mainColor)),
             ],
           ),
-          backgroundColor: colorScheme.surfaceContainer,
-          selectedColor: colorScheme.primary,
-          labelStyle: TextStyle(
-            color: selected
-                ? colorScheme.onPrimaryContainer
-                : colorScheme.onSurface,
-            fontWeight: FontWeight.w600,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         );
       },
     ),
   );
 
-  String _monthShort(DateTime d) {
-    const m = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return m[d.month - 1];
-  }
+  String _monthShort(DateTime d) =>
+      const ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+      [d.month - 1];
 }
 
 class _TimeChips extends StatelessWidget {
@@ -386,40 +383,106 @@ class _TimeChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 44,
+    height: 54,
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       itemCount: isoList.length,
-      separatorBuilder: (_, __) => const SizedBox(width: 8),
+      separatorBuilder: (_, __) => const SizedBox(width: 10),
       itemBuilder: (ctx, i) {
         final dt = DateTime.tryParse(isoList[i])?.toLocal();
-        final label = (dt == null)
+        final label = dt == null
             ? isoList[i]
-            : '${(dt.hour % 12 == 0 ? 12 : dt.hour % 12)}:${dt.minute.toString().padLeft(2, '0')}'
-            ' ${dt.hour >= 12 ? 'pm' : 'am'}';
+            : '${(dt.hour % 12 == 0 ? 12 : dt.hour % 12)}:${dt.minute.toString().padLeft(2, '0')} '
+            '${dt.hour >= 12 ? 'pm' : 'am'}';
 
-        final selected = i == selectedIndex;
+        final sel = i == selectedIndex;
+        final fg  = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
 
-        return ChoiceChip(
-          selected: selected,
-          onSelected: (_) => onSelect(i),
-          label: Text(
+        return _PillChip(
+          selected: sel,
+          colors: colorScheme,
+          height: 48,
+          minWidth: 78,
+          radius: 14,
+          onTap: () => onSelect(i),
+          child: Text(
             label,
-            style: TextStyle(
-              color: selected
-                  ? colorScheme.onPrimaryContainer
-                  : colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.0, color: fg),
           ),
-          backgroundColor: colorScheme.surfaceContainer,
-          selectedColor: colorScheme.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         );
       },
     ),
   );
+}
+
+class _QualityChips extends StatelessWidget {
+  const _QualityChips({
+    required this.selectedQuality,
+    required this.onSelect2D,
+    required this.onSelect3D,
+    required this.colorScheme,
+  });
+
+  final String selectedQuality; // "2D" | "3D"
+  final VoidCallback onSelect2D;
+  final VoidCallback onSelect3D;
+  final ColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final is2D = selectedQuality == '2D';
+    final is3D = selectedQuality == '3D';
+
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _PillChip(
+            selected: is2D,
+            colors: colorScheme,
+            height: 46,
+            minWidth: 72,
+            radius: 14,
+            horizontalPadding: 20,
+            onTap: onSelect2D,
+            child: Text(
+              '2D',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                height: 1.0,
+                color: is2D
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurface,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          _PillChip(
+            selected: is3D,
+            colors: colorScheme,
+            height: 46,
+            minWidth: 72,
+            radius: 14,
+            horizontalPadding: 20,
+            onTap: onSelect3D,
+            child: Text(
+              '3D',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                height: 1.0,
+                color: is3D
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -27,4 +27,6 @@ final ColorScheme customColorScheme = ColorScheme.fromSeed(
   outline: Color(0xFFF1F1F1),
   onSurfaceVariant: Color(0xFF989898),
   outlineVariant: Color(0xFF989898),
+
+  surfaceContainerHigh: Color(0xFF4A4B56),
 );
