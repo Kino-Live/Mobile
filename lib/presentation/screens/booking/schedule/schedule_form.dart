@@ -7,9 +7,11 @@ class ScheduleFormData {
   final String posterUrl;
   final List<String> availableDays;
   final int selectedDayIndex;
-  final String quality; // "2D" | "3D"
+  final String quality;
   final List<String> timesIso;
   final int selectedTimeIndex;
+  final bool is2DAvailableForSelectedTime;
+  final bool is3DAvailableForSelectedTime;
 
   const ScheduleFormData({
     required this.title,
@@ -19,6 +21,8 @@ class ScheduleFormData {
     required this.quality,
     required this.timesIso,
     required this.selectedTimeIndex,
+    this.is2DAvailableForSelectedTime = true,
+    this.is3DAvailableForSelectedTime = true,
   });
 }
 
@@ -88,7 +92,6 @@ class ScheduleForm extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(color: Colors.black26),
                   ),
-
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -105,7 +108,6 @@ class ScheduleForm extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
@@ -128,7 +130,6 @@ class ScheduleForm extends StatelessWidget {
               ),
             ),
           ),
-
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 30, 16, 24),
@@ -144,11 +145,7 @@ class ScheduleForm extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _SectionTitle(
-                          'Select Day',
-                          color: colorScheme.onSurface,
-                          textTheme: textTheme
-                        ),
+                        _SectionTitle('Select Day', color: colorScheme.onSurface, textTheme: textTheme),
                         const SizedBox(height: 12),
                         _ArrowStrip(
                           onPrev: actions.onPrevDay,
@@ -161,12 +158,7 @@ class ScheduleForm extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 30),
-
-                        _SectionTitle(
-                          'Select Time',
-                          color: colorScheme.onSurface,
-                          textTheme: textTheme
-                        ),
+                        _SectionTitle('Select Time', color: colorScheme.onSurface, textTheme: textTheme),
                         const SizedBox(height: 12),
                         _ArrowStrip(
                           onPrev: actions.onPrevTime,
@@ -179,23 +171,19 @@ class ScheduleForm extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 30),
-
-                        _SectionTitle(
-                          'Select Quality',
-                          color: colorScheme.onSurface,
-                          textTheme: textTheme
-                        ),
+                        _SectionTitle('Select Quality', color: colorScheme.onSurface, textTheme: textTheme),
                         const SizedBox(height: 12),
                         _QualityChips(
                           selectedQuality: data.quality,
-                          onSelect2D: actions.onSet2D,
-                          onSelect3D: actions.onSet3D,
+                          onSelect2D: data.is2DAvailableForSelectedTime ? actions.onSet2D : () {},
+                          onSelect3D: data.is3DAvailableForSelectedTime ? actions.onSet3D : () {},
                           colorScheme: colorScheme,
+                          is2DAvailable: data.is2DAvailableForSelectedTime,
+                          is3DAvailable: data.is3DAvailableForSelectedTime,
                         ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 24),
                   PrimaryButton(
                     text: 'Continue',
@@ -256,20 +244,19 @@ class _ArrowStrip extends StatelessWidget {
     );
   }
 
-  Widget _circleIcon(IconData icon, VoidCallback onTap, ColorScheme colors) =>
-      InkResponse(
-        onTap: onTap,
-        radius: 22,
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: colors.surfaceContainer,
-          ),
-          child: Icon(icon, size: 20, color: colors.onSurface),
-        ),
-      );
+  Widget _circleIcon(IconData icon, VoidCallback onTap, ColorScheme colors) => InkResponse(
+    onTap: onTap,
+    radius: 22,
+    child: Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colors.surfaceContainer,
+      ),
+      child: Icon(icon, size: 20, color: colors.onSurface),
+    ),
+  );
 }
 
 class _PillChip extends StatelessWidget {
@@ -336,8 +323,8 @@ class _DayChips extends StatelessWidget {
       itemBuilder: (ctx, i) {
         final d = DateTime.tryParse(days[i]);
         final month = d != null ? _monthShort(d) : '';
-        final day   = d != null ? '${d.day}' : days[i];
-        final sel   = i == selectedIndex;
+        final day = d != null ? '${d.day}' : days[i];
+        final sel = i == selectedIndex;
 
         final topColor = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
         final mainColor = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
@@ -352,13 +339,9 @@ class _DayChips extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(month,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, height: 1.0, color: topColor)),
+              Text(month, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, height: 1.0, color: topColor)),
               const SizedBox(height: 2),
-              Text(day,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, height: 1.0, color: mainColor)),
+              Text(day, textAlign: TextAlign.center, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, height: 1.0, color: mainColor)),
             ],
           ),
         );
@@ -366,9 +349,7 @@ class _DayChips extends StatelessWidget {
     ),
   );
 
-  String _monthShort(DateTime d) =>
-      const ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-      [d.month - 1];
+  String _monthShort(DateTime d) => const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1];
 }
 
 class _TimeChips extends StatelessWidget {
@@ -395,11 +376,10 @@ class _TimeChips extends StatelessWidget {
         final dt = DateTime.tryParse(isoList[i])?.toLocal();
         final label = dt == null
             ? isoList[i]
-            : '${(dt.hour % 12 == 0 ? 12 : dt.hour % 12)}:${dt.minute.toString().padLeft(2, '0')} '
-            '${dt.hour >= 12 ? 'pm' : 'am'}';
+            : '${(dt.hour % 12 == 0 ? 12 : dt.hour % 12)}:${dt.minute.toString().padLeft(2, '0')} ${dt.hour >= 12 ? 'pm' : 'am'}';
 
         final sel = i == selectedIndex;
-        final fg  = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
+        final fg = sel ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
 
         return _PillChip(
           selected: sel,
@@ -425,17 +405,27 @@ class _QualityChips extends StatelessWidget {
     required this.onSelect2D,
     required this.onSelect3D,
     required this.colorScheme,
+    this.is2DAvailable = true,
+    this.is3DAvailable = true,
   });
 
-  final String selectedQuality; // "2D" | "3D"
+  final String selectedQuality;
   final VoidCallback onSelect2D;
   final VoidCallback onSelect3D;
   final ColorScheme colorScheme;
+  final bool is2DAvailable;
+  final bool is3DAvailable;
 
   @override
   Widget build(BuildContext context) {
     final is2D = selectedQuality == '2D';
     final is3D = selectedQuality == '3D';
+
+    Color fg(bool selected, bool available) {
+      if (selected) return colorScheme.onPrimaryContainer;
+      if (!available) return colorScheme.onSurface.withOpacity(0.4);
+      return colorScheme.onSurface;
+    }
 
     return Center(
       child: Row(
@@ -448,18 +438,11 @@ class _QualityChips extends StatelessWidget {
             minWidth: 72,
             radius: 14,
             horizontalPadding: 20,
-            onTap: onSelect2D,
+            onTap: is2DAvailable ? onSelect2D : () {},
             child: Text(
               '2D',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                height: 1.0,
-                color: is2D
-                    ? colorScheme.onPrimaryContainer
-                    : colorScheme.onSurface,
-              ),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.0, color: fg(is2D, is2DAvailable)),
             ),
           ),
           const SizedBox(width: 12),
@@ -470,18 +453,11 @@ class _QualityChips extends StatelessWidget {
             minWidth: 72,
             radius: 14,
             horizontalPadding: 20,
-            onTap: onSelect3D,
+            onTap: is3DAvailable ? onSelect3D : () {},
             child: Text(
               '3D',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                height: 1.0,
-                color: is3D
-                    ? colorScheme.onPrimaryContainer
-                    : colorScheme.onSurface,
-              ),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, height: 1.0, color: fg(is3D, is3DAvailable)),
             ),
           ),
         ],

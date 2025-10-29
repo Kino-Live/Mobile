@@ -3,12 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/booking/day_schedule.dart';
 import 'package:kinolive_mobile/domain/entities/booking/movie_schedule.dart';
 import 'package:kinolive_mobile/domain/entities/booking/showtime.dart';
-
 import 'package:kinolive_mobile/domain/usecases/booking/get_movie_schedule.dart';
 import 'package:kinolive_mobile/domain/usecases/booking/get_movie_schedule_for_date.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 import 'package:kinolive_mobile/shared/providers/booking_provider.dart';
-
 
 final scheduleVmProvider = NotifierProvider.family<ScheduleVm, ScheduleState, int>(
       (id) => ScheduleVm(),
@@ -19,16 +17,11 @@ enum ScheduleStatus { idle, loading, loaded, error }
 class ScheduleState {
   final ScheduleStatus status;
   final String? error;
-
   final int movieId;
-
-  final Map<String, DaySchedule> daysMap; // "YYYY-MM-DD" -> DaySchedule
+  final Map<String, DaySchedule> daysMap;
   final List<String> availableDays;
   final int selectedDayIndex;
-
-  /// "2D" | "3D"
   final String quality;
-
   final List<Showtime> times;
   final int selectedTimeIndex;
 
@@ -45,7 +38,7 @@ class ScheduleState {
   });
 
   bool get isLoading => status == ScheduleStatus.loading;
-  bool get hasError  => status == ScheduleStatus.error;
+  bool get hasError => status == ScheduleStatus.error;
 
   String? get selectedDate =>
       (availableDays.isEmpty || selectedDayIndex < 0 || selectedDayIndex >= availableDays.length)
@@ -88,7 +81,7 @@ class ScheduleVm extends Notifier<ScheduleState> {
 
   @override
   ScheduleState build() {
-    _getAll   = ref.read(getMovieScheduleProvider);
+    _getAll = ref.read(getMovieScheduleProvider);
     _getForDate = ref.read(getMovieScheduleForDateProvider);
     return const ScheduleState();
   }
@@ -109,21 +102,12 @@ class ScheduleVm extends Notifier<ScheduleState> {
 
     try {
       final MovieSchedule full = await _getAll(movieId);
-
-      final map  = Map<String, DaySchedule>.from(full.days);
+      final map = Map<String, DaySchedule>.from(full.days);
       final days = List<String>.from(full.availableDays)..sort();
-
       var selectedIndex = 0;
-      if (days.isNotEmpty) {
-        // TODO: pick nearest >= today if needed
-        selectedIndex = 0;
-      }
+      if (days.isNotEmpty) selectedIndex = 0;
 
-      final times = _buildTimesFor(
-        map[days.elementAtOrNull(selectedIndex)],
-        quality: state.quality,
-      );
-
+      final times = _buildTimesFor(map[days.elementAtOrNull(selectedIndex)]);
       state = state.copyWith(
         status: ScheduleStatus.loaded,
         daysMap: map,
@@ -141,25 +125,28 @@ class ScheduleVm extends Notifier<ScheduleState> {
 
   void clearError() => state = state.copyWith(error: null);
 
-  // === Actions ===
-
   void setQuality(bool is3D) {
     final q = is3D ? '3D' : '2D';
     if (q == state.quality) return;
+    final date = state.selectedDate;
+    final iso = state.selectedShowtime?.startIso;
+    if (date != null && iso != null) {
+      if (!isQualityAvailableFor(date: date, startIso: iso, quality: q)) {
+        state = state.copyWith(error: '$q not available for selected time');
+        return;
+      }
+    }
     _setQualityInternal(q);
   }
 
   Future<void> selectDay(int index) async {
     if (index < 0 || index >= state.availableDays.length) return;
-
     final date = state.availableDays[index];
-
     if (!state.daysMap.containsKey(date)) {
       await _loadDay(date);
       if (state.hasError) return;
     }
-
-    final times = _buildTimesFor(state.daysMap[date], quality: state.quality);
+    final times = _buildTimesFor(state.daysMap[date]);
     state = state.copyWith(
       selectedDayIndex: index,
       times: times,
@@ -176,6 +163,21 @@ class ScheduleVm extends Notifier<ScheduleState> {
   void selectTime(int index) {
     if (index < 0 || index >= state.times.length) return;
     state = state.copyWith(selectedTimeIndex: index);
+
+    final date = state.selectedDate;
+    final iso = state.selectedShowtime?.startIso;
+    if (date == null || iso == null) return;
+
+    final cur = state.quality;
+    if (!isQualityAvailableFor(date: date, startIso: iso, quality: cur)) {
+      final has3D = isQualityAvailableFor(date: date, startIso: iso, quality: '3D');
+      final has2D = isQualityAvailableFor(date: date, startIso: iso, quality: '2D');
+      if (has3D && !has2D) {
+        _setQualityInternal('3D');
+      } else if (has2D && !has3D) {
+        _setQualityInternal('2D');
+      }
+    }
   }
 
   void shiftTime(int delta) {
@@ -186,23 +188,8 @@ class ScheduleVm extends Notifier<ScheduleState> {
 
   String? getSelectedShowtimeId() => state.selectedShowtime?.id;
 
-  // === Helpers ===
-
   void _setQualityInternal(String q) async {
-    final date = state.selectedDate;
-    if (date == null) return;
-
-    if (!state.daysMap.containsKey(date)) {
-      await _loadDay(date);
-      if (state.hasError) return;
-    }
-
-    final times = _buildTimesFor(state.daysMap[date], quality: q);
-    state = state.copyWith(
-      quality: q,
-      times: times,
-      selectedTimeIndex: times.isEmpty ? 0 : 0,
-    );
+    state = state.copyWith(quality: q);
   }
 
   Future<void> _loadDay(String date) async {
@@ -217,14 +204,27 @@ class ScheduleVm extends Notifier<ScheduleState> {
     }
   }
 
-  List<Showtime> _buildTimesFor(
-      DaySchedule? day, {
-        required String quality,
-      }) {
+  List<Showtime> _buildTimesFor(DaySchedule? day) {
     if (day == null) return const [];
+    final all = <Showtime>[];
+    all..addAll(day.twoD)..addAll(day.threeD);
+    final byIso = <String, Showtime>{};
+    for (final t in all) {
+      byIso[t.startIso] = t;
+    }
+    final list = byIso.values.toList()..sort((a, b) => a.startIso.compareTo(b.startIso));
+    return list;
+  }
+
+  bool isQualityAvailableFor({
+    required String date,
+    required String startIso,
+    required String quality,
+  }) {
+    final day = state.daysMap[date];
+    if (day == null) return false;
     final list = (quality == '3D') ? day.threeD : day.twoD;
-    final sorted = [...list]..sort((a, b) => a.startIso.compareTo(b.startIso));
-    return sorted;
+    return list.any((t) => t.startIso == startIso);
   }
 }
 

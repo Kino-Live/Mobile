@@ -28,13 +28,12 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     final sched = ref.watch(scheduleVmProvider(widget.id));
-    final vm    = ref.read(scheduleVmProvider(widget.id).notifier);
+    final vm = ref.read(scheduleVmProvider(widget.id).notifier);
 
     final movie = ref.watch(movieDetailsVmProvider(widget.id).select((s) => s.movie));
-    final mdSt  = ref.watch(movieDetailsVmProvider(widget.id).select((s) => s.status));
+    final mdSt = ref.watch(movieDetailsVmProvider(widget.id).select((s) => s.status));
 
-    final isLoading =
-        sched.status == ScheduleStatus.loading || mdSt == MovieDetailsStatus.loading;
+    final isLoading = sched.status == ScheduleStatus.loading || mdSt == MovieDetailsStatus.loading;
 
     final error = sched.error;
     if (error != null && error.isNotEmpty) {
@@ -58,6 +57,17 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       );
     }
 
+    final selectedDate = sched.selectedDate;
+    final selectedStartIso = sched.selectedShowtime?.startIso;
+
+    final can2D = (selectedDate != null && selectedStartIso != null)
+        ? vm.isQualityAvailableFor(date: selectedDate, startIso: selectedStartIso, quality: '2D')
+        : true;
+
+    final can3D = (selectedDate != null && selectedStartIso != null)
+        ? vm.isQualityAvailableFor(date: selectedDate, startIso: selectedStartIso, quality: '3D')
+        : true;
+
     final data = ScheduleFormData(
       title: movie!.title,
       posterUrl: movie.posterUrl,
@@ -66,6 +76,8 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       quality: sched.quality,
       timesIso: sched.times.map((t) => t.startIso).toList(),
       selectedTimeIndex: sched.selectedTimeIndex,
+      is2DAvailableForSelectedTime: can2D,
+      is3DAvailableForSelectedTime: can3D,
     );
 
     final actions = ScheduleFormActions(
