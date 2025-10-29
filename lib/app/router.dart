@@ -23,6 +23,8 @@ import 'package:kinolive_mobile/presentation/screens/billboard/billboard_screen.
 import 'package:kinolive_mobile/presentation/screens/splash/splash_screen.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 
+import '../presentation/screens/booking/schedule/schedule_screen.dart';
+
 const List<String> publicPaths = <String>[
   splashPath,
   loginPath,
@@ -66,6 +68,14 @@ final appRouter = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
           return MovieDetailsScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: schedulePath,
+        name: scheduleName,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return ScheduleScreen(id: id);
         },
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),
