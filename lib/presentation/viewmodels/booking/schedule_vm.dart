@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/booking/day_schedule.dart';
 import 'package:kinolive_mobile/domain/entities/booking/movie_schedule.dart';
@@ -104,6 +103,7 @@ class ScheduleVm extends Notifier<ScheduleState> {
       final MovieSchedule full = await _getAll(movieId);
       final map = Map<String, DaySchedule>.from(full.days);
       final days = List<String>.from(full.availableDays)..sort();
+
       var selectedIndex = 0;
       if (days.isNotEmpty) selectedIndex = 0;
 
@@ -116,6 +116,9 @@ class ScheduleVm extends Notifier<ScheduleState> {
         times: times,
         selectedTimeIndex: times.isEmpty ? 0 : 0,
       );
+
+      _reconcileStateAfterRefresh();
+
     } on AppException catch (e) {
       state = state.copyWith(status: ScheduleStatus.error, error: e.message);
     } catch (e) {
@@ -128,30 +131,37 @@ class ScheduleVm extends Notifier<ScheduleState> {
   void setQuality(bool is3D) {
     final q = is3D ? '3D' : '2D';
     if (q == state.quality) return;
+
     final date = state.selectedDate;
     final iso = state.selectedShowtime?.startIso;
+
     if (date != null && iso != null) {
       if (!isQualityAvailableFor(date: date, startIso: iso, quality: q)) {
         state = state.copyWith(error: '$q not available for selected time');
         return;
       }
     }
+
     _setQualityInternal(q);
   }
 
   Future<void> selectDay(int index) async {
     if (index < 0 || index >= state.availableDays.length) return;
     final date = state.availableDays[index];
+
     if (!state.daysMap.containsKey(date)) {
       await _loadDay(date);
       if (state.hasError) return;
     }
+
     final times = _buildTimesFor(state.daysMap[date]);
     state = state.copyWith(
       selectedDayIndex: index,
       times: times,
       selectedTimeIndex: times.isEmpty ? 0 : 0,
     );
+
+    _reconcileStateAfterRefresh();
   }
 
   Future<void> shiftDay(int delta) async {
@@ -188,7 +198,7 @@ class ScheduleVm extends Notifier<ScheduleState> {
 
   String? getSelectedShowtimeId() => state.selectedShowtime?.id;
 
-  void _setQualityInternal(String q) async {
+  void _setQualityInternal(String q) {
     state = state.copyWith(quality: q);
   }
 
@@ -225,6 +235,28 @@ class ScheduleVm extends Notifier<ScheduleState> {
     if (day == null) return false;
     final list = (quality == '3D') ? day.threeD : day.twoD;
     return list.any((t) => t.startIso == startIso);
+  }
+
+  void _reconcileStateAfterRefresh() {
+    final date = state.selectedDate;
+    final iso = state.selectedShowtime?.startIso;
+
+    if (date == null || iso == null) return;
+
+    if (!isQualityAvailableFor(date: date, startIso: iso, quality: state.quality)) {
+      final has3D = isQualityAvailableFor(date: date, startIso: iso, quality: '3D');
+      final has2D = isQualityAvailableFor(date: date, startIso: iso, quality: '2D');
+
+      if (has3D && !has2D) {
+        _setQualityInternal('3D');
+      } else if (has2D && !has3D) {
+        _setQualityInternal('2D');
+      } else {
+        if (state.times.isNotEmpty) {
+          state = state.copyWith(selectedTimeIndex: 0);
+        }
+      }
+    }
   }
 }
 
