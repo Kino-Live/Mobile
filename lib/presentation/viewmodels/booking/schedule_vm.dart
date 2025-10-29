@@ -62,7 +62,7 @@ class ScheduleState {
   }) {
     return ScheduleState(
       status: status ?? this.status,
-      error: error,
+      error: error, // ВАЖНО: без "?? this.error", чтобы clearError() работал
       movieId: movieId ?? this.movieId,
       daysMap: daysMap ?? this.daysMap,
       availableDays: availableDays ?? this.availableDays,
@@ -114,11 +114,10 @@ class ScheduleVm extends Notifier<ScheduleState> {
         availableDays: days,
         selectedDayIndex: selectedIndex,
         times: times,
-        selectedTimeIndex: times.isEmpty ? 0 : 0,
+        selectedTimeIndex: 0,
       );
 
       _reconcileStateAfterRefresh();
-
     } on AppException catch (e) {
       state = state.copyWith(status: ScheduleStatus.error, error: e.message);
     } catch (e) {
@@ -128,21 +127,32 @@ class ScheduleVm extends Notifier<ScheduleState> {
 
   void clearError() => state = state.copyWith(error: null);
 
+  /// Переключение качества пользователем.
+  /// Если желаемое недоступно для выбранного времени:
+  /// 1) пробуем альтернативу для этого же времени;
+  /// 2) иначе прыгаем на первый доступный слот дня (приоритет 2D).
   void setQuality(bool is3D) {
-    final q = is3D ? '3D' : '2D';
-    if (q == state.quality) return;
+    final desired = is3D ? '3D' : '2D';
+    if (desired == state.quality) return;
 
     final date = state.selectedDate;
     final iso = state.selectedShowtime?.startIso;
 
     if (date != null && iso != null) {
-      if (!isQualityAvailableFor(date: date, startIso: iso, quality: q)) {
-        state = state.copyWith(error: '$q not available for selected time');
+      final wantedAvailable = isQualityAvailableFor(date: date, startIso: iso, quality: desired);
+      if (!wantedAvailable) {
+        final alt = desired == '3D' ? '2D' : '3D';
+        final altAvailable = isQualityAvailableFor(date: date, startIso: iso, quality: alt);
+        if (altAvailable) {
+          _setQualityInternal(alt);
+          return;
+        }
+        _fallbackToFirstAvailableForDay(date, prefer2D: true);
         return;
       }
     }
 
-    _setQualityInternal(q);
+    _setQualityInternal(desired);
   }
 
   Future<void> selectDay(int index) async {
@@ -158,7 +168,7 @@ class ScheduleVm extends Notifier<ScheduleState> {
     state = state.copyWith(
       selectedDayIndex: index,
       times: times,
-      selectedTimeIndex: times.isEmpty ? 0 : 0,
+      selectedTimeIndex: 0,
     );
 
     _reconcileStateAfterRefresh();
@@ -186,6 +196,8 @@ class ScheduleVm extends Notifier<ScheduleState> {
         _setQualityInternal('3D');
       } else if (has2D && !has3D) {
         _setQualityInternal('2D');
+      } else {
+        _fallbackToFirstAvailableForDay(date, prefer2D: true);
       }
     }
   }
@@ -214,6 +226,7 @@ class ScheduleVm extends Notifier<ScheduleState> {
     }
   }
 
+  /// Собираем уникальные по startIso тайм-слоты и сортируем
   List<Showtime> _buildTimesFor(DaySchedule? day) {
     if (day == null) return const [];
     final all = <Showtime>[];
@@ -237,10 +250,12 @@ class ScheduleVm extends Notifier<ScheduleState> {
     return list.any((t) => t.startIso == startIso);
   }
 
+  /// Если для выбранного времени текущее качество недоступно:
+  /// - переключаемся на доступное для этого времени,
+  /// - иначе — на первый доступный слот за день (приоритет 2D).
   void _reconcileStateAfterRefresh() {
     final date = state.selectedDate;
     final iso = state.selectedShowtime?.startIso;
-
     if (date == null || iso == null) return;
 
     if (!isQualityAvailableFor(date: date, startIso: iso, quality: state.quality)) {
@@ -252,11 +267,41 @@ class ScheduleVm extends Notifier<ScheduleState> {
       } else if (has2D && !has3D) {
         _setQualityInternal('2D');
       } else {
-        if (state.times.isNotEmpty) {
-          state = state.copyWith(selectedTimeIndex: 0);
-        }
+        _fallbackToFirstAvailableForDay(date, prefer2D: true);
       }
     }
+  }
+
+  /// Выбрать первый доступный слот дня (приоритет 2D)
+  void _fallbackToFirstAvailableForDay(String date, {bool prefer2D = true}) {
+    final day = state.daysMap[date];
+    if (day == null) return;
+
+    if (prefer2D && day.twoD.isNotEmpty) {
+      _setQualityInternal('2D');
+      _setSelectedTimeByIso(day.twoD.first.startIso, day);
+      return;
+    }
+    if (day.threeD.isNotEmpty) {
+      _setQualityInternal('3D');
+      _setSelectedTimeByIso(day.threeD.first.startIso, day);
+      return;
+    }
+    if (day.twoD.isNotEmpty) {
+      _setQualityInternal('2D');
+      _setSelectedTimeByIso(day.twoD.first.startIso, day);
+      return;
+    }
+  }
+
+  /// Синхронизировать selectedTimeIndex по ISO и обновить times
+  void _setSelectedTimeByIso(String iso, DaySchedule day) {
+    final times = _buildTimesFor(day);
+    final idx = times.indexWhere((t) => t.startIso == iso);
+    state = state.copyWith(
+      times: times,
+      selectedTimeIndex: idx >= 0 ? idx : 0,
+    );
   }
 }
 

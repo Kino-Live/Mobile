@@ -8,6 +8,7 @@ class QualityChips extends StatelessWidget {
     required this.colorScheme,
     this.is2DAvailable = true,
     this.is3DAvailable = true,
+    super.key,
   });
 
   final String selectedQuality;

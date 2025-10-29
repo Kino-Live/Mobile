@@ -178,10 +178,11 @@ class ScheduleForm extends StatelessWidget {
                         const SizedBox(height: 30),
                         SectionTitle('Select Quality', color: colorScheme.onSurface, textTheme: textTheme),
                         const SizedBox(height: 12),
+                        // ВАЖНО: передаём реальные обработчики ВСЕГДА, визуально лишь "диммим" недоступность
                         QualityChips(
                           selectedQuality: data.quality,
-                          onSelect2D: data.is2DAvailableForSelectedTime ? actions.onSet2D : () {},
-                          onSelect3D: data.is3DAvailableForSelectedTime ? actions.onSet3D : () {},
+                          onSelect2D: actions.onSet2D,
+                          onSelect3D: actions.onSet3D,
                           colorScheme: colorScheme,
                           is2DAvailable: data.is2DAvailableForSelectedTime,
                           is3DAvailable: data.is3DAvailableForSelectedTime,
