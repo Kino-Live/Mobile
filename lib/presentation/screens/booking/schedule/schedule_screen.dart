@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/schedule/schedule_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/booking/schedule_vm.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/movie_details_vm.dart';
@@ -36,30 +36,31 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     final isLoading =
         sched.status == ScheduleStatus.loading || mdSt == MovieDetailsStatus.loading;
 
-    void showErr(String? e) {
-      if (e == null || e.isEmpty) return;
+    final error = sched.error;
+    if (error != null && error.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e, textAlign: TextAlign.center)),
+          SnackBar(content: Text(error, textAlign: TextAlign.center)),
         );
         ref.read(scheduleVmProvider(widget.id).notifier).clearError();
       });
     }
-    showErr(sched.error);
 
     Future<void> retry() async {
       await ref.read(scheduleVmProvider(widget.id).notifier).init(widget.id, force: true);
       await ref.read(movieDetailsVmProvider(widget.id).notifier).init(widget.id, force: true);
     }
 
-    if (sched.status == ScheduleStatus.error) {
-      return Scaffold(body: SafeArea(child: RetryView(onRetry: retry)));
+    if (sched.status == ScheduleStatus.error || mdSt == MovieDetailsStatus.error) {
+      return Scaffold(
+        body: SafeArea(child: RetryView(onRetry: retry)),
+      );
     }
 
     final data = ScheduleFormData(
-      title: movie?.title ?? '',
-      posterUrl: movie?.posterUrl ?? '',
+      title: movie!.title,
+      posterUrl: movie.posterUrl,
       availableDays: sched.availableDays,
       selectedDayIndex: sched.selectedDayIndex,
       quality: sched.quality,
@@ -94,10 +95,13 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
         bottom: false,
         child: LoadingOverlay(
           loading: isLoading,
-          child: ScheduleForm(
-            data: data,
-            actions: actions,
-            onRefresh: retry,
+          child: Builder(
+            builder: (_) {
+              if (sched.status == ScheduleStatus.loaded && mdSt == MovieDetailsStatus.loaded) {
+                return ScheduleForm(data: data, actions: actions, onRefresh: retry);
+              }
+              return const SizedBox.shrink();
+            },
           ),
         ),
       ),
