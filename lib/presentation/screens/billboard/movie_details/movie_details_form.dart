@@ -38,6 +38,10 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
           floating: false,
           expandedHeight: 320,
           elevation: 0,
+          leading: IconButton(
+            onPressed: () => context.pop(),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          ),
           flexibleSpace: FlexibleSpaceBar(
             background: Stack(
               fit: StackFit.expand,
