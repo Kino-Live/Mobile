@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router_path.dart';
 import 'package:kinolive_mobile/domain/entities/movie.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/cast_card.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/expandable_text.dart';
@@ -180,7 +182,10 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () => context.pushNamed(
+                          scheduleName,
+                          pathParameters: {'id': widget.movie.id.toString()},
+                        ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
                           side: const BorderSide(color: Colors.white24),
