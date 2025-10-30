@@ -1,8 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/booking/hall.dart';
-import 'package:kinolive_mobile/domain/entities/booking/showtime.dart';
 import 'package:kinolive_mobile/domain/usecases/booking/get_hall_for_showtime.dart';
-import 'package:kinolive_mobile/domain/usecases/booking/get_showtime_by_id.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 import 'package:kinolive_mobile/shared/providers/booking_provider.dart';
 
@@ -12,8 +10,9 @@ class SeatSelectionArgs {
   const SeatSelectionArgs({required this.movieId, required this.showtimeId});
 }
 
-final seatSelectionVmProvider = NotifierProvider.family<SeatSelectionVm, SeatSelectionState, SeatSelectionArgs>(
-    (args) => SeatSelectionVm(),
+final seatSelectionVmProvider =
+NotifierProvider.family<SeatSelectionVm, SeatSelectionState, SeatSelectionArgs>(
+      (args) => SeatSelectionVm(),
 );
 
 enum SeatSelectionStatus { idle, loading, loaded, error }
@@ -25,12 +24,12 @@ class SeatSelectionState {
   final int movieId;
   final String showtimeId;
 
-  final HallInfo? hallInfo;
-  final String? date;       // YYYY-MM-DD
-  final String? startIso;
-  final String? endIso;
-  final String quality;     // "2D" / "3D"
+  final String date; // YYYY-MM-DD
+  final String startIso; // ISO
+  final String endIso; // ISO
+  final String quality; // "2D" / "3D"
 
+  final HallInfo? hallInfo;
   final Set<String> selected;
 
   const SeatSelectionState({
@@ -38,21 +37,25 @@ class SeatSelectionState {
     this.error,
     this.movieId = 0,
     this.showtimeId = '',
-    this.hallInfo,
-    this.date,
-    this.startIso,
-    this.endIso,
+    this.date = '',
+    this.startIso = '',
+    this.endIso = '',
     this.quality = '2D',
+    this.hallInfo,
     this.selected = const {},
   });
 
   bool get isLoading => status == SeatSelectionStatus.loading;
-  bool get hasError  => status == SeatSelectionStatus.error;
-  bool get isLoaded  => status == SeatSelectionStatus.loaded;
+  bool get hasError => status == SeatSelectionStatus.error;
+  bool get isLoaded => status == SeatSelectionStatus.loaded;
 
-  String get dateText  => date ?? hallInfo?.showtime.date ?? '';
-  String get timeRange => _timeRange(startIso ?? hallInfo?.showtime.startIso, endIso ?? hallInfo?.showtime.endIso);
-  bool   get is3D      => (quality.isNotEmpty ? quality : (hallInfo?.showtime.quality ?? '2D')) == '3D';
+  String get dateText => date.isNotEmpty ? date : (hallInfo?.showtime.date ?? '');
+  String get timeRange => _timeRange(
+    startIso.isNotEmpty ? startIso : hallInfo?.showtime.startIso,
+    endIso.isNotEmpty ? endIso : hallInfo?.showtime.endIso,
+  );
+  bool get is3D =>
+      (quality.isNotEmpty ? quality : (hallInfo?.showtime.quality ?? '2D')) == '3D';
 
   int get selectedCount => selected.length;
 
@@ -61,11 +64,11 @@ class SeatSelectionState {
     String? error,
     int? movieId,
     String? showtimeId,
-    HallInfo? hallInfo,
     String? date,
     String? startIso,
     String? endIso,
     String? quality,
+    HallInfo? hallInfo,
     Set<String>? selected,
   }) {
     return SeatSelectionState(
@@ -73,11 +76,11 @@ class SeatSelectionState {
       error: error,
       movieId: movieId ?? this.movieId,
       showtimeId: showtimeId ?? this.showtimeId,
-      hallInfo: hallInfo ?? this.hallInfo,
       date: date ?? this.date,
       startIso: startIso ?? this.startIso,
       endIso: endIso ?? this.endIso,
       quality: quality ?? this.quality,
+      hallInfo: hallInfo ?? this.hallInfo,
       selected: selected ?? this.selected,
     );
   }
@@ -92,49 +95,39 @@ class SeatSelectionState {
 
 class SeatSelectionVm extends Notifier<SeatSelectionState> {
   late final GetHallForShowtime _getHall;
-  late final GetShowtimeById _getShowtime;
 
   @override
   SeatSelectionState build() {
     _getHall = ref.read(getHallForShowtimeProvider);
-    _getShowtime = ref.read(getShowtimeByIdProvider);
     return const SeatSelectionState();
   }
 
-  Future<void> init(String showtimeId, {int? movieId, bool force = false}) async {
+  Future<void> init({
+    required int movieId,
+    required String showtimeId,
+    bool force = false,
+  }) async {
     if (state.isLoading && !force) return;
 
     state = state.copyWith(
       status: SeatSelectionStatus.loading,
       error: null,
-      movieId: movieId ?? state.movieId,
+      movieId: movieId,
       showtimeId: showtimeId,
       selected: <String>{},
     );
 
     try {
       final hallInfo = await _getHall(showtimeId);
-
-      Showtime? st;
-      try {
-        st = await _getShowtime(showtimeId);
-      } catch (_) {
-      }
-
-      final resolvedMovieId = movieId ?? hallInfo.showtime.movieId;
-      final resolvedDate    = st?.date    ?? hallInfo.showtime.date;
-      final resolvedStart   = st?.startIso?? hallInfo.showtime.startIso;
-      final resolvedEnd     = st?.endIso  ?? hallInfo.showtime.endIso;
-      final resolvedQuality = st?.quality ?? hallInfo.showtime.quality;
+      final st = hallInfo.showtime;
 
       state = state.copyWith(
         status: SeatSelectionStatus.loaded,
         hallInfo: hallInfo,
-        movieId: resolvedMovieId,
-        date: resolvedDate,
-        startIso: resolvedStart,
-        endIso: resolvedEnd,
-        quality: resolvedQuality,
+        date: st.date,
+        startIso: st.startIso,
+        endIso: st.endIso,
+        quality: st.quality,
         error: null,
       );
     } on AppException catch (e) {
