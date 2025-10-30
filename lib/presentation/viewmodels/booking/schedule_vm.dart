@@ -204,7 +204,26 @@ class ScheduleVm extends Notifier<ScheduleState> {
     selectTime(i);
   }
 
-  String? getSelectedShowtimeId() => state.selectedShowtime?.id;
+  String? getShowtimeIdFor({
+    required String date,
+    required String startIso,
+    required String quality, // '2D' | '3D'
+  }) {
+    final day = state.daysMap[date];
+    if (day == null) return null;
+    final list = (quality == '3D') ? day.threeD : day.twoD;
+    for (final t in list) {
+      if (t.startIso == startIso) return t.id;
+    }
+    return null;
+  }
+
+  String? getSelectedShowtimeIdForCurrentQuality() {
+    final date = state.selectedDate;
+    final iso = state.selectedShowtime?.startIso;
+    if (date == null || iso == null) return null;
+    return getShowtimeIdFor(date: date, startIso: iso, quality: state.quality);
+  }
 
   void _setQualityInternal(String q) {
     state = state.copyWith(quality: q);

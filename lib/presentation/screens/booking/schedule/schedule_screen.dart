@@ -92,13 +92,35 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
       onSet2D: () => vm.setQuality(false),
       onSet3D: () => vm.setQuality(true),
       onContinue: () {
-        final st = sched.selectedShowtime?.id;
-        if (st == null) {
+        final date = sched.selectedDate;
+        final startIso = sched.selectedShowtime?.startIso;
+        final quality = sched.quality;
+
+        if (date == null || startIso == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Please select time')),
           );
           return;
         }
+
+        String? st = vm.getShowtimeIdFor(
+          date: date,
+          startIso: startIso,
+          quality: quality,
+        );
+
+        if (st == null) {
+          final alt = quality == '3D' ? '2D' : '3D';
+          st = vm.getShowtimeIdFor(date: date, startIso: startIso, quality: alt);
+        }
+
+        if (st == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Showtime not found')),
+          );
+          return;
+        }
+
         context.pushNamed(
           seatSelectionName,
           pathParameters: {
