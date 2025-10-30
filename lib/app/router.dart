@@ -79,8 +79,8 @@ final appRouter = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(
-        path: schedulePath,
-        name: scheduleName,
+        name: seatSelectionName,
+        path: seatSelectionPath,
         builder: (context, state) {
           final movieId = int.parse(state.pathParameters['movieId']!);
           final showtimeId = state.pathParameters['showtimeId']!;
