@@ -49,11 +49,37 @@ class SeatSelectionState {
   bool get hasError => status == SeatSelectionStatus.error;
   bool get isLoaded => status == SeatSelectionStatus.loaded;
 
-  String get dateText => date.isNotEmpty ? date : (hallInfo?.showtime.date ?? '');
-  String get timeRange => _timeRange(
-    startIso.isNotEmpty ? startIso : hallInfo?.showtime.startIso,
-    endIso.isNotEmpty ? endIso : hallInfo?.showtime.endIso,
-  );
+  String get dateText {
+    final iso = startIso.isNotEmpty ? startIso : hallInfo?.showtime.startIso;
+    String ymd = '';
+    if (iso != null && iso.contains('T')) {
+      ymd = iso.split('T').first;
+    } else {
+      ymd = date.isNotEmpty ? date : (hallInfo?.showtime.date ?? '');
+    }
+    if (ymd.isEmpty) return '';
+
+    final dayName = _weekdayEnFromYmd(ymd);
+    final dmyShort = _dmyShortFromYmd(ymd);
+    return '$dmyShort,\n$dayName';
+  }
+
+  String get timeRange {
+    String _hhmm(String? iso) {
+      if (iso == null || iso.isEmpty) return '';
+      final m = RegExp(r'T(\d{2}):(\d{2})').firstMatch(iso);
+      if (m != null) return '${m.group(1)}:${m.group(2)}';
+      final t = iso.split('T');
+      if (t.length > 1 && t[1].length >= 5) return t[1].substring(0, 5);
+      return '';
+    }
+
+    final s = startIso.isNotEmpty ? startIso : hallInfo?.showtime.startIso;
+    final e = endIso.isNotEmpty ? endIso : hallInfo?.showtime.endIso;
+    if (s == null || e == null || s.isEmpty || e.isEmpty) return '';
+    return '${_hhmm(s)} - ${_hhmm(e)}';
+  }
+
   bool get is3D =>
       (quality.isNotEmpty ? quality : (hallInfo?.showtime.quality ?? '2D')) == '3D';
 
@@ -83,13 +109,6 @@ class SeatSelectionState {
       hallInfo: hallInfo ?? this.hallInfo,
       selected: selected ?? this.selected,
     );
-  }
-
-  static String _timeRange(String? start, String? end) {
-    if (start == null || end == null || start.isEmpty || end.isEmpty) return '';
-    final s = start.split('T').last.substring(0, 5);
-    final e = end.split('T').last.substring(0, 5);
-    return '$s - $e';
   }
 }
 
@@ -161,4 +180,32 @@ class SeatSelectionVm extends Notifier<SeatSelectionState> {
   void clearSelection() => state = state.copyWith(selected: <String>{});
 
   List<String> getSelectedSeats() => state.selected.toList()..sort();
+}
+
+// =================== HELPERS ===================
+
+// YYYY-MM-DD -> dd.MM.yy
+String _dmyShortFromYmd(String ymd) {
+  final p = ymd.split('-');
+  if (p.length != 3) return ymd;
+  final yy = p[0].substring(2);
+  return '${p[2].padLeft(2, '0')}.${p[1].padLeft(2, '0')}.$yy';
+}
+
+String _weekdayEnFromYmd(String ymd) {
+  try {
+    final dt = DateTime.parse(ymd);
+    const names = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    return names[(dt.weekday - 1) % 7];
+  } catch (_) {
+    return '';
+  }
 }
