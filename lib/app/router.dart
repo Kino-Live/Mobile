@@ -82,8 +82,9 @@ final appRouter = Provider<GoRouter>((ref) {
         path: schedulePath,
         name: scheduleName,
         builder: (context, state) {
-          final id = int.parse(state.pathParameters['id']!);
-          return SeatSelectionScreen(movieId: id);
+          final movieId = int.parse(state.pathParameters['movieId']!);
+          final showtimeId = state.pathParameters['showtimeId']!;
+          return SeatSelectionScreen(movieId: movieId, showtimeId: showtimeId);
         },
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),
