@@ -1,4 +1,3 @@
-// seat_grid.dart
 import 'package:flutter/material.dart';
 import 'package:kinolive_mobile/domain/entities/booking/hall.dart';
 
@@ -41,6 +40,8 @@ class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin 
   bool _didSetInitial = false;
   int _rowsHash = 0;
 
+  double? _fitScaleWidth;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -48,6 +49,7 @@ class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin 
   void initState() {
     super.initState();
     _rowsHash = _calcRowsHash(widget.rows);
+    _tc.addListener(_enforcePanConstraints);
     WidgetsBinding.instance.addPostFrameCallback((_) => _fitAndCenterTop());
   }
 
@@ -75,6 +77,7 @@ class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin 
 
   @override
   void dispose() {
+    _tc.removeListener(_enforcePanConstraints);
     if (widget.controller == null) {
       _tc.dispose();
     }
@@ -94,17 +97,14 @@ class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin 
     final Size content = contentBox.size;
     if (viewport.isEmpty || content.isEmpty) return;
 
-    // Масштаб, чтобы влезло по ширине
     double fitScale = viewport.width / content.width;
     fitScale = fitScale.clamp(widget.minScale, widget.maxScale);
+    _fitScaleWidth = fitScale;
 
-    // После масштабирования реальные размеры контента на экране
     final double vw = content.width * fitScale;
-    final double vh = content.height * fitScale;
 
-    // Горизонтальный центр и прижатие вверх
     final double ox = (viewport.width - vw) / 2.0;
-    final double oy = 0.0; // прижать вверх
+    final double oy = 0.0;
 
     final Matrix4 m = Matrix4.identity()
       ..scale(fitScale)
@@ -112,6 +112,48 @@ class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin 
 
     _tc.value = m;
     _didSetInitial = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _enforcePanConstraints());
+  }
+
+  void _enforcePanConstraints() {
+    final viewerBox = _viewerKey.currentContext?.findRenderObject() as RenderBox?;
+    final contentBox = _contentKey.currentContext?.findRenderObject() as RenderBox?;
+    if (viewerBox == null || !viewerBox.attached || contentBox == null || !contentBox.attached) {
+      return;
+    }
+
+    final Size viewport = viewerBox.size;
+    final Size content = contentBox.size;
+    if (viewport.isEmpty || content.isEmpty) return;
+
+    final Matrix4 mat = _tc.value.clone();
+    final double scale = mat.getMaxScaleOnAxis();
+
+    final double contentW = content.width * scale;
+
+    double tx = mat.storage[12];
+    final double ty = mat.storage[13];
+
+    const double eps = 0.5;
+
+    if (contentW <= viewport.width + eps) {
+      final double centeredTx = (viewport.width - contentW) / 2.0;
+      if ((tx - centeredTx).abs() > eps) {
+        mat.storage[12] = centeredTx;
+        _tc.value = mat;
+      }
+      return;
+    }
+
+    final double minTx = viewport.width - contentW;
+    final double maxTx = 0.0;
+
+    final double clampedTx = tx.clamp(minTx, maxTx);
+    if ((tx - clampedTx).abs() > eps) {
+      mat.storage[12] = clampedTx;
+      _tc.value = mat;
+    }
   }
 
   @override
@@ -125,7 +167,13 @@ class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin 
         borderRadius: BorderRadius.circular(widget.borderRadius),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            WidgetsBinding.instance.addPostFrameCallback((_) => _fitAndCenterTop());
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!_didSetInitial) {
+                _fitAndCenterTop();
+              } else {
+                _enforcePanConstraints();
+              }
+            });
 
             return Stack(
               children: [
@@ -142,6 +190,10 @@ class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin 
                     constrained: false,
                     boundaryMargin: const EdgeInsets.all(80),
                     clipBehavior: Clip.hardEdge,
+
+                    onInteractionUpdate: (_) => _enforcePanConstraints(),
+                    onInteractionEnd: (_) => _enforcePanConstraints(),
+
                     child: RepaintBoundary(
                       key: _contentKey,
                       child: _HallContent(
