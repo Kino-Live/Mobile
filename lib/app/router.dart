@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/movie_details/movie_details_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/now_showing_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/popular_screen.dart';
+import 'package:kinolive_mobile/presentation/screens/booking/schedule/schedule_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/login/login_screen.dart';
 
@@ -22,8 +23,6 @@ import 'package:kinolive_mobile/presentation/screens/forgot_password/success/suc
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/splash/splash_screen.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
-
-import '../presentation/screens/booking/schedule/schedule_screen.dart';
 
 const List<String> publicPaths = <String>[
   splashPath,
