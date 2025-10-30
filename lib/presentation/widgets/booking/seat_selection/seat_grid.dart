@@ -10,7 +10,6 @@ class SeatGrid extends StatefulWidget {
     this.viewportHeight = 200,
     this.minScale = 0.6,
     this.maxScale = 3.5,
-    this.doubleTapZoom = 2.0,
     this.borderRadius = 24.0,
   });
 
@@ -21,7 +20,6 @@ class SeatGrid extends StatefulWidget {
 
   final double minScale;
   final double maxScale;
-  final double doubleTapZoom;
   final double borderRadius;
 
   @override
@@ -32,30 +30,10 @@ class _SeatGridState extends State<SeatGrid> {
   final TransformationController _tc = TransformationController();
   final GlobalKey _viewerKey = GlobalKey();
 
-  double get _scale => _tc.value.getMaxScaleOnAxis();
-
   @override
   void dispose() {
     _tc.dispose();
     super.dispose();
-  }
-
-  void _zoomTo(double targetScale) {
-    targetScale = targetScale.clamp(widget.minScale, widget.maxScale);
-    final current = _scale;
-    final delta = targetScale / current;
-    if (delta == 1) return;
-
-    final box = _viewerKey.currentContext?.findRenderObject() as RenderBox?;
-    final size = box?.size ?? const Size(1, 1);
-    final focal = Offset(size.width / 2, size.height / 2);
-
-    final m = Matrix4.identity()
-      ..translate(focal.dx, focal.dy)
-      ..scale(delta)
-      ..translate(-focal.dx, -focal.dy);
-    _tc.value = m.multiplied(_tc.value);
-    setState(() {});
   }
 
   @override
@@ -68,27 +46,21 @@ class _SeatGridState extends State<SeatGrid> {
         borderRadius: BorderRadius.circular(widget.borderRadius),
         child: Stack(
           children: [
-            GestureDetector(
-              onDoubleTap: () {
-                final target = (_scale <= 1.0) ? widget.doubleTapZoom : 1.0;
-                _zoomTo(target);
-              },
-              child: InteractiveViewer(
-                key: _viewerKey,
-                transformationController: _tc,
-                minScale: widget.minScale,
-                maxScale: widget.maxScale,
-                panEnabled: true,
-                scaleEnabled: true,
-                constrained: false,
-                boundaryMargin: EdgeInsets.zero,
-                clipBehavior: Clip.hardEdge,
-                child: RepaintBoundary(
-                  child: _HallContent(
-                    rows: widget.rows,
-                    selected: widget.selected,
-                    onToggle: widget.onToggle,
-                  ),
+            InteractiveViewer(
+              key: _viewerKey,
+              transformationController: _tc,
+              minScale: widget.minScale,
+              maxScale: widget.maxScale,
+              panEnabled: true,
+              scaleEnabled: true,
+              constrained: false,
+              boundaryMargin: const EdgeInsets.all(80),
+              clipBehavior: Clip.hardEdge,
+              child: RepaintBoundary(
+                child: _HallContent(
+                  rows: widget.rows,
+                  selected: widget.selected,
+                  onToggle: widget.onToggle,
                 ),
               ),
             ),
