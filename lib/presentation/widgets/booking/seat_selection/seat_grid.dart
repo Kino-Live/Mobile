@@ -1,3 +1,4 @@
+// seat_grid.dart
 import 'package:flutter/material.dart';
 import 'package:kinolive_mobile/domain/entities/booking/hall.dart';
 
@@ -12,18 +13,19 @@ class SeatGrid extends StatefulWidget {
     this.maxScale = 3.5,
     this.borderRadius = 24.0,
     this.controller,
+    this.resetOnRowsChange = true,
   });
 
   final List<HallRow> rows;
   final Set<String> selected;
   final void Function(String seatCode) onToggle;
   final double viewportHeight;
-
   final double minScale;
   final double maxScale;
   final double borderRadius;
 
   final TransformationController? controller;
+  final bool resetOnRowsChange;
 
   @override
   State<SeatGrid> createState() => _SeatGridState();
@@ -32,10 +34,44 @@ class SeatGrid extends StatefulWidget {
 class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin {
   late final TransformationController _tc =
       widget.controller ?? TransformationController();
+
   final GlobalKey _viewerKey = GlobalKey();
+  final GlobalKey _contentKey = GlobalKey();
+
+  bool _didSetInitial = false;
+  int _rowsHash = 0;
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _rowsHash = _calcRowsHash(widget.rows);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _fitAndCenterTop());
+  }
+
+  @override
+  void didUpdateWidget(covariant SeatGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.resetOnRowsChange) {
+      final newHash = _calcRowsHash(widget.rows);
+      if (newHash != _rowsHash) {
+        _rowsHash = newHash;
+        _didSetInitial = false;
+        WidgetsBinding.instance.addPostFrameCallback((_) => _fitAndCenterTop());
+      }
+    }
+  }
+
+  int _calcRowsHash(List<HallRow> rows) {
+    int h = 17;
+    for (final r in rows) {
+      h = 37 * h + r.seats.length;
+    }
+    return h;
+  }
 
   @override
   void dispose() {
@@ -43,6 +79,39 @@ class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin 
       _tc.dispose();
     }
     super.dispose();
+  }
+
+  void _fitAndCenterTop() {
+    if (_didSetInitial) return;
+
+    final viewerBox = _viewerKey.currentContext?.findRenderObject() as RenderBox?;
+    final contentBox = _contentKey.currentContext?.findRenderObject() as RenderBox?;
+    if (viewerBox == null || !viewerBox.attached || contentBox == null || !contentBox.attached) {
+      return;
+    }
+
+    final Size viewport = viewerBox.size;
+    final Size content = contentBox.size;
+    if (viewport.isEmpty || content.isEmpty) return;
+
+    // Масштаб, чтобы влезло по ширине
+    double fitScale = viewport.width / content.width;
+    fitScale = fitScale.clamp(widget.minScale, widget.maxScale);
+
+    // После масштабирования реальные размеры контента на экране
+    final double vw = content.width * fitScale;
+    final double vh = content.height * fitScale;
+
+    // Горизонтальный центр и прижатие вверх
+    final double ox = (viewport.width - vw) / 2.0;
+    final double oy = 0.0; // прижать вверх
+
+    final Matrix4 m = Matrix4.identity()
+      ..scale(fitScale)
+      ..translate(ox / fitScale, oy / fitScale);
+
+    _tc.value = m;
+    _didSetInitial = true;
   }
 
   @override
@@ -54,47 +123,58 @@ class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin 
       height: widget.viewportHeight,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(widget.borderRadius),
-        child: Stack(
-          children: [
-            InteractiveViewer(
-              key: _viewerKey,
-              transformationController: _tc,
-              minScale: widget.minScale,
-              maxScale: widget.maxScale,
-              panEnabled: true,
-              scaleEnabled: true,
-              constrained: false,
-              boundaryMargin: const EdgeInsets.all(80),
-              clipBehavior: Clip.hardEdge,
-              child: RepaintBoundary(
-                child: _HallContent(
-                  rows: widget.rows,
-                  selected: widget.selected,
-                  onToggle: widget.onToggle,
-                ),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: 24,
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                      colors: [
-                        cs.surface.withOpacity(0.9),
-                        cs.surface.withOpacity(0.0),
-                      ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            WidgetsBinding.instance.addPostFrameCallback((_) => _fitAndCenterTop());
+
+            return Stack(
+              children: [
+                SizedBox(
+                  key: _viewerKey,
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: InteractiveViewer(
+                    transformationController: _tc,
+                    minScale: widget.minScale,
+                    maxScale: widget.maxScale,
+                    panEnabled: true,
+                    scaleEnabled: true,
+                    constrained: false,
+                    boundaryMargin: const EdgeInsets.all(80),
+                    clipBehavior: Clip.hardEdge,
+                    child: RepaintBoundary(
+                      key: _contentKey,
+                      child: _HallContent(
+                        rows: widget.rows,
+                        selected: widget.selected,
+                        onToggle: widget.onToggle,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ],
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 24,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            cs.surface.withOpacity(0.9),
+                            cs.surface.withOpacity(0.0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -190,9 +270,12 @@ class _SeatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isReserved = status == HallSeatStatus.reserved || status == HallSeatStatus.blocked;
-    final Color border = isSelected ? cs.primary : (isReserved ? cs.secondaryContainer : cs.outline);
-    final Color fill = isSelected ? cs.primary : (isReserved ? cs.secondaryContainer : Colors.transparent);
+    final bool isReserved =
+        status == HallSeatStatus.reserved || status == HallSeatStatus.blocked;
+    final Color border =
+    isSelected ? cs.primary : (isReserved ? cs.secondaryContainer : cs.outline);
+    final Color fill =
+    isSelected ? cs.primary : (isReserved ? cs.secondaryContainer : Colors.transparent);
 
     return InkWell(
       onTap: isReserved ? null : onTap,
