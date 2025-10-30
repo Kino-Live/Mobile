@@ -71,11 +71,21 @@ class HallRowDto {
       _$HallRowDtoFromJson(json);
 }
 
-enum HallSeatStatusDto { available, reserved, blocked }
+@JsonEnum(alwaysCreate: true)
+enum HallSeatStatusDto {
+  @JsonValue('available')
+  available,
+  @JsonValue('reserved')
+  reserved,
+  @JsonValue('blocked')
+  blocked,
+}
 
 @JsonSerializable(createToJson: false)
 class HallSeatDto {
   final String code;
+
+  @JsonKey(unknownEnumValue: HallSeatStatusDto.available)
   final HallSeatStatusDto status;
 
   const HallSeatDto({required this.code, required this.status});

@@ -44,7 +44,11 @@ HallRowDto _$HallRowDtoFromJson(Map<String, dynamic> json) => HallRowDto(
 
 HallSeatDto _$HallSeatDtoFromJson(Map<String, dynamic> json) => HallSeatDto(
   code: json['code'] as String,
-  status: $enumDecode(_$HallSeatStatusDtoEnumMap, json['status']),
+  status: $enumDecode(
+    _$HallSeatStatusDtoEnumMap,
+    json['status'],
+    unknownValue: HallSeatStatusDto.available,
+  ),
 );
 
 const _$HallSeatStatusDtoEnumMap = {
