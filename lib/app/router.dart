@@ -8,6 +8,7 @@ import 'package:kinolive_mobile/presentation/screens/billboard/movie_details/mov
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/now_showing_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/popular_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/schedule/schedule_screen.dart';
+import 'package:kinolive_mobile/presentation/screens/booking/seats/seat_selection_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/login/login_screen.dart';
 
@@ -75,6 +76,14 @@ final appRouter = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
           return ScheduleScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: schedulePath,
+        name: scheduleName,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return SeatSelectionScreen(movieId: id);
         },
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),

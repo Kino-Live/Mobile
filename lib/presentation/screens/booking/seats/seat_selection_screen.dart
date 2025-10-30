@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SeatSelectionScreen extends ConsumerStatefulWidget {
   const SeatSelectionScreen({super.key, required this.movieId});
-  final String movieId;
+  final int movieId;
 
   @override
   ConsumerState<SeatSelectionScreen> createState() => _SeatSelectionScreenState();
