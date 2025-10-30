@@ -78,6 +78,14 @@ class _TimeChipsState extends State<TimeChips> {
     }
   }
 
+  String _hhmmFromIso(String iso) {
+    final m = RegExp(r'T(\d{2}):(\d{2})').firstMatch(iso);
+    if (m != null) return '${m.group(1)}:${m.group(2)}';
+    final t = iso.split('T');
+    if (t.length > 1 && t[1].length >= 5) return t[1].substring(0, 5);
+    return iso;
+  }
+
   @override
   Widget build(BuildContext context) => SizedBox(
     height: 54,
@@ -88,10 +96,7 @@ class _TimeChipsState extends State<TimeChips> {
       padding: const EdgeInsets.symmetric(horizontal: 4),
       separatorBuilder: (_, __) => const SizedBox(width: 10),
       itemBuilder: (ctx, i) {
-        final dt = DateTime.tryParse(widget.isoList[i])?.toLocal();
-        final label = dt == null
-            ? widget.isoList[i]
-            : '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+        final label = _hhmmFromIso(widget.isoList[i]);
         final sel = i == widget.selectedIndex;
         final fg = sel ? widget.colorScheme.onPrimaryContainer : widget.colorScheme.onSurface;
 
