@@ -67,7 +67,7 @@ class SeatSelectionFormActions {
   });
 }
 
-class SeatSelectionForm extends StatelessWidget {
+class SeatSelectionForm extends StatefulWidget {
   const SeatSelectionForm({
     super.key,
     required this.data,
@@ -78,23 +78,42 @@ class SeatSelectionForm extends StatelessWidget {
   final SeatSelectionFormActions actions;
 
   @override
+  State<SeatSelectionForm> createState() => _SeatSelectionFormState();
+}
+
+class _SeatSelectionFormState extends State<SeatSelectionForm>
+    with AutomaticKeepAliveClientMixin {
+  final TransformationController _seatTc = TransformationController();
+  final GlobalKey _seatGridAreaKey = GlobalKey();
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void dispose() {
+    _seatTc.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final GlobalKey seatGridAreaKey = GlobalKey();
 
     return Container(
       color: cs.surface,
       child: InstantRefreshScrollView(
-        onRefresh: actions.onRefresh,
-        refreshBlockAreas: [seatGridAreaKey],
+        onRefresh: widget.actions.onRefresh,
+        refreshBlockAreas: [_seatGridAreaKey],
         slivers: [
           SliverAppBar(
             pinned: true,
             backgroundColor: cs.surface,
             elevation: 0,
             leading: IconButton(
-              onPressed: actions.onBack,
+              onPressed: widget.actions.onBack,
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
             ),
             centerTitle: true,
@@ -124,12 +143,13 @@ class SeatSelectionForm extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             child: AspectRatio(
                               aspectRatio: 2 / 3,
-                              child: data.posterUrl.isEmpty
+                              child: widget.data.posterUrl.isEmpty
                                   ? Container(color: Colors.black26)
                                   : Image.network(
-                                data.posterUrl,
+                                widget.data.posterUrl,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(color: Colors.black26),
+                                errorBuilder: (_, __, ___) =>
+                                    Container(color: Colors.black26),
                               ),
                             ),
                           ),
@@ -140,7 +160,7 @@ class SeatSelectionForm extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                data.title,
+                                widget.data.title,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: tt.titleMedium?.copyWith(
@@ -150,12 +170,13 @@ class SeatSelectionForm extends StatelessWidget {
                               const SizedBox(height: 8),
                               InfoRow(
                                 icon: Icons.place_outlined,
-                                text: '${data.cinemaName}${data.hallName.isNotEmpty ? ', ${data.hallName}' : ''}\n${data.cinemaAddr}',
+                                text:
+                                '${widget.data.cinemaName}${widget.data.hallName.isNotEmpty ? ', ${widget.data.hallName}' : ''}\n${widget.data.cinemaAddr}',
                               ),
                               const SizedBox(height: 6),
                               InfoRow(
                                 icon: Icons.calendar_today_outlined,
-                                text: data.dateText,
+                                text: widget.data.dateText,
                               ),
                               const SizedBox(height: 6),
                               Row(
@@ -163,11 +184,11 @@ class SeatSelectionForm extends StatelessWidget {
                                   Expanded(
                                     child: InfoRow(
                                       icon: Icons.schedule,
-                                      text: data.timeRange,
+                                      text: widget.data.timeRange,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  Tag(text: data.is3D ? '3D' : '2D'),
+                                  Tag(text: widget.data.is3D ? '3D' : '2D'),
                                 ],
                               ),
                             ],
@@ -179,7 +200,7 @@ class SeatSelectionForm extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   Container(
-                    key: seatGridAreaKey,
+                    key: _seatGridAreaKey,
                     padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
                     decoration: BoxDecoration(
                       color: cs.surfaceContainer,
@@ -188,16 +209,18 @@ class SeatSelectionForm extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SectionTitle('Select seats', color: cs.onSurface, textTheme: tt),
+                        SectionTitle('Select seats',
+                            color: cs.onSurface, textTheme: tt),
                         const SizedBox(height: 12),
 
                         ScreenLine(color: cs.primary.withOpacity(0.35)),
                         const SizedBox(height: 10),
 
                         SeatGrid(
-                          rows: data.rows,
-                          selected: data.selected,
-                          onToggle: actions.onToggleSeat,
+                          rows: widget.data.rows,
+                          selected: widget.data.selected,
+                          onToggle: widget.actions.onToggleSeat,
+                          controller: _seatTc,
                         ),
 
                         const SizedBox(height: 10),
@@ -207,16 +230,17 @@ class SeatSelectionForm extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 16),
-                  if (data.selectedCount > 0)
+                  if (widget.data.selectedCount > 0)
                     TextButton(
-                      onPressed: actions.onClear,
-                      child: Text('Clear selection (${data.selectedCount})'),
+                      onPressed: widget.actions.onClear,
+                      child: Text(
+                          'Clear selection (${widget.data.selectedCount})'),
                     ),
                   const SizedBox(height: 8),
 
                   PrimaryButton(
                     text: 'Continue',
-                    onPressed: actions.onContinue,
+                    onPressed: widget.actions.onContinue,
                     backgroundColor: cs.primary,
                     foregroundColor: cs.onPrimaryContainer,
                     shape: RoundedRectangleBorder(

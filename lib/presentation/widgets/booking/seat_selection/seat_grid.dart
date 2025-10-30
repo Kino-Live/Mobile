@@ -11,6 +11,7 @@ class SeatGrid extends StatefulWidget {
     this.minScale = 0.6,
     this.maxScale = 3.5,
     this.borderRadius = 24.0,
+    this.controller,
   });
 
   final List<HallRow> rows;
@@ -22,22 +23,31 @@ class SeatGrid extends StatefulWidget {
   final double maxScale;
   final double borderRadius;
 
+  final TransformationController? controller;
+
   @override
   State<SeatGrid> createState() => _SeatGridState();
 }
 
-class _SeatGridState extends State<SeatGrid> {
-  final TransformationController _tc = TransformationController();
+class _SeatGridState extends State<SeatGrid> with AutomaticKeepAliveClientMixin {
+  late final TransformationController _tc =
+      widget.controller ?? TransformationController();
   final GlobalKey _viewerKey = GlobalKey();
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void dispose() {
-    _tc.dispose();
+    if (widget.controller == null) {
+      _tc.dispose();
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final cs = Theme.of(context).colorScheme;
 
     return SizedBox(
