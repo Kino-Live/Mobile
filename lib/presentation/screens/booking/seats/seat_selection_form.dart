@@ -81,11 +81,13 @@ class SeatSelectionForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final GlobalKey seatGridAreaKey = GlobalKey();
 
     return Container(
       color: cs.surface,
       child: InstantRefreshScrollView(
         onRefresh: actions.onRefresh,
+        refreshBlockAreas: [seatGridAreaKey],
         slivers: [
           SliverAppBar(
             pinned: true,
@@ -127,8 +129,7 @@ class SeatSelectionForm extends StatelessWidget {
                                   : Image.network(
                                 data.posterUrl,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    Container(color: Colors.black26),
+                                errorBuilder: (_, __, ___) => Container(color: Colors.black26),
                               ),
                             ),
                           ),
@@ -149,8 +150,7 @@ class SeatSelectionForm extends StatelessWidget {
                               const SizedBox(height: 8),
                               InfoRow(
                                 icon: Icons.place_outlined,
-                                text:
-                                '${data.cinemaName}${data.hallName.isNotEmpty ? ', ${data.hallName}' : ''}\n${data.cinemaAddr}',
+                                text: '${data.cinemaName}${data.hallName.isNotEmpty ? ', ${data.hallName}' : ''}\n${data.cinemaAddr}',
                               ),
                               const SizedBox(height: 6),
                               InfoRow(
@@ -179,6 +179,7 @@ class SeatSelectionForm extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   Container(
+                    key: seatGridAreaKey,
                     padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
                     decoration: BoxDecoration(
                       color: cs.surfaceContainer,
@@ -187,8 +188,7 @@ class SeatSelectionForm extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        SectionTitle('Select seats',
-                            color: cs.onSurface, textTheme: tt),
+                        SectionTitle('Select seats', color: cs.onSurface, textTheme: tt),
                         const SizedBox(height: 12),
 
                         ScreenLine(color: cs.primary.withOpacity(0.35)),

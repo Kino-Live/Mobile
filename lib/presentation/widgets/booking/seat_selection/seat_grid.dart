@@ -64,7 +64,6 @@ class _SeatGridState extends State<SeatGrid> {
                 ),
               ),
             ),
-
             Positioned(
               left: 0,
               right: 0,
@@ -103,8 +102,7 @@ class _HallContent extends StatelessWidget {
   final Set<String> selected;
   final void Function(String seatCode) onToggle;
 
-  String _rowLabel(int index) =>
-      String.fromCharCode('A'.codeUnitAt(0) + index);
+  String _rowLabel(int index) => String.fromCharCode('A'.codeUnitAt(0) + index);
 
   @override
   Widget build(BuildContext context) {
@@ -182,12 +180,9 @@ class _SeatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isReserved =
-        status == HallSeatStatus.reserved || status == HallSeatStatus.blocked;
-    final Color border =
-    isSelected ? cs.primary : (isReserved ? cs.secondaryContainer : cs.outline);
-    final Color fill =
-    isSelected ? cs.primary : (isReserved ? cs.secondaryContainer : Colors.transparent);
+    final bool isReserved = status == HallSeatStatus.reserved || status == HallSeatStatus.blocked;
+    final Color border = isSelected ? cs.primary : (isReserved ? cs.secondaryContainer : cs.outline);
+    final Color fill = isSelected ? cs.primary : (isReserved ? cs.secondaryContainer : Colors.transparent);
 
     return InkWell(
       onTap: isReserved ? null : onTap,
