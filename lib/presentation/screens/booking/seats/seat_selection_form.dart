@@ -119,7 +119,8 @@ class _SeatSelectionFormState extends State<SeatSelectionForm>
             centerTitle: true,
             title: Text(
               'Select Seat',
-              style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+              style: tt.headlineMedium?.copyWith(color: cs.primary),
             ),
           ),
           SliverToBoxAdapter(
