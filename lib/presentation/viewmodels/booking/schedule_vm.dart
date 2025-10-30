@@ -62,7 +62,7 @@ class ScheduleState {
   }) {
     return ScheduleState(
       status: status ?? this.status,
-      error: error, // ВАЖНО: без "?? this.error", чтобы clearError() работал
+      error: error,
       movieId: movieId ?? this.movieId,
       daysMap: daysMap ?? this.daysMap,
       availableDays: availableDays ?? this.availableDays,
@@ -127,10 +127,6 @@ class ScheduleVm extends Notifier<ScheduleState> {
 
   void clearError() => state = state.copyWith(error: null);
 
-  /// Переключение качества пользователем.
-  /// Если желаемое недоступно для выбранного времени:
-  /// 1) пробуем альтернативу для этого же времени;
-  /// 2) иначе прыгаем на первый доступный слот дня (приоритет 2D).
   void setQuality(bool is3D) {
     final desired = is3D ? '3D' : '2D';
     if (desired == state.quality) return;
@@ -226,7 +222,6 @@ class ScheduleVm extends Notifier<ScheduleState> {
     }
   }
 
-  /// Собираем уникальные по startIso тайм-слоты и сортируем
   List<Showtime> _buildTimesFor(DaySchedule? day) {
     if (day == null) return const [];
     final all = <Showtime>[];
@@ -250,9 +245,6 @@ class ScheduleVm extends Notifier<ScheduleState> {
     return list.any((t) => t.startIso == startIso);
   }
 
-  /// Если для выбранного времени текущее качество недоступно:
-  /// - переключаемся на доступное для этого времени,
-  /// - иначе — на первый доступный слот за день (приоритет 2D).
   void _reconcileStateAfterRefresh() {
     final date = state.selectedDate;
     final iso = state.selectedShowtime?.startIso;
@@ -272,7 +264,6 @@ class ScheduleVm extends Notifier<ScheduleState> {
     }
   }
 
-  /// Выбрать первый доступный слот дня (приоритет 2D)
   void _fallbackToFirstAvailableForDay(String date, {bool prefer2D = true}) {
     final day = state.daysMap[date];
     if (day == null) return;
@@ -294,7 +285,6 @@ class ScheduleVm extends Notifier<ScheduleState> {
     }
   }
 
-  /// Синхронизировать selectedTimeIndex по ISO и обновить times
   void _setSelectedTimeByIso(String iso, DaySchedule day) {
     final times = _buildTimesFor(day);
     final idx = times.indexWhere((t) => t.startIso == iso);

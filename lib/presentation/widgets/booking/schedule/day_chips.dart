@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kinolive_mobile/presentation/widgets/booking/pill_chip.dart';
+import 'package:kinolive_mobile/presentation/widgets/booking/schedule/pill_chip.dart';
 
 class DayChips extends StatefulWidget {
   const DayChips({

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:kinolive_mobile/presentation/widgets/booking/arrow_strip.dart';
-import 'package:kinolive_mobile/presentation/widgets/booking/day_chips.dart';
-import 'package:kinolive_mobile/presentation/widgets/booking/quality_chips.dart';
-import 'package:kinolive_mobile/presentation/widgets/booking/section_title.dart';
-import 'package:kinolive_mobile/presentation/widgets/booking/time_chips.dart';
+import 'package:kinolive_mobile/presentation/widgets/booking/schedule/arrow_strip.dart';
+import 'package:kinolive_mobile/presentation/widgets/booking/schedule/day_chips.dart';
+import 'package:kinolive_mobile/presentation/widgets/booking/schedule/quality_chips.dart';
+import 'package:kinolive_mobile/presentation/widgets/booking/schedule/section_title.dart';
+import 'package:kinolive_mobile/presentation/widgets/booking/schedule/time_chips.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/instant_refresh_scroll_view.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';
 
@@ -178,7 +178,6 @@ class ScheduleForm extends StatelessWidget {
                         const SizedBox(height: 30),
                         SectionTitle('Select Quality', color: colorScheme.onSurface, textTheme: textTheme),
                         const SizedBox(height: 12),
-                        // ВАЖНО: передаём реальные обработчики ВСЕГДА, визуально лишь "диммим" недоступность
                         QualityChips(
                           selectedQuality: data.quality,
                           onSelect2D: actions.onSet2D,
