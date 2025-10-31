@@ -1,15 +1,5 @@
 import 'package:flutter/material.dart';
 
-// green: FF25AA68
-// grey: FF989898
-// white: FFF1F1F1
-// blue: FF648DDB
-
-// inputpanel grey: FF2B2B38
-// inputpanelText grey: FF4A4B56
-
-//background: FF161621
-
 const Color myBlue = Color(0xFF719AE4);
 
 final ColorScheme customColorScheme = ColorScheme.fromSeed(

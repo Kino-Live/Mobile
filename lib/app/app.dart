@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kinolive_mobile/app/app_constants.dart';
 
-import 'package:kinolive_mobile/app/router.dart';
-import 'package:kinolive_mobile/app/theme.dart';
+import 'package:kinolive_mobile/app/router/router.dart';
+import 'package:kinolive_mobile/app/design/theme.dart';
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
@@ -12,7 +13,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'KinoLive',
+      title: appName,
       theme: customThemeData,
       routerConfig: router,
     );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:kinolive_mobile/app/router_path.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/forgot_password_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/check_email/row_otp_boxes.dart';

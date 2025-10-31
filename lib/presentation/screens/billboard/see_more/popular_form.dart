@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kinolive_mobile/app/router_path.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/domain/entities/movie.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/see_more/movie_grid_tile.dart';

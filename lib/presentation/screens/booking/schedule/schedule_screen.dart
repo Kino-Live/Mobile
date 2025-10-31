@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kinolive_mobile/app/router_path.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/schedule/schedule_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/booking/schedule_vm.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/movie_details_vm.dart';

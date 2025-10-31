@@ -3,8 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import 'package:kinolive_mobile/app/router_path.dart';
-import 'package:kinolive_mobile/app/colors_theme.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
+import 'package:kinolive_mobile/app/design/colors_theme.dart';
 import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 import 'package:kinolive_mobile/presentation/validators/auth_validators.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';

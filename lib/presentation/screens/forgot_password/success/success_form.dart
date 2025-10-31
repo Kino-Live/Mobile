@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:kinolive_mobile/app/router_path.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/presentation/widgets/success/success_icon.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/header.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';

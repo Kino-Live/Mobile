@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kinolive_mobile/app/router_path.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/register_vm.dart';
 import 'package:kinolive_mobile/presentation/screens/register/register_form.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';

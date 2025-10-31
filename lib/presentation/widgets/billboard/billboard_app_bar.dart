@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:kinolive_mobile/app/app_constants.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
 
 class BillboardAppBar extends HookConsumerWidget implements PreferredSizeWidget {
@@ -54,7 +55,7 @@ class BillboardAppBar extends HookConsumerWidget implements PreferredSizeWidget 
                 duration: const Duration(milliseconds: 220),
                 opacity: searchOpen ? 0 : 1,
                 child: Text(
-                  'KinoLive',
+                  appName,
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
