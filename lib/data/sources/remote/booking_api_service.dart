@@ -10,7 +10,7 @@ class BookingApiService {
   final Dio _dio;
   BookingApiService(this._dio);
 
-  Future<MovieShowtimesAllDto> getMovieShowtimesAll(int movieId) async {
+  Future<MovieShowtimesAllDto> getMovieShowTimesAll(int movieId) async {
     try {
       final Response<Map<String, dynamic>> resp =
       await _dio.get('/movies/$movieId/showtimes');
@@ -27,7 +27,7 @@ class BookingApiService {
     }
   }
 
-  Future<DayShowtimesDto> getMovieShowtimesForDate({
+  Future<DayShowtimesDto> getMovieShowTimesForDate({
     required int movieId,
     required String date,
   }) async {
@@ -54,7 +54,7 @@ class BookingApiService {
     }
   }
 
-  Future<ShowtimeDetailsDto> getShowtimeById(String showtimeId) async {
+  Future<ShowtimeDetailsDto> getShowTimeById(String showtimeId) async {
     try {
       final Response<Map<String, dynamic>> resp =
       await _dio.get('/showtimes/$showtimeId');
@@ -75,7 +75,7 @@ class BookingApiService {
     }
   }
 
-  Future<HallForShowtimeDto> getHallForShowtime(String showtimeId) async {
+  Future<HallForShowtimeDto> getHallForShowTime(String showtimeId) async {
     try {
       final Response<Map<String, dynamic>> resp =
       await _dio.get('/showtimes/$showtimeId/hall');

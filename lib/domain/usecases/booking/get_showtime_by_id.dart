@@ -5,7 +5,7 @@ class GetShowtimeById {
   final BookingRepository _repo;
   GetShowtimeById(this._repo);
 
-  Future<Showtime> call(String showtimeId) {
-    return _repo.getShowtimeById(showtimeId);
+  Future<ShowTime> call(String showtimeId) {
+    return _repo.getShowTimeById(showtimeId);
   }
 }

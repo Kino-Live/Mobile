@@ -21,7 +21,7 @@ class ScheduleState {
   final List<String> availableDays;
   final int selectedDayIndex;
   final String quality;
-  final List<Showtime> times;
+  final List<ShowTime> times;
   final int selectedTimeIndex;
 
   const ScheduleState({
@@ -44,7 +44,7 @@ class ScheduleState {
           ? null
           : availableDays[selectedDayIndex];
 
-  Showtime? get selectedShowtime =>
+  ShowTime? get selectedShowtime =>
       (times.isEmpty || selectedTimeIndex < 0 || selectedTimeIndex >= times.length)
           ? null
           : times[selectedTimeIndex];
@@ -57,7 +57,7 @@ class ScheduleState {
     List<String>? availableDays,
     int? selectedDayIndex,
     String? quality,
-    List<Showtime>? times,
+    List<ShowTime>? times,
     int? selectedTimeIndex,
   }) {
     return ScheduleState(
@@ -241,11 +241,11 @@ class ScheduleVm extends Notifier<ScheduleState> {
     }
   }
 
-  List<Showtime> _buildTimesFor(DaySchedule? day) {
+  List<ShowTime> _buildTimesFor(DaySchedule? day) {
     if (day == null) return const [];
-    final all = <Showtime>[];
+    final all = <ShowTime>[];
     all..addAll(day.twoD)..addAll(day.threeD);
-    final byIso = <String, Showtime>{};
+    final byIso = <String, ShowTime>{};
     for (final t in all) {
       byIso[t.startIso] = t;
     }

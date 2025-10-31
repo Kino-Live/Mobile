@@ -1,8 +1,8 @@
 import 'package:kinolive_mobile/domain/entities/booking/showtime.dart';
 
 class DaySchedule {
-  final List<Showtime> twoD;
-  final List<Showtime> threeD;
+  final List<ShowTime> twoD;
+  final List<ShowTime> threeD;
 
   const DaySchedule({
     required this.twoD,

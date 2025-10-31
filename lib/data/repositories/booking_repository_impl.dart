@@ -7,51 +7,38 @@ import 'package:kinolive_mobile/domain/entities/booking/showtime.dart';
 import 'package:kinolive_mobile/domain/repositories/booking_repository.dart';
 
 class BookingRepositoryImpl implements BookingRepository {
-  final BookingApiService _api;
+  final BookingApiService _apiService;
 
-  BookingRepositoryImpl(this._api);
+  BookingRepositoryImpl(this._apiService);
 
   @override
   Future<MovieSchedule> getMovieSchedule(int movieId) async {
-    final dto = await _api.getMovieShowtimesAll(movieId);
-    final days = dto.days.map(
-          (key, value) => MapEntry(
-        key,
+    final response = await _apiService.getMovieShowTimesAll(movieId);
+
+    final mappedDays = response.days.map(
+          (date, dailyDto) => MapEntry(
+        date,
         DaySchedule(
-          twoD: value.twoD
-              .map(
-                (s) => Showtime(
-              id: s.showtimeId,
-              movieId: movieId,
-              date: key,
-              quality: '2D',
-              startIso: s.startIso,
-              endIso: s.endIso,
-              hallId: s.hallId,
-            ),
-          )
-              .toList(),
-          threeD: value.threeD
-              .map(
-                (s) => Showtime(
-              id: s.showtimeId,
-              movieId: movieId,
-              date: key,
-              quality: '3D',
-              startIso: s.startIso,
-              endIso: s.endIso,
-              hallId: s.hallId,
-            ),
-          )
-              .toList(),
+          twoD: _mapShowTimeList(
+            items: dailyDto.twoD,
+            movieId: movieId,
+            date: date,
+            quality: '2D',
+          ),
+          threeD: _mapShowTimeList(
+            items: dailyDto.threeD,
+            movieId: movieId,
+            date: date,
+            quality: '3D',
+          ),
         ),
       ),
     );
 
     return MovieSchedule(
-      movieId: dto.movieId,
-      days: days,
-      availableDays: dto.availableDays,
+      movieId: response.movieId,
+      days: mappedDays,
+      availableDays: response.availableDays,
     );
   }
 
@@ -60,41 +47,29 @@ class BookingRepositoryImpl implements BookingRepository {
     required int movieId,
     required String date,
   }) async {
-    final dto = await _api.getMovieShowtimesForDate(movieId: movieId, date: date);
+    final response =
+    await _apiService.getMovieShowTimesForDate(movieId: movieId, date: date);
+
     return DaySchedule(
-      twoD: dto.twoD
-          .map(
-            (s) => Showtime(
-          id: s.showtimeId,
-          movieId: movieId,
-          date: date,
-          quality: '2D',
-          startIso: s.startIso,
-          endIso: s.endIso,
-          hallId: s.hallId,
-        ),
-      )
-          .toList(),
-      threeD: dto.threeD
-          .map(
-            (s) => Showtime(
-          id: s.showtimeId,
-          movieId: movieId,
-          date: date,
-          quality: '3D',
-          startIso: s.startIso,
-          endIso: s.endIso,
-          hallId: s.hallId,
-        ),
-      )
-          .toList(),
+      twoD: _mapShowTimeList(
+        items: response.twoD,
+        movieId: movieId,
+        date: date,
+        quality: '2D',
+      ),
+      threeD: _mapShowTimeList(
+        items: response.threeD,
+        movieId: movieId,
+        date: date,
+        quality: '3D',
+      ),
     );
   }
 
   @override
-  Future<Showtime> getShowtimeById(String showtimeId) async {
-    final dto = await _api.getShowtimeById(showtimeId);
-    return Showtime(
+  Future<ShowTime> getShowTimeById(String showtimeId) async {
+    final dto = await _apiService.getShowTimeById(showtimeId);
+    return ShowTime(
       id: dto.showtimeId,
       movieId: dto.movieId,
       date: dto.date,
@@ -106,50 +81,76 @@ class BookingRepositoryImpl implements BookingRepository {
   }
 
   @override
-  Future<HallInfo> getHallForShowtime(String showtimeId) async {
-    final dto = await _api.getHallForShowtime(showtimeId);
+  Future<HallInfo> getHallForShowTime(String showtimeId) async {
+    final response = await _apiService.getHallForShowTime(showtimeId);
 
-    final hallRows = dto.hall.rows
-        .map(
-          (r) => HallRow(
-        rowName: r.row,
-        seats: r.seats
-            .map(
-              (s) => HallSeat(
-            code: s.code,
-            status: switch (s.status) {
-              HallSeatStatusDto.available => HallSeatStatus.available,
-              HallSeatStatusDto.reserved => HallSeatStatus.reserved,
-              HallSeatStatusDto.blocked => HallSeatStatus.blocked,
-            },
-          ),
-        )
-            .toList(),
-      ),
-    )
-        .toList();
+    final rows = response.hall.rows.map(_mapHallRow).toList();
 
     return HallInfo(
       showtime: ShowtimeMeta(
-        id: dto.showtime.showtimeId,
-        movieId: dto.showtime.movieId,
-        date: dto.showtime.date,
-        quality: dto.showtime.quality,
-        startIso: dto.showtime.startIso,
-        endIso: dto.showtime.endIso,
-        hallId: dto.showtime.hallId,
+        id: response.showtime.showtimeId,
+        movieId: response.showtime.movieId,
+        date: response.showtime.date,
+        quality: response.showtime.quality,
+        startIso: response.showtime.startIso,
+        endIso: response.showtime.endIso,
+        hallId: response.showtime.hallId,
       ),
       cinema: CinemaMeta(
-        id: dto.cinema.id,
-        name: dto.cinema.name,
-        address: dto.cinema.address,
-        city: dto.cinema.city,
+        id: response.cinema.id,
+        name: response.cinema.name,
+        address: response.cinema.address,
+        city: response.cinema.city,
       ),
       hall: HallLayout(
-        id: dto.hall.id,
-        name: dto.hall.name,
-        rows: hallRows,
+        id: response.hall.id,
+        name: response.hall.name,
+        rows: rows,
       ),
     );
+  }
+
+  List<ShowTime> _mapShowTimeList({
+    required List<dynamic> items,
+    required int movieId,
+    required String date,
+    required String quality,
+  }) {
+    return items
+        .map((s) => ShowTime(
+      id: s.showtimeId,
+      movieId: movieId,
+      date: date,
+      quality: quality,
+      startIso: s.startIso,
+      endIso: s.endIso,
+      hallId: s.hallId,
+    ))
+        .toList();
+  }
+
+  HallRow _mapHallRow(dynamic r) {
+    return HallRow(
+      rowName: r.row,
+      seats: r.seats.map(_mapHallSeat).toList(),
+    );
+  }
+
+  HallSeat _mapHallSeat(dynamic s) {
+    return HallSeat(
+      code: s.code,
+      status: _mapSeatStatus(s.status),
+    );
+  }
+
+  HallSeatStatus _mapSeatStatus(HallSeatStatusDto status) {
+    switch (status) {
+      case HallSeatStatusDto.available:
+        return HallSeatStatus.available;
+      case HallSeatStatusDto.reserved:
+        return HallSeatStatus.reserved;
+      case HallSeatStatusDto.blocked:
+        return HallSeatStatus.blocked;
+    }
   }
 }

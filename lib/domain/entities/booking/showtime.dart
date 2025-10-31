@@ -1,4 +1,4 @@
-class Showtime {
+class ShowTime {
   final String id;
   final int movieId;
   final String date;
@@ -7,7 +7,7 @@ class Showtime {
   final String endIso;
   final int hallId;
 
-  const Showtime({
+  const ShowTime({
     required this.id,
     required this.movieId,
     required this.date,

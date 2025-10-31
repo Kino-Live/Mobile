@@ -6,6 +6,6 @@ class GetHallForShowtime {
   GetHallForShowtime(this._repo);
 
   Future<HallInfo> call(String showtimeId) {
-    return _repo.getHallForShowtime(showtimeId);
+    return _repo.getHallForShowTime(showtimeId);
   }
 }

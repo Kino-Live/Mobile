@@ -11,7 +11,7 @@ abstract class BookingRepository {
     required String date,
   });
 
-  Future<Showtime> getShowtimeById(String showtimeId);
+  Future<ShowTime> getShowTimeById(String showtimeId);
 
-  Future<HallInfo> getHallForShowtime(String showtimeId);
+  Future<HallInfo> getHallForShowTime(String showtimeId);
 }
