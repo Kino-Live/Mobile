@@ -45,6 +45,14 @@ class BillboardForm extends HookConsumerWidget {
 
     Future<void> defaultRefresh() => ref.read(billboardVmProvider.notifier).load();
 
+    const cardWidth = 170.0;
+    final s = MediaQuery.of(context).textScaler;
+    final titleFs = s.scale(textTheme.bodyLarge?.fontSize ?? 16.0);
+    final titleLH = (textTheme.bodyLarge?.height ?? 1.2);
+    final ratingFs = s.scale(textTheme.bodySmall?.fontSize ?? 12.0);
+    final ratingLH = (textTheme.bodySmall?.height ?? 1.2);
+    final cardHeight = cardWidth * 1.5 + 8 + titleFs * titleLH * 2 + 4 + ratingFs * ratingLH + 6;
+
     final slivers = <Widget>[
       if (state.isLoading && state.isEmpty)
         const SliverFillRemaining(
@@ -99,7 +107,7 @@ class BillboardForm extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
-                  height: 350,
+                  height: cardHeight,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: visibleNowMovies.length,
@@ -110,7 +118,7 @@ class BillboardForm extends HookConsumerWidget {
                         title: m.title,
                         rating: m.rating,
                         imageUrl: m.posterUrl,
-                        width: 170,
+                        width: cardWidth,
                         onTap: () => context.pushNamed(
                           movieDetailsName,
                           pathParameters: {'id': m.id.toString()},
@@ -121,14 +129,14 @@ class BillboardForm extends HookConsumerWidget {
                 ),
                 const SizedBox(height: 24),
 
-                  // --- POPULAR ---
-                  SectionHeader(
-                    title: 'Popular',
-                    actionText: 'See more',
-                    onAction: () => context.push(seeMorePopularPath),
-                  ),
-                  const SizedBox(height: 12),
-                  ...visiblePopularMovies.map(
+                // --- POPULAR ---
+                SectionHeader(
+                  title: 'Popular',
+                  actionText: 'See more',
+                  onAction: () => context.push(seeMorePopularPath),
+                ),
+                const SizedBox(height: 12),
+                ...visiblePopularMovies.map(
                     (m) => Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: PopularTile(
