@@ -13,7 +13,7 @@ class ForgotPasswordRepositoryImpl implements ForgotPasswordRepository {
     } on AppException {
       rethrow;
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw SomethingGetWrong(e.toString());
     }
   }
 
@@ -27,7 +27,7 @@ class ForgotPasswordRepositoryImpl implements ForgotPasswordRepository {
     } on AppException {
       rethrow;
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw SomethingGetWrong(e.toString());
     }
   }
 
@@ -41,7 +41,7 @@ class ForgotPasswordRepositoryImpl implements ForgotPasswordRepository {
     } on AppException {
       rethrow;
     } catch (e) {
-      throw NetworkException(e.toString());
+      throw SomethingGetWrong(e.toString());
     }
   }
 }

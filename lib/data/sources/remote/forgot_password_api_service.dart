@@ -45,7 +45,7 @@ class ForgotPasswordApiService {
     } on AppException {
       rethrow;
     } catch (_) {
-      throw const ServerErrorException();
+      throw const SomethingGetWrong();
     }
   }
 

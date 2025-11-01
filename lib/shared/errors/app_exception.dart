@@ -6,6 +6,11 @@ abstract class AppException implements Exception {
   String toString() => message;
 }
 
+class SomethingGetWrong extends AppException {
+  const SomethingGetWrong([super.message = 'Something get wrong']);
+}
+
+
 class InvalidResponseException extends AppException {
   const InvalidResponseException([super.message = 'Invalid server response']);
 }
