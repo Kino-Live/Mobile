@@ -35,10 +35,10 @@ class AuthApiService {
       }
 
       return token;
-    } on DioException catch (dioError) {
-      throw NetworkErrorMapper.map(dioError);
-    } catch (error) {
-      throw NetworkErrorMapper.map(error);
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
     }
   }
 }

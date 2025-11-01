@@ -22,8 +22,8 @@ class BookingApiService {
       return MovieShowtimesAllDto.fromJson(data);
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
-    } catch (e) {
-      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
     }
   }
 
@@ -49,8 +49,8 @@ class BookingApiService {
       return DayShowtimesDto.fromJson(dayJson);
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
-    } catch (e) {
-      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
     }
   }
 
@@ -70,8 +70,8 @@ class BookingApiService {
       return ShowtimeDetailsDto.fromJson(st);
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
-    } catch (e) {
-      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
     }
   }
 
@@ -87,8 +87,8 @@ class BookingApiService {
       return HallForShowtimeDto.fromJson(data);
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
-    } catch (e) {
-      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
     }
   }
 }

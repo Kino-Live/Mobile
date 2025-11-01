@@ -21,8 +21,8 @@ class MoviesApiService {
           .toList();
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
-    } catch (e) {
-      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
     }
   }
 
@@ -38,8 +38,8 @@ class MoviesApiService {
       return MovieDto.fromJson(data);
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
-    } catch (e) {
-      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
     }
   }
 }

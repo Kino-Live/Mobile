@@ -1,10 +1,7 @@
-import 'package:dio/dio.dart';
-import 'package:kinolive_mobile/data/mappers/network_error_mapper.dart';
 import 'package:kinolive_mobile/data/sources/local/auth_token_storage.dart';
 import 'package:kinolive_mobile/data/sources/remote/auth_api_service.dart';
 import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 import 'package:kinolive_mobile/domain/repositories/auth_repository.dart';
-import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthApiService _authApiService;
@@ -33,16 +30,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   Future<AuthSession> _performAuthRequest({required Future<String> Function() request}) async {
-    try {
-      final accessToken = await request();
-      await _tokenStorage.save(accessToken);
-      return AuthSession(accessToken: accessToken);
-    }
-    on AppException {
-      rethrow;
-    } catch (e) {
-      throw NetworkException(e.toString());
-    }
+    final accessToken = await request();
+    await _tokenStorage.save(accessToken);
+    return AuthSession(accessToken: accessToken);
   }
 
   @override

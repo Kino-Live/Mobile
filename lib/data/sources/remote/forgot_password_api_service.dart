@@ -19,10 +19,8 @@ class ForgotPasswordApiService {
       }
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
-    } on AppException {
-      rethrow;
     } catch (_) {
-      throw const ServerErrorException();
+      throw const SomethingGetWrong();
     }
   }
 
@@ -42,8 +40,6 @@ class ForgotPasswordApiService {
       }
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
-    } on AppException {
-      rethrow;
     } catch (_) {
       throw const SomethingGetWrong();
     }
@@ -64,10 +60,8 @@ class ForgotPasswordApiService {
       }
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
-    } on AppException {
-      rethrow;
     } catch (_) {
-      throw const ServerErrorException();
+      throw const SomethingGetWrong();
     }
   }
 }
