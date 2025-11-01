@@ -6,21 +6,28 @@ class Legend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tt = Theme.of(context).textTheme;
-    return Row(
-      children: [
-        _LegendItem(color: cs.primary, filled: true, label: 'Selected'),
-        const SizedBox(width: 12),
-        _LegendItem(color: cs.secondaryContainer, filled: true, label: 'Reserved'),
-        const SizedBox(width: 12),
-        _LegendItem(color: cs.outline, filled: false, label: 'Available'),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _LegendItem(color: cs.primary, filled: true, label: 'Selected'),
+          const SizedBox(width: 12),
+          _LegendItem(color: cs.secondaryContainer, filled: true, label: 'Reserved'),
+          const SizedBox(width: 12),
+          _LegendItem(color: cs.outline, filled: false, label: 'Available'),
+        ],
+      ),
     );
   }
 }
 
 class _LegendItem extends StatelessWidget {
-  const _LegendItem({required this.color, required this.filled, required this.label});
+  const _LegendItem({
+    required this.color,
+    required this.filled,
+    required this.label,
+  });
+
   final Color color;
   final bool filled;
   final String label;
@@ -29,6 +36,7 @@ class _LegendItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final tt = Theme.of(context).textTheme;
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 16,
