@@ -13,44 +13,35 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<bool> isLoggedIn() async {
     final token = await _tokenStorage.read();
-    return token != null && token.isNotEmpty;
+    return token?.isNotEmpty == true;
   }
 
   @override
-  Future<AuthSession> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<AuthSession> login({required String email, required String password}) {
+    return _performAuthRequest(
+      request: () => _authApiService.login(email, password),
+    );
+  }
+
+  @override
+  Future<AuthSession> register({required String email, required String password}) {
+    return _performAuthRequest(
+      request: () => _authApiService.register(email, password),
+    );
+  }
+
+  Future<AuthSession> _performAuthRequest({required Future<String> Function() request}) async {
     try {
-      final token = await _authApiService.login(email, password);
-      await _tokenStorage.save(token);
-      return AuthSession(accessToken: token);
-    } on AppException catch (e) {
-      if (e is UnauthorizedException) {
-        throw const InvalidCredentialsException();
-      }
+      final accessToken = await request();
+      await _tokenStorage.save(accessToken);
+      return AuthSession(accessToken: accessToken);
+    }
+    on AppException {
       rethrow;
     } catch (e) {
       throw NetworkException(e.toString());
     }
   }
-
-  @override
-  Future<AuthSession> register({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      final token = await _authApiService.register(email, password);
-      await _tokenStorage.save(token);
-      return AuthSession(accessToken: token);
-    } on AppException catch (e) {
-      rethrow;
-    } catch (e) {
-      throw NetworkException(e.toString());
-    }
-  }
-
 
   @override
   Future<void> logout() async {
@@ -59,9 +50,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<AuthSession?> getSavedSession() async {
-    final token = await _tokenStorage.read();
-    if (token == null || token.isEmpty) return null;
-    return AuthSession(accessToken: token);
+    final savedToken = await _tokenStorage.read();
+    if (savedToken == null || savedToken.isEmpty) return null;
+    return AuthSession(accessToken: savedToken);
   }
 }
-
