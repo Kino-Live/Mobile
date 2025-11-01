@@ -11,18 +11,12 @@ class ForgotPasswordRepositoryImpl implements ForgotPasswordRepository {
   }
 
   @override
-  Future<void> verifyResetCode({
-    required String email,
-    required String code,
-  }) async {
+  Future<void> verifyResetCode({required String email, required String code}) async {
     await _api.verifyResetCode(email: email, code: code);
   }
 
   @override
-  Future<void> resetPassword({
-    required String email,
-    required String newPassword,
-  }) async {
+  Future<void> resetPassword({required String email, required String newPassword}) async {
     await _api.resetPassword(email: email, newPassword: newPassword);
   }
 }

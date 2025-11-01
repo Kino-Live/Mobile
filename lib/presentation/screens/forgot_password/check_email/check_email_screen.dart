@@ -11,14 +11,6 @@ class CheckEmailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(forgotPasswordVmProvider, (prev, next) {
-      if (next.error != null && next.error != prev?.error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!, textAlign: TextAlign.center)),
-        );
-      }
-    });
-
     final loading = ref.watch(
       forgotPasswordVmProvider.select((s) => s.loading),
     );

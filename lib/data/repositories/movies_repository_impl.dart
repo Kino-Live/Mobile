@@ -3,30 +3,31 @@ import 'package:kinolive_mobile/domain/entities/movie.dart';
 import 'package:kinolive_mobile/domain/repositories/movies_repository.dart';
 
 class MoviesRepositoryImpl implements MoviesRepository {
-  final MoviesApiService _api;
+  final MoviesApiService apiService;
 
-  MoviesRepositoryImpl(this._api);
+  MoviesRepositoryImpl(this.apiService);
 
   @override
   Future<List<Movie>> getNowShowing() async {
-    final dtos = await _api.getNowShowing();
-    final movies = dtos.map((dto) {
+    final movieDtos = await apiService.getNowShowing();
+
+    final movies = movieDtos.map((movieDto) {
       return Movie(
-        id: dto.id,
-        title: dto.title,
-        originalTitle: dto.originalTitle,
-        posterUrl: dto.posterUrl,
-        year: dto.year,
-        ageRestrictions: dto.ageRestrictions,
-        genres: dto.genres,
-        language: dto.language,
-        duration: dto.duration,
-        producer: dto.producer,
-        director: dto.director,
-        cast: dto.cast,
-        description: dto.description,
-        trailerUrl: dto.trailerUrl,
-        rating: dto.rating,
+        id: movieDto.id,
+        title: movieDto.title,
+        originalTitle: movieDto.originalTitle,
+        posterUrl: movieDto.posterUrl,
+        year: movieDto.year,
+        ageRestrictions: movieDto.ageRestrictions,
+        genres: movieDto.genres,
+        language: movieDto.language,
+        duration: movieDto.duration,
+        producer: movieDto.producer,
+        director: movieDto.director,
+        cast: movieDto.cast,
+        description: movieDto.description,
+        trailerUrl: movieDto.trailerUrl,
+        rating: movieDto.rating,
       );
     }).toList();
 
@@ -34,24 +35,25 @@ class MoviesRepositoryImpl implements MoviesRepository {
   }
 
   @override
-  Future<Movie> getById(int id) async {
-    final dto = await _api.getById(id);
+  Future<Movie> getById(int movieId) async {
+    final movieDto = await apiService.getById(movieId);
+
     return Movie(
-      id: dto.id,
-      title: dto.title,
-      originalTitle: dto.originalTitle,
-      posterUrl: dto.posterUrl,
-      year: dto.year,
-      ageRestrictions: dto.ageRestrictions,
-      genres: dto.genres,
-      language: dto.language,
-      duration: dto.duration,
-      producer: dto.producer,
-      director: dto.director,
-      cast: dto.cast,
-      description: dto.description,
-      trailerUrl: dto.trailerUrl,
-      rating: dto.rating,
+      id: movieDto.id,
+      title: movieDto.title,
+      originalTitle: movieDto.originalTitle,
+      posterUrl: movieDto.posterUrl,
+      year: movieDto.year,
+      ageRestrictions: movieDto.ageRestrictions,
+      genres: movieDto.genres,
+      language: movieDto.language,
+      duration: movieDto.duration,
+      producer: movieDto.producer,
+      director: movieDto.director,
+      cast: movieDto.cast,
+      description: movieDto.description,
+      trailerUrl: movieDto.trailerUrl,
+      rating: movieDto.rating,
     );
   }
 }

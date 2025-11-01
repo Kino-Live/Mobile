@@ -7,12 +7,13 @@ class NetworkErrorMapper {
     if (error is SocketException) {
       return const NetworkConnectionException();
     }
+
     if (error is FormatException) {
       return const InvalidResponseException('Invalid response format');
     }
 
     if (error is! DioException) {
-      return const ServerErrorException();
+      return const SomethingGetWrong();
     }
 
     final code = error.response?.statusCode;
@@ -57,8 +58,8 @@ class NetworkErrorMapper {
             text.contains('credential') ||
             text.contains('password');
         return looksInvalidCreds
-            ? InvalidCredentialsException(message ?? 'Invalid email or password')
-            : UnauthorizedException(message ?? 'Unauthorized');
+            ? InvalidCredentialsException()
+            : UnauthorizedException();
 
       case HttpStatus.forbidden: // 403
         return ForbiddenException(message ?? 'Forbidden: access denied');

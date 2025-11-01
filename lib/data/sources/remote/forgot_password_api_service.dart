@@ -6,62 +6,65 @@ class ForgotPasswordApiService {
   final Dio _dio;
   ForgotPasswordApiService(this._dio);
 
-  Future<void> sendPasswordResetEmail(String email) async {
-    try {
-      final Response<Map<String, dynamic>> result = await _dio.post(
-        '/forgot-password',
-        data: {'email': email},
-      );
+  Future<void> sendPasswordResetEmail(String email) {
+    return _tryPostAndEnsureSuccess(
+      endpoint: '/forgot-password',
+      body: {'email': email},
+      failureMessage: 'Failed to send password reset email',
+    );
+  }
 
-      final data = result.data;
-      if (data == null || data['success'] != true) {
-        throw const NetworkException('Error sending password reset email');
-      }
+  Future<void> verifyResetCode({required String email, required String code}) {
+    return _tryPostAndEnsureSuccess(
+      endpoint: '/verify-reset-code',
+      body: {'email': email, 'code': code},
+      failureMessage: 'Invalid or expired reset code',
+    );
+  }
+
+  Future<void> resetPassword({required String email, required String newPassword}) {
+    return _tryPostAndEnsureSuccess(
+      endpoint: '/reset-password',
+      body: {'email': email, 'new_password': newPassword},
+      failureMessage: 'Failed to reset password',
+    );
+  }
+
+  Future<void> _tryPostAndEnsureSuccess({
+    required String endpoint,
+    required Map<String, dynamic> body,
+    required String failureMessage,
+  }) async {
+    try {
+      await _postAndEnsureSuccess(
+        endpoint: endpoint,
+        body: body,
+        failureMessage: failureMessage,
+      );
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
+    } on AppException {
+      rethrow;
     } catch (_) {
       throw const SomethingGetWrong();
     }
   }
 
-  Future<void> verifyResetCode({
-    required String email,
-    required String code,
+  Future<void> _postAndEnsureSuccess({
+    required String endpoint,
+    required Map<String, dynamic> body,
+    required String failureMessage,
   }) async {
-    try {
-      final Response<Map<String, dynamic>> result = await _dio.post(
-        '/verify-reset-code',
-        data: {'email': email, 'code': code},
-      );
+    final Response<dynamic> response = await _dio.post(endpoint, data: body);
 
-      final data = result.data;
-      if (data == null || data['success'] != true) {
-        throw const NetworkException('Invalid or expired reset code');
-      }
-    } on DioException catch (e) {
-      throw NetworkErrorMapper.map(e);
-    } catch (_) {
-      throw const SomethingGetWrong();
+    final dynamic payload = response.data;
+    if (payload is! Map<String, dynamic>) {
+      throw const InvalidResponseException('Invalid server response');
     }
-  }
 
-  Future<void> resetPassword({
-    required String email,
-    required String newPassword,
-  }) async {
-    try {
-      final Response<Map<String, dynamic>> res = await _dio.post(
-        '/reset-password',
-        data: {'email': email, 'new_password': newPassword},
-      );
-      final data = res.data;
-      if (data == null || data['success'] != true) {
-        throw const NetworkException('Failed to reset password');
-      }
-    } on DioException catch (e) {
-      throw NetworkErrorMapper.map(e);
-    } catch (_) {
-      throw const SomethingGetWrong();
+    final success = payload['success'];
+    if (success != true) {
+      throw NetworkException(failureMessage);
     }
   }
 }

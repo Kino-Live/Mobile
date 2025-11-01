@@ -4,42 +4,59 @@ import 'package:kinolive_mobile/data/models/movie_dto.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
 class MoviesApiService {
-  final Dio _dio;
-  MoviesApiService(this._dio);
+  final Dio dio;
+  MoviesApiService(this.dio);
 
-  Future<List<MovieDto>> getNowShowing() async {
+  Future<List<MovieDto>> getNowShowing() {
+    return _tryGet<List<MovieDto>>(
+      endpoint: '/movies/now-showing',
+      parser: (responseData) {
+        if (responseData is! List) {
+          throw const InvalidResponseException('Invalid response format.');
+        }
+        return responseData
+            .map((json) => MovieDto.fromJson(json as Map<String, dynamic>))
+            .toList();
+      },
+    );
+  }
+
+  Future<MovieDto> getById(int movieId) {
+    return _tryGet<MovieDto>(
+      endpoint: '/movies/$movieId',
+      parser: (responseData) {
+        if (responseData is! Map<String, dynamic>) {
+          throw const InvalidResponseException('Invalid response format.');
+        }
+        return MovieDto.fromJson(responseData);
+      },
+    );
+  }
+
+  Future<T> _tryGet<T>({
+    required String endpoint,
+    required T Function(dynamic data) parser,
+  }) async {
     try {
-      final Response<List<dynamic>> res = await _dio.get('/movies/now-showing');
-
-      final data = res.data;
-      if (data == null) {
-        throw const NetworkException('Empty response from server');
-      }
-
-      return data
-          .map((e) => MovieDto.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final dynamic json = await _getJson(endpoint);
+      return parser(json);
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
+    } on AppException {
+      rethrow;
     } catch (_) {
       throw const SomethingGetWrong();
     }
   }
 
-  Future<MovieDto> getById(int id) async {
-    try {
-      final Response<Map<String, dynamic>> res = await _dio.get('/movies/$id');
+  Future<dynamic> _getJson(String endpoint) async {
+    final Response<dynamic> response = await dio.get(endpoint);
 
-      final data = res.data;
-      if (data == null) {
-        throw const NetworkException('Empty response from server');
-      }
-
-      return MovieDto.fromJson(data);
-    } on DioException catch (e) {
-      throw NetworkErrorMapper.map(e);
-    } catch (_) {
-      throw const SomethingGetWrong();
+    final dynamic data = response.data;
+    if (data == null) {
+      throw const NetworkException('Empty response from server.');
     }
+
+    return data;
   }
 }

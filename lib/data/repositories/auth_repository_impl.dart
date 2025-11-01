@@ -4,46 +4,54 @@ import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 import 'package:kinolive_mobile/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthApiService _authApiService;
-  final AccessTokenStorage _tokenStorage;
+  final AuthApiService apiService;
+  final AccessTokenStorage tokenStorage;
 
-  AuthRepositoryImpl(this._authApiService, this._tokenStorage);
+  AuthRepositoryImpl(this.apiService, this.tokenStorage);
 
   @override
   Future<bool> isLoggedIn() async {
-    final token = await _tokenStorage.read();
-    return token?.isNotEmpty == true;
+    final storedToken = await tokenStorage.read();
+    return storedToken?.isNotEmpty == true;
   }
 
   @override
-  Future<AuthSession> login({required String email, required String password}) {
-    return _performAuthRequest(
-      request: () => _authApiService.login(email, password),
+  Future<AuthSession> login({
+    required String email,
+    required String password,
+  }) {
+    return _handleAuthRequest(
+      request: () => apiService.login(email, password),
     );
   }
 
   @override
-  Future<AuthSession> register({required String email, required String password}) {
-    return _performAuthRequest(
-      request: () => _authApiService.register(email, password),
+  Future<AuthSession> register({
+    required String email,
+    required String password,
+  }) {
+    return _handleAuthRequest(
+      request: () => apiService.register(email, password),
     );
   }
 
-  Future<AuthSession> _performAuthRequest({required Future<String> Function() request}) async {
+  Future<AuthSession> _handleAuthRequest({
+    required Future<String> Function() request,
+  }) async {
     final accessToken = await request();
-    await _tokenStorage.save(accessToken);
+    await tokenStorage.save(accessToken);
     return AuthSession(accessToken: accessToken);
   }
 
   @override
   Future<void> logout() async {
-    await _tokenStorage.clear();
+    await tokenStorage.clear();
   }
 
   @override
   Future<AuthSession?> getSavedSession() async {
-    final savedToken = await _tokenStorage.read();
-    if (savedToken == null || savedToken.isEmpty) return null;
-    return AuthSession(accessToken: savedToken);
+    final storedToken = await tokenStorage.read();
+    if (storedToken == null || storedToken.isEmpty) return null;
+    return AuthSession(accessToken: storedToken);
   }
 }
