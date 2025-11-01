@@ -35,6 +35,21 @@ class NowShowingForm extends HookConsumerWidget {
     final state = ref.watch(billboardVmProvider);
     final movies = state.movies;
 
+    const paddingH = 16.0;
+    const crossSpacing = 12.0;
+    const crossAxisCount = 2;
+    final gridWidth = MediaQuery.of(context).size.width - paddingH * 2;
+    final tileWidth =
+        (gridWidth - crossSpacing * (crossAxisCount - 1)) / crossAxisCount;
+
+    final s = MediaQuery.of(context).textScaler;
+    final titleFs = s.scale(textTheme.bodyLarge?.fontSize ?? 16.0);
+    final titleLH = (textTheme.bodyLarge?.height ?? 1.2);
+    final ratingFs = s.scale(textTheme.bodySmall?.fontSize ?? 12.0);
+    final ratingLH = (textTheme.bodySmall?.height ?? 1.2);
+    final cardHeight =
+        tileWidth * 1.5 + 8 + titleFs * titleLH * 2 + 4 + ratingFs * ratingLH + 6;
+
     final slivers = <Widget>[
       if (state.isLoading && state.isEmpty)
         const SliverFillRemaining(
@@ -66,11 +81,11 @@ class NowShowingForm extends HookConsumerWidget {
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
               sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: crossSpacing,
                   mainAxisSpacing: 12,
-                  mainAxisExtent: 350,
+                  mainAxisExtent: cardHeight,
                 ),
                 delegate: SliverChildBuilderDelegate(
                       (context, i) {
