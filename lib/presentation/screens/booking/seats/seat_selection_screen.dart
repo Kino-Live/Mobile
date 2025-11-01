@@ -110,13 +110,13 @@ class _SeatSelectionScreenState extends ConsumerState<SeatSelectionScreen> {
       onContinue: () {
         final selected = seatVm.getSelectedSeats();
         final msg = [
-          'movieId: ${data.movieId}',
-          'showtimeId: ${data.showtimeId}',
-          'date: ${data.date}',
-          'start: ${data.startIso}',
-          'end: ${data.endIso}',
-          'quality: ${data.quality}',
-          'seats: ${selected.join(", ")}',
+          // 'movieId: ${data.movieId}',
+          // 'showtimeId: ${data.showtimeId}',
+          // 'date: ${data.date}',
+          // 'start: ${data.startIso}',
+          // 'end: ${data.endIso}',
+          // 'quality: ${data.quality}',
+          'selected seats: ${selected.join(", ")}',
         ].join('\n');
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       },
