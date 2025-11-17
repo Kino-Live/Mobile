@@ -122,7 +122,12 @@ class BookingRepositoryImpl implements BookingRepository {
           HallSeatStatusDto.blocked => HallSeatStatus.blocked,
         };
 
-        return HallSeat(code: seatDto.code, status: seatStatus);
+        return HallSeat(
+          code: seatDto.code,
+          status: seatStatus,
+          price: seatDto.price,
+          currency: seatDto.currency,
+        );
       }).toList();
 
       return HallRow(rowName: rowDto.row, seats: seats);

@@ -72,8 +72,14 @@ class HallSeat {
   final String code;
   final HallSeatStatus status;
 
+  final double price;
+
+  final String currency;
+
   const HallSeat({
     required this.code,
     required this.status,
+    required this.price,
+    required this.currency,
   });
 }
