@@ -23,22 +23,22 @@ class NetworkErrorMapper {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return NetworkTimeoutException(serverMessage ?? 'Network timeout');
+        return NetworkTimeoutException('Network timeout');
 
       case DioExceptionType.cancel:
-        return RequestCancelledException(serverMessage ?? 'Request cancelled');
+        return RequestCancelledException('Request cancelled');
 
       case DioExceptionType.badCertificate:
-        return SslCertificateException(serverMessage ?? 'SSL certificate problem');
+        return SslCertificateException('SSL certificate problem');
 
       case DioExceptionType.connectionError:
-        return NetworkConnectionException(serverMessage ?? 'Network connection error');
+        return NetworkConnectionException('Network connection error');
 
       case DioExceptionType.unknown:
         if (error.error is SocketException) {
-          return NetworkConnectionException(serverMessage ?? 'No internet connection');
+          return NetworkConnectionException('No internet connection');
         }
-        return ServerErrorException(serverMessage ?? 'Unknown network error');
+        return ServerErrorException('Unknown network error');
 
       case DioExceptionType.badResponse:
         return _mapHttpError(code, serverMessage, error);
