@@ -49,11 +49,14 @@ class HallInfoDto {
 
   final Map<String, String>? legend;
 
+  final HallPricingDto? pricing;
+
   const HallInfoDto({
     required this.id,
     required this.name,
     required this.rows,
     this.legend,
+    this.pricing,
   });
 
   factory HallInfoDto.fromJson(Map<String, dynamic> json) =>
@@ -88,8 +91,34 @@ class HallSeatDto {
   @JsonKey(unknownEnumValue: HallSeatStatusDto.available)
   final HallSeatStatusDto status;
 
-  const HallSeatDto({required this.code, required this.status});
+  final double price;
+
+  final String currency;
+
+  const HallSeatDto({
+    required this.code,
+    required this.status,
+    required this.price,
+    required this.currency,
+  });
 
   factory HallSeatDto.fromJson(Map<String, dynamic> json) =>
       _$HallSeatDtoFromJson(json);
+}
+
+@JsonSerializable(createToJson: false)
+class HallPricingDto {
+  final String currency;
+
+  /// key: "A", "B", "C" ...
+  @JsonKey(name: 'row_prices')
+  final Map<String, double> rowPrices;
+
+  const HallPricingDto({
+    required this.currency,
+    required this.rowPrices,
+  });
+
+  factory HallPricingDto.fromJson(Map<String, dynamic> json) =>
+      _$HallPricingDtoFromJson(json);
 }

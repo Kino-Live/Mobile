@@ -33,6 +33,9 @@ HallInfoDto _$HallInfoDtoFromJson(Map<String, dynamic> json) => HallInfoDto(
   legend: (json['legend'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),
+  pricing: json['pricing'] == null
+      ? null
+      : HallPricingDto.fromJson(json['pricing'] as Map<String, dynamic>),
 );
 
 HallRowDto _$HallRowDtoFromJson(Map<String, dynamic> json) => HallRowDto(
@@ -49,6 +52,8 @@ HallSeatDto _$HallSeatDtoFromJson(Map<String, dynamic> json) => HallSeatDto(
     json['status'],
     unknownValue: HallSeatStatusDto.available,
   ),
+  price: (json['price'] as num).toDouble(),
+  currency: json['currency'] as String,
 );
 
 const _$HallSeatStatusDtoEnumMap = {
@@ -56,3 +61,11 @@ const _$HallSeatStatusDtoEnumMap = {
   HallSeatStatusDto.reserved: 'reserved',
   HallSeatStatusDto.blocked: 'blocked',
 };
+
+HallPricingDto _$HallPricingDtoFromJson(Map<String, dynamic> json) =>
+    HallPricingDto(
+      currency: json['currency'] as String,
+      rowPrices: (json['row_prices'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(k, (e as num).toDouble()),
+      ),
+    );
