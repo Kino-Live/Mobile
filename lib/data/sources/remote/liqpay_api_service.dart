@@ -3,11 +3,11 @@ import 'package:kinolive_mobile/data/mappers/network_error_mapper.dart';
 import 'package:kinolive_mobile/data/models/payments/liqpay_init_payment_dto.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
-class LiqpayApiService {
+class LiqPayApiService {
   final Dio _dio;
-  LiqpayApiService(this._dio);
+  LiqPayApiService(this._dio);
 
-  Future<LiqpayInitPaymentDto> createPayment({
+  Future<LiqPayInitPaymentDto> createPayment({
     required double amount,
     required String currency,
     required String orderId,
@@ -45,7 +45,7 @@ class LiqpayApiService {
       }
 
       final params = json['params'];
-      return LiqpayInitPaymentDto(
+      return LiqPayInitPaymentDto(
         data: data,
         signature: signature,
         params: params is Map<String, dynamic> ? params : null,

@@ -4,7 +4,7 @@ import 'package:kinolive_mobile/domain/entities/payments/liqpay_init_payment.dar
 import 'package:kinolive_mobile/domain/repositories/liqpay_repository.dart';
 
 class LiqPayRepositoryImpl implements LiqPayRepository {
-  final LiqpayApiService _api;
+  final LiqPayApiService _api;
 
   LiqPayRepositoryImpl(this._api);
 
@@ -16,7 +16,7 @@ class LiqPayRepositoryImpl implements LiqPayRepository {
     required String description,
     String? email,
   }) async {
-    final LiqpayInitPaymentDto dto = await _api.createPayment(
+    final LiqPayInitPaymentDto dto = await _api.createPayment(
       amount: amount,
       currency: currency,
       orderId: orderId,
@@ -27,7 +27,7 @@ class LiqPayRepositoryImpl implements LiqPayRepository {
     return _mapDtoToEntity(dto);
   }
 
-  LiqpayInitPayment _mapDtoToEntity(LiqpayInitPaymentDto dto) {
+  LiqpayInitPayment _mapDtoToEntity(LiqPayInitPaymentDto dto) {
     return LiqpayInitPayment(
       data: dto.data,
       signature: dto.signature,

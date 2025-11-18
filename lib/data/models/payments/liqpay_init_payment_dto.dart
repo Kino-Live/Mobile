@@ -3,19 +3,19 @@ import 'package:json_annotation/json_annotation.dart';
 part 'liqpay_init_payment_dto.g.dart';
 
 @JsonSerializable()
-class LiqpayInitPaymentDto {
+class LiqPayInitPaymentDto {
   final String data;
   final String signature;
 
   final Map<String, dynamic>? params;
 
-  LiqpayInitPaymentDto({
+  LiqPayInitPaymentDto({
     required this.data,
     required this.signature,
     this.params,
   });
 
-  factory LiqpayInitPaymentDto.fromJson(Map<String, dynamic> json) =>
+  factory LiqPayInitPaymentDto.fromJson(Map<String, dynamic> json) =>
       _$LiqpayInitPaymentDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$LiqpayInitPaymentDtoToJson(this);
