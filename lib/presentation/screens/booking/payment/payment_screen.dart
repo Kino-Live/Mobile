@@ -119,6 +119,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
     final actions = PaymentFormActions(
       onBack: () => context.pop(),
+      onRefresh: () async {
+        return;
+      },
       onPay: _handlePay,
     );
 

@@ -3,6 +3,7 @@ import 'package:kinolive_mobile/domain/entities/booking/hall.dart';
 import 'package:kinolive_mobile/presentation/widgets/booking/seat_selection/info_row.dart';
 import 'package:kinolive_mobile/presentation/widgets/booking/seat_selection/selected_tickets_panel.dart';
 import 'package:kinolive_mobile/presentation/widgets/booking/seat_selection/tag.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/instant_refresh_scroll_view.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';
 
 class PaymentFormData {
@@ -40,10 +41,12 @@ class PaymentFormData {
 
 class PaymentFormActions {
   final VoidCallback onBack;
+  final Future<void> Function() onRefresh;
   final Future<void> Function() onPay;
 
   const PaymentFormActions({
     required this.onBack,
+    required this.onRefresh,
     required this.onPay,
   });
 }
@@ -65,7 +68,8 @@ class PaymentForm extends StatelessWidget {
 
     return Container(
       color: cs.surface,
-      child: CustomScrollView(
+      child: InstantRefreshScrollView(
+        onRefresh: actions.onRefresh,
         slivers: [
           SliverAppBar(
             pinned: true,
