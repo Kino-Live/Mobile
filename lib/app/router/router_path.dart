@@ -27,3 +27,6 @@ const String paymentPath = '/payment';
 const String paymentName = 'payment';
 
 const String seeMorePopularPath = '/see-more-popular';
+
+const String paymentSuccessPath = '/payment-success/:orderId';
+const String paymentSuccessName = 'payment-success';

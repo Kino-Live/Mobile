@@ -8,6 +8,7 @@ import 'package:kinolive_mobile/presentation/screens/billboard/movie_details/mov
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/now_showing_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/popular_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/payment/payment_screen.dart';
+import 'package:kinolive_mobile/presentation/screens/booking/payment/success/success_payment_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/schedule/schedule_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/seats/seat_selection_screen.dart';
 
@@ -94,6 +95,14 @@ final appRouter = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final args = state.extra as PaymentScreenArgs;
           return PaymentScreen(args: args);
+        },
+      ),
+      GoRoute(
+        name: paymentSuccessName,
+        path: paymentSuccessPath,
+        builder: (context, state) {
+          final orderId = state.pathParameters['orderId']!;
+          return PaymentSuccessScreen(orderId: orderId);
         },
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),
