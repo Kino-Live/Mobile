@@ -35,6 +35,11 @@ class SelectedTicketsPanel extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
+    final int itemCount = selectedCodes.length;
+    const double perItemHeight = 28.0;
+    final int visibleItems = itemCount.clamp(1, 3); // 1..3
+    final double listHeight = perItemHeight * visibleItems;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -52,7 +57,7 @@ class SelectedTicketsPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           SizedBox(
-            height: 80,
+            height: listHeight,
             child: Scrollbar(
               child: ListView.builder(
                 itemCount: selectedCodes.length,
