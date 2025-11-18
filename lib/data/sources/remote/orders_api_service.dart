@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:kinolive_mobile/data/mappers/network_error_mapper.dart';
-import 'package:kinolive_mobile/data/models/profile/order_dto.dart';
+import 'package:kinolive_mobile/data/models/orders/order_dto.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
 class OrdersApiService {
