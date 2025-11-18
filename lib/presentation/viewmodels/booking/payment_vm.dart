@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
+import 'package:kinolive_mobile/domain/entities/payments/liqpay_init_payment.dart';
 import 'package:kinolive_mobile/domain/usecases/orders/create_order.dart';
+import 'package:kinolive_mobile/domain/usecases/payments/init_liqpay_payment.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/payment/payment_screen.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
+import 'package:kinolive_mobile/shared/providers/liqpay_providers.dart';
 import 'package:kinolive_mobile/shared/providers/orders_providers.dart';
 
-final paymentVmProvider = NotifierProvider.family<PaymentVm, PaymentState, PaymentScreenArgs>(
+final paymentVmProvider =
+NotifierProvider.family<PaymentVm, PaymentState, PaymentScreenArgs>(
       (args) => PaymentVm(),
 );
 
@@ -16,39 +20,94 @@ class PaymentState {
   final String? error;
   final Order? order;
 
+  final LiqpayInitPayment? liqpayPayment;
+
   const PaymentState({
     this.status = PaymentStatus.idle,
     this.error,
     this.order,
+    this.liqpayPayment,
   });
 
   bool get isProcessing => status == PaymentStatus.processing;
   bool get isSuccess => status == PaymentStatus.success;
-  bool get hasError => status == PaymentStatus.error && (error ?? '').isNotEmpty;
+  bool get hasError =>
+      status == PaymentStatus.error && (error ?? '').isNotEmpty;
 
   PaymentState copyWith({
     PaymentStatus? status,
     String? error,
     Order? order,
+    LiqpayInitPayment? liqpayPayment,
   }) {
     return PaymentState(
       status: status ?? this.status,
       error: error,
       order: order ?? this.order,
+      liqpayPayment: liqpayPayment ?? this.liqpayPayment,
     );
   }
 }
 
 class PaymentVm extends Notifier<PaymentState> {
   late final CreateOrder _createOrder;
+  late final InitLiqPayPayment _initLiqpayPayment;
 
   @override
   PaymentState build() {
     _createOrder = ref.read(createOrderProvider);
+    _initLiqpayPayment = ref.read(initLiqPayPaymentProvider);
     return const PaymentState();
   }
 
-  Future<void> pay(PaymentScreenArgs args) async {
+  Future<LiqpayInitPayment?> initLiqpay(PaymentScreenArgs args) async {
+    if (state.isProcessing) return null;
+
+    state = state.copyWith(
+      status: PaymentStatus.processing,
+      error: null,
+      order: null,
+      liqpayPayment: null,
+    );
+
+    try {
+      final hallInfo = args.hallInfo;
+
+      final orderId =
+          'cinema_${hallInfo.showtime.id}_${DateTime.now().millisecondsSinceEpoch}';
+
+      final payment = await _initLiqpayPayment(
+        amount: args.totalPrice,
+        currency: args.totalCurrency,
+        orderId: orderId,
+        description: 'Tickets for ${args.movieTitle}',
+      );
+
+      state = state.copyWith(
+        status: PaymentStatus.idle,
+        error: null,
+        liqpayPayment: payment,
+      );
+
+      return payment;
+    } on AppException catch (e) {
+      state = state.copyWith(
+        status: PaymentStatus.error,
+        error: e.message,
+        liqpayPayment: null,
+      );
+      return null;
+    } catch (_) {
+      state = state.copyWith(
+        status: PaymentStatus.error,
+        error: 'Payment could not be initialized.',
+        liqpayPayment: null,
+      );
+      return null;
+    }
+  }
+
+  Future<void> createOrderAfterLiqpay(PaymentScreenArgs args) async {
     if (state.isProcessing) return;
 
     state = state.copyWith(
@@ -79,7 +138,7 @@ class PaymentVm extends Notifier<PaymentState> {
         status: PaymentStatus.error,
         error: e.message,
       );
-    } catch (e) {
+    } catch (_) {
       state = state.copyWith(
         status: PaymentStatus.error,
         error: 'Payment failed. Please try again.',
