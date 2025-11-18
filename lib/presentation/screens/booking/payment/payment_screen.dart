@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/domain/entities/booking/hall.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/payment/payment_form.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/payment/liqpay_webview_page.dart';
@@ -126,15 +127,10 @@ class PaymentScreen extends ConsumerWidget {
     final state = ref.read(paymentVmProvider(args));
 
     if (state.isSuccess && state.order != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Payment successful. Order №${state.order!.id}',
-            textAlign: TextAlign.center,
-          ),
-        ),
+      context.goNamed(
+        paymentSuccessName,
+        pathParameters: {'orderId': state.order!.id},
       );
-      context.pop();
     } else if (state.hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
