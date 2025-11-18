@@ -261,6 +261,7 @@ class _SeatSelectionFormState extends State<SeatSelectionForm>
                       selectedCodes: selectedCodes,
                       totalPrice: totalPrice,
                       totalCurrency: totalCurrency,
+                      maxVisibleItems: 3,
                     ),
                   ],
                   const SizedBox(height: 16),

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/movie_details/movie_details_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/now_showing_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/see_more/popular_screen.dart';
+import 'package:kinolive_mobile/presentation/screens/booking/payment/payment_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/schedule/schedule_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/seats/seat_selection_screen.dart';
 
@@ -85,6 +86,14 @@ final appRouter = Provider<GoRouter>((ref) {
           final movieId = int.parse(state.pathParameters['movieId']!);
           final showtimeId = state.pathParameters['showtimeId']!;
           return SeatSelectionScreen(movieId: movieId, showtimeId: showtimeId);
+        },
+      ),
+      GoRoute(
+        name: paymentName,
+        path: paymentPath,
+        builder: (context, state) {
+          final args = state.extra as PaymentScreenArgs;
+          return PaymentScreen(args: args);
         },
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),

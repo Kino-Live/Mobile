@@ -3,16 +3,19 @@ import 'package:kinolive_mobile/domain/entities/booking/hall.dart';
 
 class SelectedTicketsPanel extends StatelessWidget {
   const SelectedTicketsPanel({
+    super.key,
     required this.rows,
     required this.selectedCodes,
     required this.totalPrice,
     required this.totalCurrency,
+    this.maxVisibleItems = 3,
   });
 
   final List<HallRow> rows;
   final List<String> selectedCodes;
   final double totalPrice;
   final String totalCurrency;
+  final int maxVisibleItems;
 
   HallSeat? _findSeat(String code) {
     for (final row in rows) {
@@ -35,10 +38,11 @@ class SelectedTicketsPanel extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    final int itemCount = selectedCodes.length;
-    const double perItemHeight = 28.0;
-    final int visibleItems = itemCount.clamp(1, 3); // 1..3
-    final double listHeight = perItemHeight * visibleItems;
+    const double rowHeight = 24;
+    final int rowsCount = selectedCodes.length;
+    final int visibleRows =
+    rowsCount == 0 ? 1 : rowsCount.clamp(1, maxVisibleItems);
+    final double boxHeight = visibleRows * rowHeight;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -57,7 +61,7 @@ class SelectedTicketsPanel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           SizedBox(
-            height: listHeight,
+            height: boxHeight,
             child: Scrollbar(
               child: ListView.builder(
                 itemCount: selectedCodes.length,

@@ -23,4 +23,7 @@ const String scheduleName = 'schedule';
 const String seatSelectionPath = '/seat-selection/:movieId/:showtimeId';
 const String seatSelectionName = 'seat-selection';
 
+const String paymentPath = '/payment';
+const String paymentName = 'payment';
+
 const String seeMorePopularPath = '/see-more-popular';

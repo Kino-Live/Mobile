@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
+import 'package:kinolive_mobile/presentation/screens/booking/payment/payment_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/seats/seat_selection_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/booking/seat_selection_vm.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/movie_details_vm.dart';
@@ -109,16 +111,46 @@ class _SeatSelectionScreenState extends ConsumerState<SeatSelectionScreen> {
       onClear: seatVm.clearSelection,
       onContinue: () {
         final selected = seatVm.getSelectedSeats();
-        final msg = [
-          // 'movieId: ${data.movieId}',
-          // 'showtimeId: ${data.showtimeId}',
-          // 'date: ${data.date}',
-          // 'start: ${data.startIso}',
-          // 'end: ${data.endIso}',
-          // 'quality: ${data.quality}',
-          'selected seats: ${selected.join(", ")}',
-        ].join('\n');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+        if (selected.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Select at least one seat', textAlign: TextAlign.center,),),
+          );
+          return;
+        }
+
+        final hallInfo = seatState.hallInfo;
+        if (hallInfo == null) return;
+
+        double totalPrice = 0;
+        String currency = '';
+
+        for (final code in selected) {
+          for (final row in hallInfo.hall.rows) {
+            for (final seat in row.seats) {
+              if (seat.code == code) {
+                totalPrice += seat.price;
+                if (currency.isEmpty) {
+                  currency = seat.currency;
+                }
+              }
+            }
+          }
+        }
+
+        context.push(
+          paymentPath,
+          extra: PaymentScreenArgs(
+            hallInfo: hallInfo,
+            selectedCodes: selected,
+            totalPrice: totalPrice,
+            totalCurrency: currency,
+            movieTitle: movie?.title ?? 'Movie',
+            posterUrl: movie?.posterUrl ?? '',
+            dateText: seatState.dateText,
+            timeRange: seatState.timeRange,
+            is3D: seatState.is3D,
+          ),
+        );
       },
     );
 
