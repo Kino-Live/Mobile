@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class LiqpayWebViewPage extends StatefulWidget {
+class LiqPayWebViewPage extends StatefulWidget {
   final String data;
   final String signature;
 
-  const LiqpayWebViewPage({
+  const LiqPayWebViewPage({
     super.key,
     required this.data,
     required this.signature,
   });
 
   @override
-  State<LiqpayWebViewPage> createState() => _LiqpayWebViewPageState();
+  State<LiqPayWebViewPage> createState() => _LiqPayWebViewPageState();
 }
 
-class _LiqpayWebViewPageState extends State<LiqpayWebViewPage> {
+class _LiqPayWebViewPageState extends State<LiqPayWebViewPage> {
   late final WebViewController _controller;
   bool _isLoading = true;
+
+  static const String _resultUrlPrefix =
+      'https://test.kinolive/payment_success';
 
   @override
   void initState() {
@@ -34,11 +37,25 @@ class _LiqpayWebViewPageState extends State<LiqpayWebViewPage> {
             setState(() => _isLoading = false);
           },
           onNavigationRequest: (request) {
-            debugPrint('LiqPay nav: ${request.url}');
+            final url = request.url;
+            debugPrint('LiqPay nav: $url');
 
-            // Must match result_url from buildLiqpayParams
-            if (request.url.startsWith('https://test.kinolive/payment_success')) {
-              Navigator.of(context).pop(true);
+            if (url.startsWith(_resultUrlPrefix)) {
+              final uri = Uri.parse(url);
+              final status = uri.queryParameters['status'];
+              final code = uri.queryParameters['code'];
+
+              debugPrint('LiqPay result: status=$status, code=$code');
+
+              final bool isSuccess =
+                  status == 'success' || status == 'sandbox';
+
+              if (isSuccess) {
+                Navigator.of(context).pop(true);
+              } else {
+                Navigator.of(context).pop(false);
+              }
+
               return NavigationDecision.prevent;
             }
 
@@ -77,13 +94,16 @@ class _LiqpayWebViewPageState extends State<LiqpayWebViewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LiqPay test'),
+        centerTitle: true,
+        title: const Text('Ticket payment'),
       ),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),
           if (_isLoading)
-            const Center(child: CircularProgressIndicator()),
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
         ],
       ),
     );

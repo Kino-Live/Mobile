@@ -102,7 +102,7 @@ class PaymentScreen extends ConsumerWidget {
 
     final bool? paid = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => LiqpayWebViewPage(
+        builder: (_) => LiqPayWebViewPage(
           data: payment.data,
           signature: payment.signature,
         ),
