@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/domain/entities/booking/hall.dart';
-import 'package:kinolive_mobile/presentation/widgets/booking/seat_selection/info_row.dart';
-import 'package:kinolive_mobile/presentation/widgets/booking/seat_selection/selected_tickets_panel.dart';
-import 'package:kinolive_mobile/presentation/widgets/booking/seat_selection/tag.dart';
-import 'package:kinolive_mobile/presentation/widgets/general/primary_button.dart';
+import 'package:kinolive_mobile/presentation/screens/booking/payment/payment_form.dart';
+import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';
+import 'package:kinolive_mobile/shared/errors/app_exception.dart';
+import 'package:kinolive_mobile/shared/providers/orders_providers.dart';
 
 class PaymentScreenArgs {
   final HallInfo hallInfo;
@@ -25,146 +26,110 @@ class PaymentScreenArgs {
     required this.totalCurrency,
     required this.movieTitle,
     required this.posterUrl,
-
     required this.dateText,
     required this.timeRange,
     required this.is3D,
   });
 }
 
-class PaymentScreen extends StatelessWidget {
+class PaymentScreen extends ConsumerStatefulWidget {
   const PaymentScreen({super.key, required this.args});
   final PaymentScreenArgs args;
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+  ConsumerState<PaymentScreen> createState() => _PaymentScreenState();
+}
 
-    final cinema = args.hallInfo.cinema;
-    final hall = args.hallInfo.hall;
+class _PaymentScreenState extends ConsumerState<PaymentScreen> {
+  bool _isPaying = false;
+
+  Future<void> _handlePay() async {
+    if (_isPaying) return;
+
+    setState(() => _isPaying = true);
+
+    final createOrder = ref.read(createOrderProvider);
+    final showtime = widget.args.hallInfo.showtime;
+    final hall = widget.args.hallInfo.hall;
+
+    try {
+      final order = await createOrder(
+        showtimeId: showtime.id,
+        movieId: showtime.movieId,
+        hallId: hall.id,
+        seats: widget.args.selectedCodes,
+        totalAmount: widget.args.totalPrice,
+        currency: widget.args.totalCurrency,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Payment successful. Order №${order.id}',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+
+      // context.go(ordersHistoryPath);
+      context.pop();
+    } on AppException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message, textAlign: TextAlign.center),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payment error', textAlign: TextAlign.center),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isPaying = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hallInfo = widget.args.hallInfo;
+    final cinema = hallInfo.cinema;
+    final hall = hallInfo.hall;
+
+    final data = PaymentFormData(
+      movieTitle: widget.args.movieTitle,
+      posterUrl: widget.args.posterUrl,
+      cinemaName: cinema.name,
+      cinemaAddress: '${cinema.city}, ${cinema.address}',
+      hallName: hall.name,
+      dateText: widget.args.dateText,
+      timeRange: widget.args.timeRange,
+      is3D: widget.args.is3D,
+      rows: hall.rows,
+      selectedCodes: widget.args.selectedCodes,
+      totalPrice: widget.args.totalPrice,
+      totalCurrency: widget.args.totalCurrency,
+    );
+
+    final actions = PaymentFormActions(
+      onBack: () => context.pop(),
+      onPay: _handlePay,
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        ),
-        centerTitle: true,
-        title: Text(
-          'Payment',
-          style: tt.headlineMedium?.copyWith(color: cs.primary),
-        ),
-      ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 90,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: AspectRatio(
-                          aspectRatio: 2 / 3,
-                          child: args.posterUrl.isEmpty
-                              ? Container(color: Colors.black26)
-                              : Image.network(
-                            args.posterUrl,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            args.movieTitle,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: tt.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-
-                          InfoRow(
-                            icon: Icons.place_outlined,
-                            text:
-                            '${cinema.name}${hall.name.isNotEmpty ? ', ${hall.name}' : ''}\n${cinema.city}, ${cinema.address}',
-                          ),
-                          const SizedBox(height: 6),
-
-                          InfoRow(
-                            icon: Icons.calendar_today_outlined,
-                            text: args.dateText,
-                          ),
-                          const SizedBox(height: 6),
-
-                          Row(
-                            children: [
-                              Expanded(
-                                child: InfoRow(
-                                  icon: Icons.schedule,
-                                  text: args.timeRange,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Tag(text: args.is3D ? '3D' : '2D'),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              Expanded(
-                child: SingleChildScrollView(
-                  child: SelectedTicketsPanel(
-                    rows: hall.rows,
-                    selectedCodes: args.selectedCodes,
-                    totalPrice: args.totalPrice,
-                    totalCurrency: args.totalCurrency,
-                    maxVisibleItems: 6,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              PrimaryButton(
-                text: 'Pay by LiqPay',
-                onPressed: () {
-                  
-                },
-                backgroundColor: cs.primary,
-                foregroundColor: cs.onPrimaryContainer,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ],
+        bottom: false,
+        child: LoadingOverlay(
+          loading: _isPaying,
+          child: PaymentForm(
+            data: data,
+            actions: actions,
           ),
         ),
       ),
