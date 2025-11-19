@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/bottom_nav_bar.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
@@ -15,17 +17,17 @@ class ProfileScreen extends StatelessWidget {
     final String? phone = null;
 
     String fallback(String? value, String fallback) {
-      if (value == null || value.trim().isEmpty) {
-        return fallback;
-      }
+      if (value == null || value.trim().isEmpty) return fallback;
       return value;
+    }
+
+    Future<void> logout() async {
+      await ref.read(authStateProvider.notifier).logout();
     }
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-
       appBar: const ProfileAppBar(),
-
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -34,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 32),
 
-                // --- User Avatar with fallback icon ---
+                // --- User Avatar ---
                 CircleAvatar(
                   radius: 44,
                   backgroundColor: Colors.grey.shade800,
@@ -45,7 +47,6 @@ class ProfileScreen extends StatelessWidget {
                       width: 88,
                       height: 88,
                       errorBuilder: (context, error, stackTrace) {
-                        // If image fails to load, show default profile icon
                         return const Icon(
                           Icons.person,
                           size: 48,
@@ -58,7 +59,7 @@ class ProfileScreen extends StatelessWidget {
 
                 const SizedBox(height: 16),
 
-                // --- User Info (Name, Email, Phone) ---
+                // --- User Info ---
                 Text(
                   fallback(name, 'None'),
                   style: textTheme.titleMedium?.copyWith(
@@ -83,7 +84,7 @@ class ProfileScreen extends StatelessWidget {
 
                 const SizedBox(height: 32),
 
-                // --- Profile menu buttons ---
+                // --- Menu Buttons ---
                 ProfileMenuButton(
                   icon: Icons.confirmation_number_outlined,
                   title: 'My tickets',
@@ -111,18 +112,13 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // --- Logout button (red accent) ---
+                // --- Logout ---
                 ProfileMenuButton(
                   icon: Icons.logout,
                   title: 'Logout',
                   titleColor: const Color(0xFFFF5B5B),
                   iconColor: const Color(0xFFFF5B5B),
-                  onTap: () {
-                    // TODO: add actual logout handler
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Logout tapped')),
-                    );
-                  },
+                  onTap: logout,
                 ),
               ],
             ),
@@ -132,7 +128,7 @@ class ProfileScreen extends StatelessWidget {
 
       // --- Bottom navigation bar ---
       bottomNavigationBar: BottomNavBar(
-        initialIndex: 2, // 0 - Billboard, 1 - Coming Soon, 2 - Profile
+        initialIndex: 2,
         onResetUi: () {},
       ),
     );
@@ -174,7 +170,6 @@ class ProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// A reusable widget for profile menu buttons
 class ProfileMenuButton extends StatelessWidget {
   const ProfileMenuButton({
     super.key,
@@ -200,7 +195,6 @@ class ProfileMenuButton extends StatelessWidget {
       height: 56,
       width: double.infinity,
       child: Material(
-        // Uses app theme surfaceContainer color
         color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(

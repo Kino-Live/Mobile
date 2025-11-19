@@ -54,7 +54,6 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
       }
 
       context.go(profilePath);
-      // await ref.read(authStateProvider.notifier).logout();
     }
 
     if (!mounted) return;
