@@ -27,6 +27,9 @@ class Order {
 
   final Map<String, dynamic>? payment;
 
+  final String? movieTitle;
+  final String? posterUrl;
+
   const Order({
     required this.id,
     required this.userId,
@@ -43,6 +46,8 @@ class Order {
     this.cancelledAt,
     this.refundedAt,
     this.payment,
+    this.movieTitle,
+    this.posterUrl,
   });
 
   bool get isPaid => status == OrderStatus.paid;

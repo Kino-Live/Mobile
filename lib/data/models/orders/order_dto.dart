@@ -45,6 +45,12 @@ class OrderDto {
 
   final Map<String, dynamic>? payment;
 
+  @JsonKey(name: 'movie_title')
+  final String? movieTitle;
+
+  @JsonKey(name: 'poster_url')
+  final String? posterUrl;
+
   const OrderDto({
     required this.orderId,
     required this.userId,
@@ -61,6 +67,8 @@ class OrderDto {
     this.cancelledAt,
     this.refundedAt,
     this.payment,
+    this.movieTitle,
+    this.posterUrl,
   });
 
   factory OrderDto.fromJson(Map<String, dynamic> json) =>

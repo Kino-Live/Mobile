@@ -79,6 +79,9 @@ Order orderFromDto(OrderDto dto) {
     cancelledAt: _parseDateTimeOrNull(dto.cancelledAt),
     refundedAt: _parseDateTimeOrNull(dto.refundedAt),
     payment: dto.payment,
+
+    movieTitle: dto.movieTitle,
+    posterUrl: dto.posterUrl,
   );
 }
 

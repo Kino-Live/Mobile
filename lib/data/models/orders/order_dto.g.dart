@@ -22,6 +22,8 @@ OrderDto _$OrderDtoFromJson(Map<String, dynamic> json) => OrderDto(
   cancelledAt: json['cancelled_at'] as String?,
   refundedAt: json['refunded_at'] as String?,
   payment: json['payment'] as Map<String, dynamic>?,
+  movieTitle: json['movie_title'] as String?,
+  posterUrl: json['poster_url'] as String?,
 );
 
 Map<String, dynamic> _$OrderDtoToJson(OrderDto instance) => <String, dynamic>{
@@ -40,4 +42,6 @@ Map<String, dynamic> _$OrderDtoToJson(OrderDto instance) => <String, dynamic>{
   'cancelled_at': instance.cancelledAt,
   'refunded_at': instance.refundedAt,
   'payment': instance.payment,
+  'movie_title': instance.movieTitle,
+  'poster_url': instance.posterUrl,
 };
