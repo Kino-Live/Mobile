@@ -30,3 +30,6 @@ const String seeMorePopularPath = '/see-more-popular';
 
 const String paymentSuccessPath = '/payment-success/:orderId';
 const String paymentSuccessName = 'payment-success';
+
+const String ticketPath = '/ticket/:orderId';
+const String ticketName = 'ticket';
