@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/profile/my_tickets_vm.dart';
 
@@ -60,7 +62,7 @@ class MyTicketsScreen extends HookConsumerWidget {
             },
             onViewTicket: () {
               // TODO: navigate to ticket details screen
-              // context.pushNamed(ticketDetailsRoute, pathParameters: {'orderId': order.id});
+              context.pushNamed(ticketDetailsName, pathParameters: {'orderId': order.id});
             },
           );
         },
@@ -191,7 +193,7 @@ class TicketListItem extends StatelessWidget {
         ? order.movieTitle!
         : 'Movie #${order.movieId}';
 
-    // теперь до 5 мест: "Seats: A1, A2, A3, A4, A5..."
+    // "Seats: A1, A2, A3, A4, A5..."
     final subtitle = 'Seats: ${_shortenSeats(order.seats, max: 5)}';
     final priceLine = 'Amount: ${order.totalAmount.toStringAsFixed(2)} ${order.currency}';
     final createdAt = _formatDateTime(order.createdAt);

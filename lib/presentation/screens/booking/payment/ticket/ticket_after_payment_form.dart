@@ -5,7 +5,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 class TicketAfterPaymentForm extends StatelessWidget {
   final String orderId;
-
   final String movieTitle;
   final String cinemaName;
   final String cinemaAddress;
@@ -26,16 +25,16 @@ class TicketAfterPaymentForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF15151A),
+            color: cs.surfaceContainer,
             borderRadius: BorderRadius.circular(24),
           ),
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
@@ -50,9 +49,7 @@ class TicketAfterPaymentForm extends StatelessWidget {
                   color: cs.onSurface,
                 ),
               ),
-
               const SizedBox(height: 16),
-
               Row(
                 children: [
                   Expanded(
@@ -70,9 +67,7 @@ class TicketAfterPaymentForm extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 12),
-
               Row(
                 children: [
                   Expanded(
@@ -90,9 +85,7 @@ class TicketAfterPaymentForm extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 12),
-
               Center(
                 child: Column(
                   children: [
@@ -115,56 +108,48 @@ class TicketAfterPaymentForm extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24),
-
               Container(
                 height: 1,
                 margin: const EdgeInsets.symmetric(vertical: 8),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: Colors.white24,
+                      color: cs.outline.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
                 ),
               ),
-
               const SizedBox(height: 16),
-
               Center(
                 child: QrImageView(
                   data: orderId,
                   version: QrVersions.auto,
                   size: 180,
                   backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
+                  foregroundColor: cs.onSurface,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 'Scan this QR at the cinema entrance',
                 textAlign: TextAlign.center,
                 style: tt.bodySmall?.copyWith(
-                  color: Colors.white60,
+                  color: cs.onSurface.withOpacity(0.6),
                 ),
               ),
             ],
           ),
         ),
-
         const SizedBox(height: 32),
-
         SizedBox(
           height: 54,
           child: ElevatedButton(
             onPressed: () => context.go(billboardPath),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1ED760),
-              foregroundColor: Colors.black,
+              backgroundColor: cs.primary,
+              foregroundColor: cs.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
@@ -200,7 +185,8 @@ class _InfoBlock extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment:
+      crossAxisStart ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: [
         Text(
           label,

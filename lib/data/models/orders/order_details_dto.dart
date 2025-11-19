@@ -7,46 +7,39 @@ class OrderDetailsDto {
   @JsonKey(name: 'order_id')
   final String orderId;
 
-  @JsonKey(name: 'movie_id')
-  final int movieId;
+  @JsonKey(name: 'movie_title')
+  final String movieTitle;
 
-  @JsonKey(name: 'hall_id')
-  final int hallId;
+  @JsonKey(name: 'show_start_iso')
+  final String showStartIso;
 
-  @JsonKey(name: 'showtime_id')
-  final String showtimeId;
+  @JsonKey(name: 'cinema_name')
+  final String cinemaName;
+
+  @JsonKey(name: 'cinema_address')
+  final String cinemaAddress;
+
+  @JsonKey(name: 'cinema_city')
+  final String cinemaCity;
 
   final List<String> seats;
 
-  @JsonKey(name: 'total_amount')
-  final double totalAmount;
-
-  final String currency;
-
-  /// paid | cancelled | refunded | pending
-  final String status;
-
-  @JsonKey(name: 'created_at')
-  final String createdAt;
-
-  @JsonKey(name: 'paid_at')
-  final String? paidAt;
+  @JsonKey(name: 'tickets_count')
+  final int ticketsCount;
 
   const OrderDetailsDto({
     required this.orderId,
-    required this.movieId,
-    required this.hallId,
-    required this.showtimeId,
+    required this.movieTitle,
+    required this.showStartIso,
+    required this.cinemaName,
+    required this.cinemaAddress,
+    required this.cinemaCity,
     required this.seats,
-    required this.totalAmount,
-    required this.currency,
-    required this.status,
-    required this.createdAt,
-    this.paidAt,
+    required this.ticketsCount,
   });
 
-  factory OrderDetailsDto.fromJson(Map<String, dynamic> json) =>
-      _$OrderDetailsDtoFromJson(json);
+  factory OrderDetailsDto.fromJson(Map<String, dynamic> json)
+  => _$OrderDetailsDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$OrderDetailsDtoToJson(this);
 }

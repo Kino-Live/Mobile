@@ -1,32 +1,23 @@
-import 'package:kinolive_mobile/domain/entities/orders/order.dart';
-
 class OrderDetails {
   final String id;
-  final int movieId;
-  final int hallId;
-  final String showtimeId;
+
+  final String movieTitle;
+  final String cinemaName;
+  final String cinemaAddress;
+  final String cinemaCity;
+
+  final DateTime showStart;
   final List<String> seats;
-
-  final double totalAmount;
-  final String currency;
-
-  final OrderStatus status;
-
-  final DateTime createdAt;
-  final DateTime? paidAt;
+  final int ticketsCount;
 
   const OrderDetails({
     required this.id,
-    required this.movieId,
-    required this.hallId,
-    required this.showtimeId,
+    required this.movieTitle,
+    required this.cinemaName,
+    required this.cinemaAddress,
+    required this.cinemaCity,
+    required this.showStart,
     required this.seats,
-    required this.totalAmount,
-    required this.currency,
-    required this.status,
-    required this.createdAt,
-    this.paidAt,
+    required this.ticketsCount,
   });
-
-  bool get isPaid => status == OrderStatus.paid;
 }

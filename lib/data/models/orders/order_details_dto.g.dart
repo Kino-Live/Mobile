@@ -9,27 +9,23 @@ part of 'order_details_dto.dart';
 OrderDetailsDto _$OrderDetailsDtoFromJson(Map<String, dynamic> json) =>
     OrderDetailsDto(
       orderId: json['order_id'] as String,
-      movieId: (json['movie_id'] as num).toInt(),
-      hallId: (json['hall_id'] as num).toInt(),
-      showtimeId: json['showtime_id'] as String,
+      movieTitle: json['movie_title'] as String,
+      showStartIso: json['show_start_iso'] as String,
+      cinemaName: json['cinema_name'] as String,
+      cinemaAddress: json['cinema_address'] as String,
+      cinemaCity: json['cinema_city'] as String,
       seats: (json['seats'] as List<dynamic>).map((e) => e as String).toList(),
-      totalAmount: (json['total_amount'] as num).toDouble(),
-      currency: json['currency'] as String,
-      status: json['status'] as String,
-      createdAt: json['created_at'] as String,
-      paidAt: json['paid_at'] as String?,
+      ticketsCount: (json['tickets_count'] as num).toInt(),
     );
 
 Map<String, dynamic> _$OrderDetailsDtoToJson(OrderDetailsDto instance) =>
     <String, dynamic>{
       'order_id': instance.orderId,
-      'movie_id': instance.movieId,
-      'hall_id': instance.hallId,
-      'showtime_id': instance.showtimeId,
+      'movie_title': instance.movieTitle,
+      'show_start_iso': instance.showStartIso,
+      'cinema_name': instance.cinemaName,
+      'cinema_address': instance.cinemaAddress,
+      'cinema_city': instance.cinemaCity,
       'seats': instance.seats,
-      'total_amount': instance.totalAmount,
-      'currency': instance.currency,
-      'status': instance.status,
-      'created_at': instance.createdAt,
-      'paid_at': instance.paidAt,
+      'tickets_count': instance.ticketsCount,
     };

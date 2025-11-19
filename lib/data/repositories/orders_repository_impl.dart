@@ -88,14 +88,12 @@ Order orderFromDto(OrderDto dto) {
 OrderDetails orderDetailsFromDto(OrderDetailsDto dto) {
   return OrderDetails(
     id: dto.orderId,
-    movieId: dto.movieId,
-    hallId: dto.hallId,
-    showtimeId: dto.showtimeId,
+    movieTitle: dto.movieTitle,
+    cinemaName: dto.cinemaName,
+    cinemaAddress: dto.cinemaAddress,
+    cinemaCity: dto.cinemaCity,
+    showStart: DateTime.tryParse(dto.showStartIso) ?? DateTime.now(),
     seats: List<String>.from(dto.seats),
-    totalAmount: dto.totalAmount,
-    currency: dto.currency,
-    status: _mapStatus(dto.status),
-    createdAt: DateTime.parse(dto.createdAt),
-    paidAt: _parseDateTimeOrNull(dto.paidAt),
+    ticketsCount: dto.ticketsCount,
   );
 }

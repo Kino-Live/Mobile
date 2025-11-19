@@ -26,16 +26,17 @@ class TicketDetailsForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-
+        // Main ticket card
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF15151A),
+            color: cs.surfaceContainer,
             borderRadius: BorderRadius.circular(24),
           ),
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
@@ -121,10 +122,10 @@ class TicketDetailsForm extends StatelessWidget {
               Container(
                 height: 1,
                 margin: const EdgeInsets.symmetric(vertical: 8),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: Colors.white24,
+                      color: cs.outline.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -139,7 +140,7 @@ class TicketDetailsForm extends StatelessWidget {
                   version: QrVersions.auto,
                   size: 180,
                   backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
+                  foregroundColor: cs.onSurface,
                 ),
               ),
 
@@ -149,33 +150,10 @@ class TicketDetailsForm extends StatelessWidget {
                 'Scan this QR at the cinema entrance',
                 textAlign: TextAlign.center,
                 style: tt.bodySmall?.copyWith(
-                  color: Colors.white60,
+                  color: cs.onSurface.withOpacity(0.6),
                 ),
               ),
             ],
-          ),
-        ),
-
-        const SizedBox(height: 32),
-
-        SizedBox(
-          height: 54,
-          child: ElevatedButton(
-            onPressed: () => context.go(billboardPath),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1ED760),
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-            child: const Text(
-              'Back to menu',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ),
         ),
       ],
@@ -200,7 +178,8 @@ class _InfoBlock extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment:
+      crossAxisStart ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: [
         Text(
           label,
