@@ -7,6 +7,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
     final String? name = null;
@@ -21,7 +22,7 @@ class ProfileScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF111218),
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -34,7 +35,7 @@ class ProfileScreen extends StatelessWidget {
                 Text(
                   'Profile',
                   style: textTheme.titleLarge?.copyWith(
-                    color: const Color(0xFF04D361), // green accent color
+                    color: colorScheme.primary, // use primary color from theme
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -44,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
                 // --- User Avatar with fallback icon ---
                 CircleAvatar(
                   radius: 44,
-                  backgroundColor: Colors.grey.shade800,
+                  backgroundColor: Colors.grey.shade800, // back to custom dark color
                   child: ClipOval(
                     child: Image.asset(
                       'assets/images/profile.jpg',
@@ -67,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
 
                 // --- User Info (Name, Email, Phone) ---
                 Text(
-                  fallback(name, 'None'),
+                  fallback(name, 'Not provided'),
                   style: textTheme.titleMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -118,7 +119,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // --- Logout button (red color) ---
+                // --- Logout button (red accent) ---
                 ProfileMenuButton(
                   icon: Icons.logout,
                   title: 'Logout',
@@ -166,7 +167,9 @@ class ProfileMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final background = const Color(0xFF242633);
+
+    // Back to custom panel color used in the original design
+    const background = Color(0xFF242633);
 
     return SizedBox(
       height: 56,
