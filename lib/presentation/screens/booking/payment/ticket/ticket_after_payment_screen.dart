@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:kinolive_mobile/presentation/screens/booking/payment/ticket/ticket_form.dart';
+import 'package:kinolive_mobile/presentation/screens/booking/payment/ticket/ticket_after_payment_form.dart';
 
-class TicketScreen extends StatelessWidget {
+class TicketAfterPaymentScreen extends StatelessWidget {
   final String orderId;
 
-  const TicketScreen({
+  const TicketAfterPaymentScreen({
     super.key,
     required this.orderId,
   });
@@ -20,7 +20,7 @@ class TicketScreen extends StatelessWidget {
             color: Colors.black,
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-              child: TicketForm(
+              child: TicketAfterPaymentForm(
                 orderId: orderId,
                 movieTitle: 'Avengers',
                 cinemaName: 'KinoLive Cinema',

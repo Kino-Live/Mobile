@@ -31,11 +31,14 @@ const String seeMorePopularPath = '/see-more-popular';
 const String paymentSuccessPath = '/payment-success/:orderId';
 const String paymentSuccessName = 'payment-success';
 
-const String ticketPath = '/ticket/:orderId';
-const String ticketName = 'ticket';
+const String ticketAfterPaymentPath = '/ticket-after-payment/:orderId';
+const String ticketAfterPaymentName = 'ticket-after-payment';
 
 const String profilePath = '/profile';
 const String profileName = 'profile';
 
 const String myTicketsPath = '/my-tickets';
 const String myTicketsName = 'my-tickets';
+
+const String ticketDetailsPath = '/ticket-details/:orderId';
+const String ticketDetailsName = 'ticket-details';

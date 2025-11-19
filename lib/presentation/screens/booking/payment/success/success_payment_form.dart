@@ -34,7 +34,7 @@ class PaymentSuccessForm extends StatelessWidget {
         PrimaryButton(
           text: 'View E-Ticket',
           onPressed: () => context.goNamed(
-            ticketName,
+            ticketAfterPaymentName,
             pathParameters: {'orderId': orderId},
           ),
           backgroundColor: cs.primaryContainer,

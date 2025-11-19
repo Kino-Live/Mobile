@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-class TicketForm extends StatelessWidget {
+class TicketAfterPaymentForm extends StatelessWidget {
   final String orderId;
 
   final String movieTitle;
@@ -13,7 +13,7 @@ class TicketForm extends StatelessWidget {
   final int ticketsCount;
   final String seatsText;
 
-  const TicketForm({
+  const TicketAfterPaymentForm({
     super.key,
     required this.orderId,
     required this.movieTitle,
