@@ -1,35 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kinolive_mobile/domain/entities/orders/order.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/profile/my_tickets_vm.dart';
 
-class MyTicketsScreen extends StatelessWidget {
+class MyTicketsScreen extends HookConsumerWidget {
   const MyTicketsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    // Temporary mock data. Replace with real tickets from your view model.
-    final tickets = <_TicketUiModel>[
-      const _TicketUiModel(
-        title: 'Fast & Furious 7',
-        subtitle: 'Hollywood Movie',
-        language: 'Language: English',
-        statusLabel: 'Paid',
-      ),
-      const _TicketUiModel(
-        title: 'Spider Man',
-        subtitle: 'Hollywood Movie',
-        language: 'Language: English',
-        statusLabel: 'Paid',
-      ),
-      const _TicketUiModel(
-        title: 'Sultan',
-        subtitle: 'Bollywood Movie',
-        language: 'Language: Hindi',
-        statusLabel: 'Paid',
-      ),
-    ];
+    // Load tickets on first screen build
+    useEffect(() {
+      Future.microtask(
+            () => ref.read(myTicketsVmProvider.notifier).load(),
+      );
+      return null;
+    }, const []);
+
+    // Show snackbar for errors while still having tickets
+    ref.listen(myTicketsVmProvider, (prev, next) {
+      if (next.hasError && next.error != null && next.orders.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.error!, textAlign: TextAlign.center)),
+        );
+        ref.read(myTicketsVmProvider.notifier).clearError();
+      }
+    });
+
+    final state = ref.watch(myTicketsVmProvider);
+
+    Future<void> reload() async {
+      await ref.read(myTicketsVmProvider.notifier).load();
+    }
+
+    Widget body;
+
+    if (state.isLoading && state.orders.isEmpty) {
+      body = const Center(child: CircularProgressIndicator());
+    } else if (state.hasError && state.orders.isEmpty) {
+      body = _ErrorView(message: state.error ?? 'Error loading tickets', onRetry: reload);
+    } else if (state.isEmpty) {
+      body = _EmptyView(onRefresh: reload);
+    } else {
+      body = ListView.separated(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        itemCount: state.orders.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final order = state.orders[index];
+          return TicketListItem(
+            order: order,
+            onCancel: () {
+              // TODO: handle cancel booking if backend supports it
+            },
+            onViewTicket: () {
+              // TODO: navigate to ticket details screen
+              // context.pushNamed(ticketDetailsRoute, pathParameters: {'orderId': order.id});
+            },
+          );
+        },
+      );
+    }
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -38,7 +73,7 @@ class MyTicketsScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'My tickets',
+          'My Tickets',
           style: textTheme.titleLarge?.copyWith(
             color: colorScheme.primary,
             fontWeight: FontWeight.w600,
@@ -46,62 +81,121 @@ class MyTicketsScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          itemCount: tickets.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            final t = tickets[index];
-            return TicketListItem(
-              data: t,
-              onCancel: () {
-                // TODO: handle cancel booking
-              },
-              onViewTicket: () {
-                // TODO: navigate to single ticket screen
-                // e.g. context.pushNamed(ticketName, pathParameters: {'orderId': ...});
-              },
-            );
-          },
+        child: RefreshIndicator(
+          onRefresh: reload,
+          child: body,
         ),
       ),
     );
   }
 }
 
-/// Simple UI model for ticket card
-class _TicketUiModel {
-  const _TicketUiModel({
-    required this.title,
-    required this.subtitle,
-    required this.language,
-    required this.statusLabel,
-  });
+/// Empty state UI
+class _EmptyView extends StatelessWidget {
+  final Future<void> Function() onRefresh;
 
-  final String title;
-  final String subtitle;
-  final String language;
-  final String statusLabel;
+  const _EmptyView({required this.onRefresh});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        const SizedBox(height: 120),
+        Icon(Icons.confirmation_number_outlined, size: 64, color: Colors.grey.shade500),
+        const SizedBox(height: 16),
+        Center(child: Text('No tickets yet', style: textTheme.titleMedium)),
+        const SizedBox(height: 8),
+        Center(
+          child: Text(
+            'Buy a ticket and it will appear here',
+            style: textTheme.bodyMedium,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Center(
+          child: ElevatedButton(
+            onPressed: onRefresh,
+            child: const Text('Refresh'),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-/// Card widget that looks similar to the design
+/// Error state UI
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final Future<void> Function() onRetry;
+
+  const _ErrorView({
+    required this.message,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        const SizedBox(height: 120),
+        Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+        const SizedBox(height: 16),
+        Center(child: Text('Error', style: textTheme.titleMedium)),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Center(
+          child: ElevatedButton(
+            onPressed: onRetry,
+            child: const Text('Try again'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Ticket card UI
 class TicketListItem extends StatelessWidget {
   const TicketListItem({
     super.key,
-    required this.data,
+    required this.order,
     this.onCancel,
     this.onViewTicket,
   });
 
-  final _TicketUiModel data;
+  final Order order;
   final VoidCallback? onCancel;
   final VoidCallback? onViewTicket;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
+    final title = (order.movieTitle != null && order.movieTitle!.isNotEmpty)
+        ? order.movieTitle!
+        : 'Movie #${order.movieId}';
+
+    final subtitle = 'Seats: ${_shortenSeats(order.seats)}';
+    final priceLine = 'Amount: ${order.totalAmount.toStringAsFixed(2)} ${order.currency}';
+    final createdAt = _formatDateTime(order.createdAt);
+
+    final statusLabel = _statusLabel(order.status);
+    final statusColor = _statusColor(order.status, context);
 
     return Container(
       decoration: BoxDecoration(
@@ -114,21 +208,12 @@ class TicketListItem extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Poster placeholder
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: SizedBox(
                   width: 72,
                   height: 72,
-                  child: Image.asset(
-                    'assets/images/placeholder_poster.jpg',
-                    // TODO: replace with real poster
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: Colors.black26,
-                      child: const Icon(Icons.movie, color: Colors.white70),
-                    ),
-                  ),
+                  child: _PosterImage(posterUrl: order.posterUrl),
                 ),
               ),
               const SizedBox(width: 12),
@@ -136,13 +221,11 @@ class TicketListItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title + "Paid" badge
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           child: Text(
-                            data.title,
+                            title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: textTheme.titleMedium?.copyWith(
@@ -158,13 +241,13 @@ class TicketListItem extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: statusColor,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            data.statusLabel,
+                            statusLabel,
                             style: textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onPrimary,
+                              color: Colors.white,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -173,17 +256,18 @@ class TicketListItem extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      data.subtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                      ),
+                      subtitle,
+                      style: textTheme.bodySmall?.copyWith(color: Colors.white70),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      data.language,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                      ),
+                      priceLine,
+                      style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Created: $createdAt',
+                      style: textTheme.bodySmall?.copyWith(color: Colors.white38),
                     ),
                   ],
                 ),
@@ -197,7 +281,7 @@ class TicketListItem extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: onCancel,
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.white70),
+                    side: const BorderSide(color: Colors.white70),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -225,9 +309,7 @@ class TicketListItem extends StatelessWidget {
                   ),
                   child: Text(
                     'View ticket',
-                    style: textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -237,4 +319,76 @@ class TicketListItem extends StatelessWidget {
       ),
     );
   }
+}
+
+class _PosterImage extends StatelessWidget {
+  final String? posterUrl;
+
+  const _PosterImage({this.posterUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    if (posterUrl == null || posterUrl!.isEmpty) {
+      return Image.asset(
+        'assets/images/placeholder_poster.jpg',
+        fit: BoxFit.cover,
+      );
+    }
+
+    return Image.network(
+      posterUrl!,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset(
+        'assets/images/placeholder_poster.jpg',
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+}
+
+// ===================== Helpers =====================
+
+String _statusLabel(OrderStatus status) {
+  switch (status) {
+    case OrderStatus.paid:
+      return 'Paid';
+    case OrderStatus.cancelled:
+      return 'Cancelled';
+    case OrderStatus.refunded:
+      return 'Refunded';
+    default:
+      return 'Unknown';
+  }
+}
+
+Color _statusColor(OrderStatus status, BuildContext context) {
+  switch (status) {
+    case OrderStatus.paid:
+      return Colors.green;
+    case OrderStatus.cancelled:
+      return Colors.red;
+    case OrderStatus.refunded:
+      return Colors.orange;
+    default:
+      return Theme.of(context).colorScheme.primary;
+  }
+}
+
+String _formatDateTime(DateTime dt) {
+  final d = dt.day.toString().padLeft(2, '0');
+  final m = dt.month.toString().padLeft(2, '0');
+  final y = dt.year.toString();
+  final hh = dt.hour.toString().padLeft(2, '0');
+  final mm = dt.minute.toString().padLeft(2, '0');
+  return '$d.$m.$y $hh:$mm';
+}
+
+/// Shortens seats list like "A1, A2, A3..."
+String _shortenSeats(List<String> seats, {int max = 3}) {
+  if (seats.isEmpty) return '-';
+  if (seats.length <= max) {
+    return seats.join(', ');
+  }
+  final visible = seats.take(max).join(', ');
+  return '$visible...';
 }
