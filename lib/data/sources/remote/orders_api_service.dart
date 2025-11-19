@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:kinolive_mobile/data/mappers/network_error_mapper.dart';
+import 'package:kinolive_mobile/data/models/orders/order_details_dto.dart';
 import 'package:kinolive_mobile/data/models/orders/order_dto.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
@@ -66,6 +67,26 @@ class OrdersApiService {
           .whereType<Map<String, dynamic>>()
           .map(OrderDto.fromJson)
           .toList();
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } on AppException {
+      rethrow;
+    } catch (_) {
+      throw const SomethingGetWrong();
+    }
+  }
+
+  Future<OrderDetailsDto> getOrderDetails(String orderId) async {
+    try {
+      final Response<Map<String, dynamic>> resp =
+      await _dio.get('/my-orders/$orderId');
+
+      final json = resp.data;
+      if (json == null) {
+        throw const InvalidResponseException('Empty response from server');
+      }
+
+      return OrderDetailsDto.fromJson(json);
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
     } on AppException {
