@@ -36,3 +36,6 @@ const String ticketName = 'ticket';
 
 const String profilePath = '/profile';
 const String profileName = 'profile';
+
+const String myTicketsPath = '/my-tickets';
+const String myTicketsName = 'my-tickets';

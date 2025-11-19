@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/bottom_nav_bar.dart';
 
@@ -89,7 +91,7 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.confirmation_number_outlined,
                   title: 'My tickets',
                   onTap: () {
-                    // TODO: navigate to tickets screen
+                    context.push(myTicketsPath);
                   },
                 ),
                 const SizedBox(height: 16),

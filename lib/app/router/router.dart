@@ -14,6 +14,7 @@ import 'package:kinolive_mobile/presentation/screens/booking/schedule/schedule_s
 import 'package:kinolive_mobile/presentation/screens/booking/seats/seat_selection_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/login/login_screen.dart';
+import 'package:kinolive_mobile/presentation/screens/profile/my_tickets/my_tickets_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/profile/profile_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/register/register_screen.dart';
@@ -115,6 +116,11 @@ final appRouter = Provider<GoRouter>((ref) {
           final orderId = state.pathParameters['orderId']!;
           return TicketScreen(orderId: orderId);
         },
+      ),
+      GoRoute(
+        path: myTicketsPath,
+        name: myTicketsName,
+        builder: (context, state) => const MyTicketsScreen(),
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),
       GoRoute(path: completeProfilePath, builder: (context, state) => const CompleteProfileScreen()),
