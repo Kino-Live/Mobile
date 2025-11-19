@@ -23,6 +23,9 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
+
+      appBar: const ProfileAppBar(),
+
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -31,21 +34,10 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 32),
 
-                // --- Page Title ---
-                Text(
-                  'Profile',
-                  style: textTheme.titleLarge?.copyWith(
-                    color: colorScheme.primary, // use primary color from theme
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
                 // --- User Avatar with fallback icon ---
                 CircleAvatar(
                   radius: 44,
-                  backgroundColor: Colors.grey.shade800, // back to custom dark color
+                  backgroundColor: Colors.grey.shade800,
                   child: ClipOval(
                     child: Image.asset(
                       'assets/images/profile.jpg',
@@ -68,7 +60,7 @@ class ProfileScreen extends StatelessWidget {
 
                 // --- User Info (Name, Email, Phone) ---
                 Text(
-                  fallback(name, 'Not provided'),
+                  fallback(name, 'None'),
                   style: textTheme.titleMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -147,6 +139,41 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
+class ProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const ProfileAppBar({super.key});
+
+  @override
+  Size get preferredSize => const Size.fromHeight(72);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      automaticallyImplyLeading: false,
+      toolbarHeight: 72,
+      centerTitle: false,
+      titleSpacing: 0,
+      title: SizedBox(
+        height: 72,
+        child: Center(
+          child: Text(
+            'Profile',
+            style: textTheme.headlineMedium?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A reusable widget for profile menu buttons
 class ProfileMenuButton extends StatelessWidget {
   const ProfileMenuButton({
@@ -167,15 +194,14 @@ class ProfileMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    // Back to custom panel color used in the original design
-    const background = Color(0xFF242633);
+    final colorScheme = theme.colorScheme;
 
     return SizedBox(
       height: 56,
       width: double.infinity,
       child: Material(
-        color: background,
+        // Uses app theme surfaceContainer color
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
