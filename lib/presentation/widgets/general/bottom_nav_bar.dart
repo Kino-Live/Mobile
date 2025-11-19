@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/billboard_vm.dart';
-import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 
 class BottomNavBar extends ConsumerStatefulWidget {
   const BottomNavBar({
@@ -39,12 +40,21 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
       // Billboard
       if (prev == 0) {
         await ref.read(billboardVmProvider.notifier).load();
+        return;
       }
+
+      context.go(billboardPath);
     } else if (next == 1) {
       // TODO: navigate to the second screen/route if it appears
     } else if (next == 2) {
-      // TODO: profile
-      await ref.read(authStateProvider.notifier).logout();
+      if (prev == 2) {
+        // TODO: provider for profile
+        // await ref.read(billboardVmProvider.notifier).load();
+        return;
+      }
+
+      context.go(profilePath);
+      // await ref.read(authStateProvider.notifier).logout();
     }
 
     if (!mounted) return;

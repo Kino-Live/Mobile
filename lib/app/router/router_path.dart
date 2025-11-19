@@ -33,3 +33,6 @@ const String paymentSuccessName = 'payment-success';
 
 const String ticketPath = '/ticket/:orderId';
 const String ticketName = 'ticket';
+
+const String profilePath = '/profile';
+const String profileName = 'profile';
