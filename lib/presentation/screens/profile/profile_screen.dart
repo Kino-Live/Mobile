@@ -9,6 +9,17 @@ class ProfileScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
+    final String? name = null;
+    final String? email = null;
+    final String? phone = null;
+
+    String fallback(String? value, String fallback) {
+      if (value == null || value.trim().isEmpty) {
+        return fallback;
+      }
+      return value;
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF111218),
       body: SafeArea(
@@ -30,18 +41,33 @@ class ProfileScreen extends StatelessWidget {
 
                 const SizedBox(height: 32),
 
-                // --- User Avatar ---
-                const CircleAvatar(
+                // --- User Avatar with fallback icon ---
+                CircleAvatar(
                   radius: 44,
-                  backgroundImage: AssetImage('assets/images/profile.jpg'),
-                  // Replace with Icon(...) if no image available
+                  backgroundColor: Colors.grey.shade800,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/profile.jpg',
+                      fit: BoxFit.cover,
+                      width: 88,
+                      height: 88,
+                      errorBuilder: (context, error, stackTrace) {
+                        // If image fails to load, show default profile icon
+                        return const Icon(
+                          Icons.person,
+                          size: 48,
+                          color: Colors.white70,
+                        );
+                      },
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 16),
 
                 // --- User Info (Name, Email, Phone) ---
                 Text(
-                  'Marybeth Walker',
+                  fallback(name, 'None'),
                   style: textTheme.titleMedium?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -49,14 +75,14 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'marybethwalker@gmail.com',
+                  fallback(email, 'No email'),
                   style: textTheme.bodyMedium?.copyWith(
                     color: Colors.white70,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '+268 000000000',
+                  fallback(phone, 'No phone'),
                   style: textTheme.bodyMedium?.copyWith(
                     color: Colors.white70,
                   ),
@@ -70,15 +96,6 @@ class ProfileScreen extends StatelessWidget {
                   title: 'My tickets',
                   onTap: () {
                     // TODO: navigate to tickets screen
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                ProfileMenuButton(
-                  icon: Icons.credit_card_outlined,
-                  title: 'My credit cards',
-                  onTap: () {
-                    // TODO: navigate to credit cards screen
                   },
                 ),
                 const SizedBox(height: 16),
