@@ -13,7 +13,6 @@ class MyTicketsScreen extends HookConsumerWidget {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    // Load tickets on first screen build
     useEffect(() {
       Future.microtask(
             () => ref.read(myTicketsVmProvider.notifier).load(),
@@ -21,7 +20,6 @@ class MyTicketsScreen extends HookConsumerWidget {
       return null;
     }, const []);
 
-    // Show snackbar for errors while still having tickets
     ref.listen(myTicketsVmProvider, (prev, next) {
       if (next.hasError && next.error != null && next.orders.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -33,25 +31,28 @@ class MyTicketsScreen extends HookConsumerWidget {
 
     final state = ref.watch(myTicketsVmProvider);
 
+    final List<Order> activeOrders =
+    state.orders.where((o) => o.status == OrderStatus.paid).toList();
+
     Future<void> reload() async {
       await ref.read(myTicketsVmProvider.notifier).load();
     }
 
     Widget body;
 
-    if (state.isLoading && state.orders.isEmpty) {
+    if (state.isLoading && activeOrders.isEmpty) {
       body = const Center(child: CircularProgressIndicator());
-    } else if (state.hasError && state.orders.isEmpty) {
+    } else if (state.hasError && activeOrders.isEmpty) {
       body = _ErrorView(message: state.error ?? 'Error loading tickets', onRetry: reload);
-    } else if (state.isEmpty) {
+    } else if (activeOrders.isEmpty) {
       body = _EmptyView(onRefresh: reload);
     } else {
       body = ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        itemCount: state.orders.length,
+        itemCount: activeOrders.length,
         separatorBuilder: (_, __) => const SizedBox(height: 16),
         itemBuilder: (context, index) {
-          final order = state.orders[index];
+          final order = activeOrders[index];
           return TicketListItem(
             order: order,
             onCancel: () {
@@ -190,12 +191,10 @@ class TicketListItem extends StatelessWidget {
         ? order.movieTitle!
         : 'Movie #${order.movieId}';
 
-    final subtitle = 'Seats: ${_shortenSeats(order.seats)}';
+    // теперь до 5 мест: "Seats: A1, A2, A3, A4, A5..."
+    final subtitle = 'Seats: ${_shortenSeats(order.seats, max: 5)}';
     final priceLine = 'Amount: ${order.totalAmount.toStringAsFixed(2)} ${order.currency}';
     final createdAt = _formatDateTime(order.createdAt);
-
-    final statusLabel = _statusLabel(order.status);
-    final statusColor = _statusColor(order.status, context);
 
     return Container(
       decoration: BoxDecoration(
@@ -221,38 +220,15 @@ class TicketListItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            statusLabel,
-                            style: textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
+                    // Title only (no status badge)
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -309,7 +285,10 @@ class TicketListItem extends StatelessWidget {
                   ),
                   child: Text(
                     'View ticket',
-                    style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+                    style: textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onPrimary,
+                    ),
                   ),
                 ),
               ),
@@ -348,32 +327,6 @@ class _PosterImage extends StatelessWidget {
 
 // ===================== Helpers =====================
 
-String _statusLabel(OrderStatus status) {
-  switch (status) {
-    case OrderStatus.paid:
-      return 'Paid';
-    case OrderStatus.cancelled:
-      return 'Cancelled';
-    case OrderStatus.refunded:
-      return 'Refunded';
-    default:
-      return 'Unknown';
-  }
-}
-
-Color _statusColor(OrderStatus status, BuildContext context) {
-  switch (status) {
-    case OrderStatus.paid:
-      return Colors.green;
-    case OrderStatus.cancelled:
-      return Colors.red;
-    case OrderStatus.refunded:
-      return Colors.orange;
-    default:
-      return Theme.of(context).colorScheme.primary;
-  }
-}
-
 String _formatDateTime(DateTime dt) {
   final d = dt.day.toString().padLeft(2, '0');
   final m = dt.month.toString().padLeft(2, '0');
@@ -383,8 +336,8 @@ String _formatDateTime(DateTime dt) {
   return '$d.$m.$y $hh:$mm';
 }
 
-/// Shortens seats list like "A1, A2, A3..."
-String _shortenSeats(List<String> seats, {int max = 3}) {
+/// Shortens seats list like "A1, A2, A3, A4, A5..."
+String _shortenSeats(List<String> seats, {int max = 5}) {
   if (seats.isEmpty) return '-';
   if (seats.length <= max) {
     return seats.join(', ');
