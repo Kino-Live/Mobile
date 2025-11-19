@@ -32,19 +32,6 @@ class TicketForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: 24),
-
-        Text(
-          '"Thank you for purchasing your movie ticket with us.\n'
-              'We hope you enjoy your movie experience."',
-          textAlign: TextAlign.center,
-          style: tt.titleMedium?.copyWith(
-            color: cs.onBackground,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-
-        const SizedBox(height: 32),
 
         Container(
           decoration: BoxDecoration(
@@ -67,15 +54,19 @@ class TicketForm extends StatelessWidget {
               const SizedBox(height: 16),
 
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _InfoBlock(
-                    label: 'Date',
-                    value: dateText,
+                  Expanded(
+                    child: _InfoBlock(
+                      label: 'Date',
+                      value: dateText,
+                    ),
                   ),
-                  _InfoBlock(
-                    label: 'Order',
-                    value: orderId,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _InfoBlock(
+                      label: 'Order',
+                      value: orderId,
+                    ),
                   ),
                 ],
               ),
@@ -83,25 +74,46 @@ class TicketForm extends StatelessWidget {
               const SizedBox(height: 12),
 
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _InfoBlock(
-                    label: 'Tickets',
-                    value: '$ticketsCount',
+                  Expanded(
+                    child: _InfoBlock(
+                      label: 'Tickets',
+                      value: '$ticketsCount',
+                    ),
                   ),
-                  _InfoBlock(
-                    label: 'Seating',
-                    value: seatsText,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _InfoBlock(
+                      label: 'Seating',
+                      value: seatsText,
+                    ),
                   ),
                 ],
               ),
 
               const SizedBox(height: 12),
 
-              _InfoBlock(
-                label: 'Cinema',
-                value: '$cinemaName\n$cinemaAddress',
-                crossAxisStart: true,
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      'Cinema',
+                      style: tt.bodySmall?.copyWith(
+                        color: cs.onSurface.withOpacity(0.6),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$cinemaName\n$cinemaAddress',
+                      textAlign: TextAlign.center,
+                      style: tt.bodyMedium?.copyWith(
+                        color: cs.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 24),
@@ -114,7 +126,6 @@ class TicketForm extends StatelessWidget {
                     top: BorderSide(
                       color: Colors.white24,
                       width: 1,
-                      style: BorderStyle.solid,
                     ),
                   ),
                 ),
@@ -159,7 +170,7 @@ class TicketForm extends StatelessWidget {
               ),
             ),
             child: const Text(
-              'Return',
+              'Back to menu',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -188,29 +199,26 @@ class _InfoBlock extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return Expanded(
-      child: Column(
-        crossAxisAlignment:
-        crossAxisStart ? CrossAxisAlignment.start : CrossAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: tt.bodySmall?.copyWith(
-              color: cs.onSurface.withOpacity(0.6),
-              fontWeight: FontWeight.w500,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          label,
+          style: tt.bodySmall?.copyWith(
+            color: cs.onSurface.withOpacity(0.6),
+            fontWeight: FontWeight.w500,
           ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            textAlign: crossAxisStart ? TextAlign.start : TextAlign.center,
-            style: tt.bodyMedium?.copyWith(
-              color: cs.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          textAlign: TextAlign.center,
+          style: tt.bodyMedium?.copyWith(
+            color: cs.onSurface,
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
