@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/presentation/screens/profile/my_tickets/details/ticket_details_form.dart';
-import 'package:kinolive_mobile/presentation/viewmodels/profile/ticket_details_vm.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/ticket_details_vm.dart';
 
 class TicketDetailsScreen extends HookConsumerWidget {
   final String orderId;
