@@ -100,7 +100,7 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.history,
                   title: 'History',
                   onTap: () {
-                    // TODO: navigate to history screen
+                    context.push(historyPath);
                   },
                 ),
                 const SizedBox(height: 16),

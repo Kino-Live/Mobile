@@ -42,3 +42,6 @@ const String myTicketsName = 'my-tickets';
 
 const String ticketDetailsPath = '/ticket-details/:orderId';
 const String ticketDetailsName = 'ticket-details';
+
+const String historyPath = '/history';
+const String historyName = 'history';
