@@ -41,21 +41,8 @@ class _LiqPayWebViewPageState extends State<LiqPayWebViewPage> {
             debugPrint('LiqPay nav: $url');
 
             if (url.startsWith(_resultUrlPrefix)) {
-              final uri = Uri.parse(url);
-              final status = uri.queryParameters['status'];
-              final code = uri.queryParameters['code'];
-
-              debugPrint('LiqPay result: status=$status, code=$code');
-
-              final bool isSuccess =
-                  status == 'success' || status == 'sandbox';
-
-              if (isSuccess) {
-                Navigator.of(context).pop(true);
-              } else {
-                Navigator.of(context).pop(false);
-              }
-
+              debugPrint('LiqPay redirect to result_url, closing WebView');
+              Navigator.of(context).pop();
               return NavigationDecision.prevent;
             }
 
@@ -80,7 +67,7 @@ class _LiqPayWebViewPageState extends State<LiqPayWebViewPage> {
             <input type="hidden" name="data" value="${widget.data}" />
             <input type="hidden" name="signature" value="${widget.signature}" />
             <noscript>
-              <button type="submit">Оплатить</button>
+              <button type="submit">Pay</button>
             </noscript>
           </form>
         </body>
@@ -96,6 +83,10 @@ class _LiqPayWebViewPageState extends State<LiqPayWebViewPage> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Ticket payment'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: Stack(
         children: [

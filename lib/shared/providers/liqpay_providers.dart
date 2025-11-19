@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/data/repositories/liqpay_repository_impl.dart';
 import 'package:kinolive_mobile/data/sources/remote/liqpay_api_service.dart';
+import 'package:kinolive_mobile/domain/entities/payments/check_liqpay_status.dart';
 import 'package:kinolive_mobile/domain/repositories/liqpay_repository.dart';
 import 'package:kinolive_mobile/domain/usecases/payments/init_liqpay_payment.dart';
 import 'package:kinolive_mobile/shared/providers/network/dio_provider.dart';
@@ -18,4 +19,9 @@ final liqPayRepositoryProvider = Provider<LiqPayRepository>((ref) {
 final initLiqPayPaymentProvider = Provider<InitLiqPayPayment>((ref) {
   final repo = ref.watch(liqPayRepositoryProvider);
   return InitLiqPayPayment(repo);
+});
+
+final checkLiqPayStatusProvider = Provider<CheckLiqPayStatus>((ref) {
+  final repo = ref.watch(liqPayRepositoryProvider);
+  return CheckLiqPayStatus(repo);
 });

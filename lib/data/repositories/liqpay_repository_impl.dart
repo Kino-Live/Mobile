@@ -34,4 +34,12 @@ class LiqPayRepositoryImpl implements LiqPayRepository {
       rawParams: dto.params,
     );
   }
+
+  @override
+  Future<String> checkPaymentStatus({
+    required String orderId,
+  }) async {
+    final dto = await _api.checkPaymentStatus(orderId: orderId);
+    return dto.status;
+  }
 }

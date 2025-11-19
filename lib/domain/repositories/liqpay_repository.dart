@@ -8,4 +8,8 @@ abstract class LiqPayRepository {
     required String description,
     String? email,
   });
+
+  Future<String> checkPaymentStatus({
+    required String orderId,
+  });
 }

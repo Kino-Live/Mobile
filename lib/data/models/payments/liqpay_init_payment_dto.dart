@@ -16,7 +16,7 @@ class LiqPayInitPaymentDto {
   });
 
   factory LiqPayInitPaymentDto.fromJson(Map<String, dynamic> json) =>
-      _$LiqpayInitPaymentDtoFromJson(json);
+      _$LiqPayInitPaymentDtoFromJson(json);
 
-  Map<String, dynamic> toJson() => _$LiqpayInitPaymentDtoToJson(this);
+  Map<String, dynamic> toJson() => _$LiqPayInitPaymentDtoToJson(this);
 }

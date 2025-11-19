@@ -45,7 +45,7 @@ class PaymentScreen extends ConsumerWidget {
 
     final vmState = ref.watch(paymentVmProvider(args));
 
-    final data = PaymentFormData(
+    final formData = PaymentFormData(
       movieTitle: args.movieTitle,
       posterUrl: args.posterUrl,
       cinemaName: cinema.name,
@@ -60,11 +60,9 @@ class PaymentScreen extends ConsumerWidget {
       totalCurrency: args.totalCurrency,
     );
 
-    final actions = PaymentFormActions(
+    final formActions = PaymentFormActions(
       onBack: () => context.pop(),
-      onRefresh: () async {
-        return;
-      },
+      onRefresh: () async {},
       onPay: () => _handlePay(context, ref),
     );
 
@@ -74,8 +72,8 @@ class PaymentScreen extends ConsumerWidget {
         child: LoadingOverlay(
           loading: vmState.isProcessing,
           child: PaymentForm(
-            data: data,
-            actions: actions,
+            data: formData,
+            actions: formActions,
           ),
         ),
       ),
@@ -89,19 +87,12 @@ class PaymentScreen extends ConsumerWidget {
     if (payment == null) {
       final state = ref.read(paymentVmProvider(args));
       if (state.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              state.error ?? 'Failed to init payment',
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
+        _showSnack(context, state.error ?? 'Failed to init payment');
       }
       return;
     }
 
-    final bool? paid = await Navigator.of(context).push<bool>(
+    await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => LiqPayWebViewPage(
           data: payment.data,
@@ -110,15 +101,18 @@ class PaymentScreen extends ConsumerWidget {
       ),
     );
 
-    if (paid != true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Payment not completed',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
+    final liqpayStatus = await vm.checkLiqpayStatus();
+    if (liqpayStatus == null) {
+      _showSnack(context, 'Failed to check payment status');
+      return;
+    }
+
+    debugPrint('LiqPay status = $liqpayStatus');
+
+    final isSuccess = liqpayStatus == 'success' || liqpayStatus == 'sandbox';
+
+    if (!isSuccess) {
+      _showSnack(context, 'Payment not completed');
       return;
     }
 
@@ -131,15 +125,19 @@ class PaymentScreen extends ConsumerWidget {
         paymentSuccessName,
         pathParameters: {'orderId': state.order!.id},
       );
-    } else if (state.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            state.error ?? 'Payment error',
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
+      return;
     }
+
+    if (state.hasError) {
+      _showSnack(context, state.error ?? 'Payment error');
+    }
+  }
+
+  void _showSnack(BuildContext context, String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg, textAlign: TextAlign.center),
+      ),
+    );
   }
 }

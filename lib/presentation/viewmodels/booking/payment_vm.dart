@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
+import 'package:kinolive_mobile/domain/entities/payments/check_liqpay_status.dart';
 import 'package:kinolive_mobile/domain/entities/payments/liqpay_init_payment.dart';
 import 'package:kinolive_mobile/domain/usecases/orders/create_order.dart';
 import 'package:kinolive_mobile/domain/usecases/payments/init_liqpay_payment.dart';
@@ -22,11 +23,14 @@ class PaymentState {
 
   final LiqpayInitPayment? liqpayPayment;
 
+  final String? liqpayOrderId;
+
   const PaymentState({
     this.status = PaymentStatus.idle,
     this.error,
     this.order,
     this.liqpayPayment,
+    this.liqpayOrderId,
   });
 
   bool get isProcessing => status == PaymentStatus.processing;
@@ -39,12 +43,14 @@ class PaymentState {
     String? error,
     Order? order,
     LiqpayInitPayment? liqpayPayment,
+    String? liqpayOrderId,
   }) {
     return PaymentState(
       status: status ?? this.status,
       error: error,
       order: order ?? this.order,
       liqpayPayment: liqpayPayment ?? this.liqpayPayment,
+      liqpayOrderId: liqpayOrderId ?? this.liqpayOrderId,
     );
   }
 }
@@ -52,11 +58,13 @@ class PaymentState {
 class PaymentVm extends Notifier<PaymentState> {
   late final CreateOrder _createOrder;
   late final InitLiqPayPayment _initLiqpayPayment;
+  late final CheckLiqPayStatus _checkLiqpayStatus;
 
   @override
   PaymentState build() {
     _createOrder = ref.read(createOrderProvider);
     _initLiqpayPayment = ref.read(initLiqPayPaymentProvider);
+    _checkLiqpayStatus = ref.read(checkLiqPayStatusProvider);
     return const PaymentState();
   }
 
@@ -68,6 +76,7 @@ class PaymentVm extends Notifier<PaymentState> {
       error: null,
       order: null,
       liqpayPayment: null,
+      liqpayOrderId: null,
     );
 
     try {
@@ -87,6 +96,7 @@ class PaymentVm extends Notifier<PaymentState> {
         status: PaymentStatus.idle,
         error: null,
         liqpayPayment: payment,
+        liqpayOrderId: orderId,
       );
 
       return payment;
@@ -95,6 +105,7 @@ class PaymentVm extends Notifier<PaymentState> {
         status: PaymentStatus.error,
         error: e.message,
         liqpayPayment: null,
+        liqpayOrderId: null,
       );
       return null;
     } catch (_) {
@@ -102,6 +113,31 @@ class PaymentVm extends Notifier<PaymentState> {
         status: PaymentStatus.error,
         error: 'Payment could not be initialized.',
         liqpayPayment: null,
+        liqpayOrderId: null,
+      );
+      return null;
+    }
+  }
+
+  Future<String?> checkLiqpayStatus() async {
+    final orderId = state.liqpayOrderId;
+    if (orderId == null || orderId.isEmpty) {
+      return null;
+    }
+
+    try {
+      final status = await _checkLiqpayStatus(orderId: orderId);
+      return status;
+    } on AppException catch (e) {
+      state = state.copyWith(
+        status: PaymentStatus.error,
+        error: e.message,
+      );
+      return null;
+    } catch (_) {
+      state = state.copyWith(
+        status: PaymentStatus.error,
+        error: 'Could not check payment status.',
       );
       return null;
     }

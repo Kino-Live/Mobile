@@ -6,7 +6,7 @@ part of 'liqpay_init_payment_dto.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-LiqPayInitPaymentDto _$LiqpayInitPaymentDtoFromJson(
+LiqPayInitPaymentDto _$LiqPayInitPaymentDtoFromJson(
   Map<String, dynamic> json,
 ) => LiqPayInitPaymentDto(
   data: json['data'] as String,
@@ -14,7 +14,7 @@ LiqPayInitPaymentDto _$LiqpayInitPaymentDtoFromJson(
   params: json['params'] as Map<String, dynamic>?,
 );
 
-Map<String, dynamic> _$LiqpayInitPaymentDtoToJson(
+Map<String, dynamic> _$LiqPayInitPaymentDtoToJson(
   LiqPayInitPaymentDto instance,
 ) => <String, dynamic>{
   'data': instance.data,

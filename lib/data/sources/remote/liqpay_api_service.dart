@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:kinolive_mobile/data/mappers/network_error_mapper.dart';
 import 'package:kinolive_mobile/data/models/payments/liqpay_init_payment_dto.dart';
+import 'package:kinolive_mobile/data/models/payments/liqpay_status_dto.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
 class LiqPayApiService {
@@ -50,6 +51,32 @@ class LiqPayApiService {
         signature: signature,
         params: params is Map<String, dynamic> ? params : null,
       );
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } on AppException {
+      rethrow;
+    } catch (_) {
+      throw const SomethingGetWrong();
+    }
+  }
+
+  Future<LiqPayStatusDto> checkPaymentStatus({
+    required String orderId,
+  }) async {
+    try {
+      final Response<Map<String, dynamic>> resp = await _dio.post(
+        '/liqpay/check-status',
+        data: {
+          'order_id': orderId,
+        },
+      );
+
+      final json = resp.data;
+      if (json == null) {
+        throw const InvalidResponseException('Empty response from server');
+      }
+
+      return LiqPayStatusDto.fromJson(json);
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
     } on AppException {
