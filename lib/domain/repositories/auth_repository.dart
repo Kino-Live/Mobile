@@ -1,3 +1,4 @@
+import 'package:kinolive_mobile/domain/entities/auth/user_profile.dart';
 import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 
 abstract class AuthRepository {
@@ -12,4 +13,5 @@ abstract class AuthRepository {
   Future<void> logout();
   Future<AuthSession?> getSavedSession();
   Future<bool> isLoggedIn();
+  Future<UserProfile> getProfile();
 }

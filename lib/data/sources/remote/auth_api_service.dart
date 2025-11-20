@@ -49,16 +49,9 @@ class AuthApiService {
     return token;
   }
 
-  Future<ProfileDto> getProfile(String token) async {
+  Future<ProfileDto> getProfile() async {
     try {
-      final res = await _dio.get(
-        '/profile',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
-      );
+      final res = await _dio.get('/profile');
 
       final data = res.data;
 

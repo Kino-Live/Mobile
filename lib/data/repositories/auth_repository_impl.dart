@@ -1,7 +1,10 @@
+import 'package:kinolive_mobile/data/models/auth/profile_dto.dart';
 import 'package:kinolive_mobile/data/sources/local/auth_token_storage.dart';
 import 'package:kinolive_mobile/data/sources/remote/auth_api_service.dart';
+import 'package:kinolive_mobile/domain/entities/auth/user_profile.dart';
 import 'package:kinolive_mobile/domain/entities/auth_session.dart';
 import 'package:kinolive_mobile/domain/repositories/auth_repository.dart';
+import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthApiService apiService;
@@ -53,5 +56,19 @@ class AuthRepositoryImpl implements AuthRepository {
     final storedToken = await tokenStorage.read();
     if (storedToken == null || storedToken.isEmpty) return null;
     return AuthSession(accessToken: storedToken);
+  }
+
+  @override
+  Future<UserProfile> getProfile() async {
+    final ProfileDto dto = await apiService.getProfile();
+
+    return UserProfile(
+      email: dto.email,
+      name: dto.name,
+      phone: dto.phone,
+      createdAt: dto.createdAt != null && dto.createdAt!.isNotEmpty
+          ? DateTime.parse(dto.createdAt!)
+          : null,
+    );
   }
 }
