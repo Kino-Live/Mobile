@@ -5,6 +5,7 @@ import 'package:kinolive_mobile/domain/repositories/orders_repository.dart';
 import 'package:kinolive_mobile/domain/usecases/orders/create_order.dart';
 import 'package:kinolive_mobile/domain/usecases/orders/get_my_orders.dart';
 import 'package:kinolive_mobile/domain/usecases/orders/get_order_details.dart';
+import 'package:kinolive_mobile/domain/usecases/orders/refund_order.dart';
 import 'package:kinolive_mobile/shared/providers/network/dio_provider.dart';
 
 final ordersApiServiceProvider = Provider<OrdersApiService>((ref) {
@@ -30,4 +31,9 @@ final getMyOrdersProvider = Provider<GetMyOrders>((ref) {
 final getOrderDetailsProvider = Provider<GetOrderDetails>((ref) {
   final repo = ref.watch(ordersRepositoryProvider);
   return GetOrderDetails(repo);
+});
+
+final refundOrderProvider = Provider<RefundOrder>((ref) {
+  final repo = ref.watch(ordersRepositoryProvider);
+  return RefundOrder(repo);
 });
