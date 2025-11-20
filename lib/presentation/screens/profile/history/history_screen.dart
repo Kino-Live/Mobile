@@ -44,10 +44,28 @@ class TicketsHistoryScreen extends HookConsumerWidget {
       return showStart.isBefore(now);
     }
 
+    DateTime _historySortKey(Order o) {
+      final now = DateTime.now();
+
+      if (o.refundedAt != null) return o.refundedAt!;
+      if (o.cancelledAt != null) return o.cancelledAt!;
+
+      final show = o.showStart;
+      if (show != null && show.isBefore(now)) {
+        return show;
+      }
+
+      return o.createdAt;
+    }
+
     final List<Order> historyOrders = state.orders
         .where(isHistoryOrder)
         .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort((a, b) {
+        final ka = _historySortKey(a);
+        final kb = _historySortKey(b);
+        return kb.compareTo(ka);
+      });
 
     Future<void> reload() async {
       await ref.read(ticketsHistoryVmProvider.notifier).load();

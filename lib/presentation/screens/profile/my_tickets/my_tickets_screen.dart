@@ -39,7 +39,7 @@ class MyTicketsScreen extends HookConsumerWidget {
       ..sort((a, b) {
         final sa = a.showStart ?? a.createdAt;
         final sb = b.showStart ?? b.createdAt;
-        return sa.compareTo(sb);
+        return sb.compareTo(sa);
       });
 
     Future<void> reload() async {
