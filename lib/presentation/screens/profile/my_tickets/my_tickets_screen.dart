@@ -33,9 +33,7 @@ class MyTicketsScreen extends HookConsumerWidget {
 
     final state = ref.watch(myTicketsVmProvider);
 
-    // 🔥 Активные билеты:
-    // - оплачены
-    // - сеанс ещё не прошёл (от сегодня в будущем)
+    // Активные билеты: paid + не в прошлом
     final List<Order> activeOrders = state.orders
         .where((o) => o.isPaid && !o.isPast)
         .toList()
@@ -70,7 +68,7 @@ class MyTicketsScreen extends HookConsumerWidget {
           return TicketListItem(
             order: order,
             onCancel: () {
-              // TODO: handle cancel booking if backend supports it
+              // TODO: cancel if needed
             },
             onViewTicket: () {
               context.pushNamed(
@@ -117,37 +115,44 @@ class _EmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        const SizedBox(height: 120),
-        Icon(
-          Icons.confirmation_number_outlined,
-          size: 64,
-          color: Colors.grey.shade500,
-        ),
-        const SizedBox(height: 16),
-        Center(
-          child: Text(
-            'No tickets yet',
-            style: textTheme.titleMedium,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.confirmation_number_outlined,
+                    size: 64,
+                    color: Colors.grey.shade500,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No tickets yet',
+                    style: textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Buy a ticket and it will appear here',
+                    style: textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: onRefresh,
+                    child: const Text('Refresh'),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Center(
-          child: Text(
-            'Buy a ticket and it will appear here',
-            style: textTheme.bodyMedium,
-          ),
-        ),
-        const SizedBox(height: 24),
-        Center(
-          child: ElevatedButton(
-            onPressed: onRefresh,
-            child: const Text('Refresh'),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -166,29 +171,46 @@ class _ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        const SizedBox(height: 120),
-        Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-        const SizedBox(height: 16),
-        Center(child: Text('Error', style: textTheme.titleMedium)),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            message,
-            textAlign: TextAlign.center,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red.shade300,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error',
+                      style: textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      message,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: onRetry,
+                      child: const Text('Try again'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 24),
-        Center(
-          child: ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Try again'),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -216,7 +238,6 @@ class TicketListItem extends StatelessWidget {
         ? order.movieTitle!
         : 'Movie #${order.movieId}';
 
-    // "Seats: A1, A2, A3, A4, A5..."
     final subtitle = 'Seats: ${_shortenSeats(order.seats, max: 5)}';
     final priceLine =
         'Amount: ${order.totalAmount.toStringAsFixed(2)} ${order.currency}';
@@ -246,7 +267,6 @@ class TicketListItem extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title only (no status badge)
                     Text(
                       title,
                       maxLines: 1,
@@ -366,7 +386,6 @@ String _formatDateTime(DateTime dt) {
   return '$d.$m.$y $hh:$mm';
 }
 
-/// Shortens seats list like "A1, A2, A3, A4, A5..."
 String _shortenSeats(List<String> seats, {int max = 5}) {
   if (seats.isEmpty) return '-';
   if (seats.length <= max) {

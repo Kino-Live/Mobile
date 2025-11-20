@@ -34,16 +34,13 @@ class TicketsHistoryScreen extends HookConsumerWidget {
     });
 
     final state = ref.watch(ticketsHistoryVmProvider);
-
     final now = DateTime.now();
 
     bool isHistoryOrder(Order o) {
       if (o.status != OrderStatus.paid) {
         return true;
       }
-
       final DateTime showStart = o.showStart ?? o.createdAt;
-
       return showStart.isBefore(now);
     }
 
@@ -83,8 +80,7 @@ class TicketsHistoryScreen extends HookConsumerWidget {
               );
             },
             onWriteReview: () {
-              // TODO: go to the "rate / write a review" screen
-              // context.pushNamed(writeReviewName, pathParameters: {'orderId': order.id});
+              // TODO: go to "rate / write a review"
             },
           );
         },
@@ -126,37 +122,44 @@ class _EmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        const SizedBox(height: 120),
-        Icon(
-          Icons.history,
-          size: 64,
-          color: Colors.grey.shade500,
-        ),
-        const SizedBox(height: 16),
-        Center(
-          child: Text(
-            'No history yet',
-            style: textTheme.titleMedium,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.history,
+                    size: 64,
+                    color: Colors.grey.shade500,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No history yet',
+                    style: textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Buy a ticket and it will appear here',
+                    style: textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: onRefresh,
+                    child: const Text('Refresh'),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Center(
-          child: Text(
-            'Buy a ticket and it will appear here',
-            style: textTheme.bodyMedium,
-          ),
-        ),
-        const SizedBox(height: 24),
-        Center(
-          child: ElevatedButton(
-            onPressed: onRefresh,
-            child: const Text('Refresh'),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -176,29 +179,46 @@ class _ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        const SizedBox(height: 120),
-        Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-        const SizedBox(height: 16),
-        Center(child: Text('Error', style: textTheme.titleMedium)),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            message,
-            textAlign: TextAlign.center,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red.shade300,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error',
+                      style: textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      message,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: onRetry,
+                      child: const Text('Try again'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 24),
-        Center(
-          child: ElevatedButton(
-            onPressed: onRetry,
-            child: const Text('Try again'),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
