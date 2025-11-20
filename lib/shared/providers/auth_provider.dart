@@ -4,6 +4,7 @@ import 'package:kinolive_mobile/data/sources/local/auth_token_storage.dart';
 import 'package:kinolive_mobile/data/sources/local/secure_key_value_storage.dart';
 import 'package:kinolive_mobile/data/sources/remote/auth_api_service.dart';
 import 'package:kinolive_mobile/domain/repositories/auth_repository.dart';
+import 'package:kinolive_mobile/domain/usecases/auth/get_profile.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/get_saved_session.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/login_user.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/logout_user.dart';
@@ -48,4 +49,9 @@ final logoutUserProvider = Provider<LogoutUser>((ref) {
 final registerUserProvider = Provider<RegisterUser>((ref) {
   final repo = ref.watch(authRepositoryProvider);
   return RegisterUser(repo);
+});
+
+final getProfileProvider = Provider<GetProfile>((ref) {
+  final repo = ref.watch(authRepositoryProvider);
+  return GetProfile(repo);
 });
