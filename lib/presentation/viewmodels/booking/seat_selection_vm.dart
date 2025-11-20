@@ -184,12 +184,11 @@ class SeatSelectionVm extends Notifier<SeatSelectionState> {
 
 // =================== HELPERS ===================
 
-// YYYY-MM-DD -> dd.MM.yy
+// YYYY-MM-DD -> dd.MM.yyyy
 String _dmyShortFromYmd(String ymd) {
   final p = ymd.split('-');
   if (p.length != 3) return ymd;
-  final yy = p[0].substring(2);
-  return '${p[2].padLeft(2, '0')}.${p[1].padLeft(2, '0')}.$yy';
+  return '${p[2].padLeft(2, '0')}.${p[1].padLeft(2, '0')}.${p[0]}';
 }
 
 String _weekdayEnFromYmd(String ymd) {
