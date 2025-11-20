@@ -43,18 +43,10 @@ class ProfileScreen extends ConsumerWidget {
                   radius: 44,
                   backgroundColor: Colors.grey.shade800,
                   child: ClipOval(
-                    child: Image.asset(
-                      'assets/images/profile.jpg',
-                      fit: BoxFit.cover,
-                      width: 88,
-                      height: 88,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.person,
-                          size: 48,
-                          color: Colors.white70,
-                        );
-                      },
+                    child: Icon(
+                      Icons.person,
+                      size: 48,
+                      color: Colors.white70,
                     ),
                   ),
                 ),
