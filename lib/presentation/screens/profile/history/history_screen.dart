@@ -35,8 +35,20 @@ class TicketsHistoryScreen extends HookConsumerWidget {
 
     final state = ref.watch(ticketsHistoryVmProvider);
 
+    final now = DateTime.now();
+
+    bool isHistoryOrder(Order o) {
+      if (o.status != OrderStatus.paid) {
+        return true;
+      }
+
+      final DateTime showStart = o.showStart ?? o.createdAt;
+
+      return showStart.isBefore(now);
+    }
+
     final List<Order> historyOrders = state.orders
-        .where((o) => o.status != OrderStatus.paid)
+        .where(isHistoryOrder)
         .toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
@@ -191,8 +203,6 @@ class _ErrorView extends StatelessWidget {
   }
 }
 
-/// ========= CARD (как на скрине) =========
-
 class HistoryTicketListItem extends StatelessWidget {
   const HistoryTicketListItem({
     super.key,
@@ -224,137 +234,135 @@ class HistoryTicketListItem extends StatelessWidget {
     final statusColor = _statusColor(order.status, context);
 
     return Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    width: 72,
-                    height: 72,
-                    child: _PosterImage(posterUrl: order.posterUrl),
-                  ),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: _PosterImage(posterUrl: order.posterUrl),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: textTheme.titleMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              statusLabel,
-                              style: textTheme.labelSmall?.copyWith(
-                                color: statusColor,
-                                fontWeight: FontWeight.w600,
-                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            statusLabel,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: statusColor,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Colors.white70,
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white70,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        priceLine,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Colors.white70,
-                        ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      priceLine,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white70,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Created: $createdAt',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Colors.white38,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Created: $createdAt',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white38,
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onViewDetails,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white54),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(
+                    'View Details',
+                    style:
+                    textTheme.labelLarge?.copyWith(color: Colors.white),
                   ),
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: onViewDetails,
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.white54),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: onWriteReview,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      'View Details',
-                      style: textTheme.labelLarge?.copyWith(color: Colors.white),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(
+                    'Write a Review',
+                    style: textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: onWriteReview,
-                    style: ElevatedButton.styleFrom(
-                      // зелёная (как во View ticket в MyTicketsScreen)
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      'Write a Review',
-                      style: textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        )
-      );
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

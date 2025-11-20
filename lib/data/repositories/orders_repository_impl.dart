@@ -44,6 +44,8 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 }
 
+// ============ HELPERS ============
+
 OrderStatus _mapStatus(String raw) {
   switch (raw) {
     case 'paid':
@@ -62,6 +64,8 @@ DateTime? _parseDateTimeOrNull(String? value) {
   return DateTime.tryParse(value);
 }
 
+// ============ MAPPERS ============
+
 Order orderFromDto(OrderDto dto) {
   return Order(
     id: dto.orderId,
@@ -79,9 +83,9 @@ Order orderFromDto(OrderDto dto) {
     cancelledAt: _parseDateTimeOrNull(dto.cancelledAt),
     refundedAt: _parseDateTimeOrNull(dto.refundedAt),
     payment: dto.payment,
-
     movieTitle: dto.movieTitle,
     posterUrl: dto.posterUrl,
+    showStart: _parseDateTimeOrNull(dto.showStartIso),
   );
 }
 

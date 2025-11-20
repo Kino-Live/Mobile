@@ -54,7 +54,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
 
     if (sched.status == ScheduleStatus.error || mdSt == MovieDetailsStatus.error) {
       return Scaffold(
-        body: SafeArea(child: RetryView(onRetry: retry)),
+        body: SafeArea(child: RetryView(onRetry: retry, message: 'No showtimes available',)),
       );
     }
 

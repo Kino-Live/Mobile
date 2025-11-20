@@ -30,6 +30,8 @@ class Order {
   final String? movieTitle;
   final String? posterUrl;
 
+  final DateTime? showStart;
+
   const Order({
     required this.id,
     required this.userId,
@@ -48,9 +50,12 @@ class Order {
     this.payment,
     this.movieTitle,
     this.posterUrl,
+    this.showStart,
   });
 
   bool get isPaid => status == OrderStatus.paid;
   bool get isCancelled => status == OrderStatus.cancelled;
   bool get isRefunded => status == OrderStatus.refunded;
+
+  bool get isPast => showStart != null && showStart!.isBefore(DateTime.now());
 }

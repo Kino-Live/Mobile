@@ -33,8 +33,17 @@ class MyTicketsScreen extends HookConsumerWidget {
 
     final state = ref.watch(myTicketsVmProvider);
 
-    final List<Order> activeOrders =
-    state.orders.where((o) => o.status == OrderStatus.paid).toList();
+    // 🔥 Активные билеты:
+    // - оплачены
+    // - сеанс ещё не прошёл (от сегодня в будущем)
+    final List<Order> activeOrders = state.orders
+        .where((o) => o.isPaid && !o.isPast)
+        .toList()
+      ..sort((a, b) {
+        final sa = a.showStart ?? a.createdAt;
+        final sb = b.showStart ?? b.createdAt;
+        return sa.compareTo(sb);
+      });
 
     Future<void> reload() async {
       await ref.read(myTicketsVmProvider.notifier).load();
@@ -45,7 +54,10 @@ class MyTicketsScreen extends HookConsumerWidget {
     if (state.isLoading && activeOrders.isEmpty) {
       body = const Center(child: CircularProgressIndicator());
     } else if (state.hasError && activeOrders.isEmpty) {
-      body = _ErrorView(message: state.error ?? 'Error loading tickets', onRetry: reload);
+      body = _ErrorView(
+        message: state.error ?? 'Error loading tickets',
+        onRetry: reload,
+      );
     } else if (activeOrders.isEmpty) {
       body = _EmptyView(onRefresh: reload);
     } else {
@@ -61,8 +73,10 @@ class MyTicketsScreen extends HookConsumerWidget {
               // TODO: handle cancel booking if backend supports it
             },
             onViewTicket: () {
-              // TODO: navigate to ticket details screen
-              context.pushNamed(ticketDetailsName, pathParameters: {'orderId': order.id});
+              context.pushNamed(
+                ticketDetailsName,
+                pathParameters: {'orderId': order.id},
+              );
             },
           );
         },
@@ -107,9 +121,18 @@ class _EmptyView extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
         const SizedBox(height: 120),
-        Icon(Icons.confirmation_number_outlined, size: 64, color: Colors.grey.shade500),
+        Icon(
+          Icons.confirmation_number_outlined,
+          size: 64,
+          color: Colors.grey.shade500,
+        ),
         const SizedBox(height: 16),
-        Center(child: Text('No tickets yet', style: textTheme.titleMedium)),
+        Center(
+          child: Text(
+            'No tickets yet',
+            style: textTheme.titleMedium,
+          ),
+        ),
         const SizedBox(height: 8),
         Center(
           child: Text(
@@ -195,7 +218,8 @@ class TicketListItem extends StatelessWidget {
 
     // "Seats: A1, A2, A3, A4, A5..."
     final subtitle = 'Seats: ${_shortenSeats(order.seats, max: 5)}';
-    final priceLine = 'Amount: ${order.totalAmount.toStringAsFixed(2)} ${order.currency}';
+    final priceLine =
+        'Amount: ${order.totalAmount.toStringAsFixed(2)} ${order.currency}';
     final createdAt = _formatDateTime(order.createdAt);
 
     return Container(
@@ -235,17 +259,21 @@ class TicketListItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+                      style:
+                      textTheme.bodySmall?.copyWith(color: Colors.white70),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       priceLine,
-                      style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+                      style:
+                      textTheme.bodySmall?.copyWith(color: Colors.white70),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Created: $createdAt',
-                      style: textTheme.bodySmall?.copyWith(color: Colors.white38),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white38,
+                      ),
                     ),
                   ],
                 ),
