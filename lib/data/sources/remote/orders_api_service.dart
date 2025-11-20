@@ -95,4 +95,29 @@ class OrdersApiService {
       throw const SomethingGetWrong();
     }
   }
+
+  Future<OrderDto> refundOrder(String orderId) async {
+    try {
+      final Response<Map<String, dynamic>> resp =
+      await _dio.post('/orders/$orderId/refund');
+
+      final json = resp.data;
+      if (json == null) {
+        throw const InvalidResponseException('Empty response from server');
+      }
+
+      final order = json['order'];
+      if (order is! Map<String, dynamic>) {
+        throw const InvalidResponseException('Malformed order payload');
+      }
+
+      return OrderDto.fromJson(order);
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } on AppException {
+      rethrow;
+    } catch (_) {
+      throw const SomethingGetWrong();
+    }
+  }
 }
