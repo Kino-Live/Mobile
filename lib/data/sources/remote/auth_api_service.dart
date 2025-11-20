@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:kinolive_mobile/data/mappers/network_error_mapper.dart';
+import 'package:kinolive_mobile/data/models/auth/profile_dto.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 
 class AuthApiService {
@@ -46,5 +47,35 @@ class AuthApiService {
     }
 
     return token;
+  }
+
+  Future<ProfileDto> getProfile(String token) async {
+    try {
+      final res = await _dio.get(
+        '/profile',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      final data = res.data;
+
+      if (data is! Map<String, dynamic>) {
+        throw const InvalidResponseException("Invalid profile response");
+      }
+
+      final profileJson = data['profile'];
+      if (profileJson is! Map<String, dynamic>) {
+        throw const InvalidResponseException("Profile missing in response");
+      }
+
+      return ProfileDto.fromJson(profileJson);
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
+    }
   }
 }
