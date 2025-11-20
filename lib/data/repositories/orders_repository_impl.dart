@@ -42,9 +42,13 @@ class OrdersRepositoryImpl implements OrdersRepository {
     final dto = await _api.getOrderDetails(orderId);
     return orderDetailsFromDto(dto);
   }
-}
 
-// ============ HELPERS ============
+  @override
+  Future<Order> refundOrder(String orderId) async {
+    final dto = await _api.refundOrder(orderId);
+    return orderFromDto(dto);
+  }
+}
 
 OrderStatus _mapStatus(String raw) {
   switch (raw) {

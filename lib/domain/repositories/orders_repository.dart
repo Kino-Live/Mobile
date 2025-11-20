@@ -14,4 +14,6 @@ abstract class OrdersRepository {
   Future<List<Order>> getMyOrders();
 
   Future<OrderDetails> getOrderDetails(String orderId);
+
+  Future<Order> refundOrder(String orderId);
 }
