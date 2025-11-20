@@ -15,21 +15,37 @@ class BillboardScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(billboardVmProvider);
+    final vm = ref.read(billboardVmProvider.notifier);
+    final isLoading = state.isLoading;
+
+    useEffect(() {
+      Future.microtask(() => vm.load());
+      return null;
+    }, const []);
+
     ref.listen(authStateProvider, (prev, next) {
       final wasAuthed = prev?.isAuthenticated == true;
       final nowAuthed = next.isAuthenticated;
+
       if (wasAuthed && !nowAuthed) {
         final m = ScaffoldMessenger.of(context);
         m.hideCurrentSnackBar();
         m.showSnackBar(
-          const SnackBar(content: Text('Logged out', textAlign: TextAlign.center)),
+          const SnackBar(
+            content: Text('Logged out', textAlign: TextAlign.center),
+          ),
         );
+
+        ref.invalidate(billboardVmProvider);
+      }
+
+      if (!wasAuthed && nowAuthed) {
+        ref.invalidate(billboardVmProvider);
+
+        ref.read(billboardVmProvider.notifier).load();
       }
     });
-
-    final state = ref.watch(billboardVmProvider);
-    final vm = ref.read(billboardVmProvider.notifier);
-    final isLoading = state.isLoading;
 
     final searchOpen = useState(false);
     final filtersOpen = useState(false);
