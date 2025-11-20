@@ -23,7 +23,7 @@ class MyTicketsScreen extends HookConsumerWidget {
     }, const []);
 
     ref.listen(myTicketsVmProvider, (prev, next) {
-      if (next.hasError && next.error != null && next.orders.isNotEmpty) {
+      if (next.hasError && next.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.error!, textAlign: TextAlign.center)),
         );
@@ -33,7 +33,6 @@ class MyTicketsScreen extends HookConsumerWidget {
 
     final state = ref.watch(myTicketsVmProvider);
 
-    // Активные билеты: paid + не в прошлом
     final List<Order> activeOrders = state.orders
         .where((o) => o.isPaid && !o.isPast)
         .toList()
@@ -68,7 +67,7 @@ class MyTicketsScreen extends HookConsumerWidget {
           return TicketListItem(
             order: order,
             onCancel: () {
-              // TODO: cancel if needed
+              _showRefundBottomSheet(context, ref, order);
             },
             onViewTicket: () {
               context.pushNamed(
@@ -103,6 +102,150 @@ class MyTicketsScreen extends HookConsumerWidget {
       ),
     );
   }
+}
+
+void _showRefundBottomSheet(
+    BuildContext context,
+    WidgetRef ref,
+    Order order,
+    ) {
+  final colorScheme = Theme.of(context).colorScheme;
+  final textTheme = Theme.of(context).textTheme;
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) {
+      final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+      return Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest.withOpacity(0.98),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Refund tickets',
+                style: textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'You are about to refund your tickets for:',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: Colors.white70,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                (order.movieTitle != null && order.movieTitle!.isNotEmpty)
+                    ? order.movieTitle!
+                    : 'Movie #${order.movieId}',
+                style: textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+
+              Center(
+                child: Text(
+                  'Refund amount',
+                  style: textTheme.labelMedium?.copyWith(
+                    color: Colors.white60,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 6),
+
+              Center(
+                child: Text(
+                  '${order.totalAmount.toStringAsFixed(2)} ${order.currency}',
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontSize: (textTheme.headlineSmall?.fontSize ?? 24) - 2,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white38),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        'Close',
+                        style: textTheme.labelLarge?.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(ctx).pop();
+                        await ref
+                            .read(myTicketsVmProvider.notifier)
+                            .refund(order.id);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text(
+                        'Confirm refund',
+                        style: textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
 /// Empty state UI

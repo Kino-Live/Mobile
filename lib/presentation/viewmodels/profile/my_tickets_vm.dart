@@ -1,17 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
 import 'package:kinolive_mobile/domain/usecases/orders/get_my_orders.dart';
+import 'package:kinolive_mobile/domain/usecases/orders/refund_order.dart';
 import 'package:kinolive_mobile/shared/errors/app_exception.dart';
 import 'package:kinolive_mobile/shared/providers/orders_providers.dart';
 
-/// Provider for MyTickets view model
 final myTicketsVmProvider =
 NotifierProvider<MyTicketsVm, MyTicketsState>(MyTicketsVm.new);
 
-/// Loading status for MyTickets
 enum MyTicketsStatus { idle, loading, loaded, error }
 
-/// State for MyTickets screen
 class MyTicketsState {
   final MyTicketsStatus status;
   final List<Order> orders;
@@ -40,18 +38,17 @@ class MyTicketsState {
   }
 }
 
-/// View model that loads and manages user's orders (tickets)
 class MyTicketsVm extends Notifier<MyTicketsState> {
   late final GetMyOrders _getMyOrders;
+  late final RefundOrder _refundOrder;
 
   @override
   MyTicketsState build() {
-    // Read use case from provider
     _getMyOrders = ref.read(getMyOrdersProvider);
+    _refundOrder = ref.read(refundOrderProvider);
     return const MyTicketsState();
   }
 
-  /// Loads all orders for the current user
   Future<void> load() async {
     if (state.isLoading) return;
 
@@ -81,6 +78,28 @@ class MyTicketsVm extends Notifier<MyTicketsState> {
     }
   }
 
-  /// Clears current error message
+  Future<void> refund(String orderId) async {
+    try {
+      final updated = await _refundOrder(orderId);
+      final updatedList = state.orders
+          .map((o) => o.id == orderId ? updated : o)
+          .toList(growable: false);
+
+      state = state.copyWith(
+        status: MyTicketsStatus.loaded,
+        orders: updatedList,
+        error: null,
+      );
+    } on AppException catch (e) {
+      state = state.copyWith(
+        error: e.message,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        error: e.toString(),
+      );
+    }
+  }
+
   void clearError() => state = state.copyWith(error: null);
 }
