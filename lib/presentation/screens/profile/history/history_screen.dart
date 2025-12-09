@@ -4,7 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
+import 'package:kinolive_mobile/domain/entities/reviews/review.dart';
+import 'package:kinolive_mobile/presentation/widgets/profile/history/history_empty_states.dart';
+import 'package:kinolive_mobile/presentation/widgets/profile/history/history_error_view.dart';
+import 'package:kinolive_mobile/presentation/widgets/profile/history/history_list_items.dart';
+import 'package:kinolive_mobile/presentation/widgets/profile/history/history_segmented_control.dart';
+import 'package:kinolive_mobile/shared/utils/history_helpers.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/profile/history_vm.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/profile/promocodes_history_vm.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/profile/reviews_history_vm.dart';
+
+enum HistoryTab { movies, reviews, promocodes }
 
 class TicketsHistoryScreen extends HookConsumerWidget {
   const TicketsHistoryScreen({super.key});
@@ -15,10 +25,14 @@ class TicketsHistoryScreen extends HookConsumerWidget {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
+    final selectedTab = useState<HistoryTab>(HistoryTab.movies);
+
     useEffect(() {
-      Future.microtask(
-            () => ref.read(ticketsHistoryVmProvider.notifier).load(),
-      );
+      Future.microtask(() {
+        ref.read(ticketsHistoryVmProvider.notifier).load();
+        ref.read(reviewsHistoryVmProvider.notifier).load();
+        ref.read(promocodesHistoryVmProvider.notifier).load();
+      });
       return null;
     }, const []);
 
@@ -33,37 +47,76 @@ class TicketsHistoryScreen extends HookConsumerWidget {
       }
     });
 
+    return Scaffold(
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          'History',
+          style: textTheme.titleLarge?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: HistorySegmentedControl(
+                selectedTab: selectedTab.value,
+                onTabChanged: (tab) {
+                  selectedTab.value = tab;
+                },
+              ),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  switch (selectedTab.value) {
+                    case HistoryTab.movies:
+                      await ref.read(ticketsHistoryVmProvider.notifier).load();
+                      break;
+                    case HistoryTab.reviews:
+                      await ref.read(reviewsHistoryVmProvider.notifier).load();
+                      break;
+                    case HistoryTab.promocodes:
+                      await ref.read(promocodesHistoryVmProvider.notifier).load();
+                      break;
+                  }
+                },
+                child: _buildTabContent(context, ref, selectedTab.value),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabContent(BuildContext context, WidgetRef ref, HistoryTab tab) {
+    switch (tab) {
+      case HistoryTab.movies:
+        return _buildMoviesTab(context, ref);
+      case HistoryTab.reviews:
+        return _buildReviewsTab(context, ref);
+      case HistoryTab.promocodes:
+        return _buildPromocodesTab(context, ref);
+    }
+  }
+
+  Widget _buildMoviesTab(BuildContext context, WidgetRef ref) {
     final state = ref.watch(ticketsHistoryVmProvider);
-    final now = DateTime.now();
-
-    bool isHistoryOrder(Order o) {
-      if (o.status != OrderStatus.paid) {
-        return true;
-      }
-      final DateTime showStart = o.showStart ?? o.createdAt;
-      return showStart.isBefore(now);
-    }
-
-    DateTime _historySortKey(Order o) {
-      final now = DateTime.now();
-
-      if (o.refundedAt != null) return o.refundedAt!;
-      if (o.cancelledAt != null) return o.cancelledAt!;
-
-      final show = o.showStart;
-      if (show != null && show.isBefore(now)) {
-        return show;
-      }
-
-      return o.createdAt;
-    }
 
     final List<Order> historyOrders = state.orders
         .where(isHistoryOrder)
         .toList()
       ..sort((a, b) {
-        final ka = _historySortKey(a);
-        final kb = _historySortKey(b);
+        final ka = historySortKey(a);
+        final kb = historySortKey(b);
         return kb.compareTo(ka);
       });
 
@@ -76,12 +129,12 @@ class TicketsHistoryScreen extends HookConsumerWidget {
     if (state.isLoading && historyOrders.isEmpty) {
       body = const Center(child: CircularProgressIndicator());
     } else if (state.hasError && historyOrders.isEmpty) {
-      body = _ErrorView(
+      body = HistoryErrorView(
         message: state.error ?? 'Error loading history',
         onRetry: reload,
       );
     } else if (historyOrders.isEmpty) {
-      body = _EmptyView(onRefresh: reload);
+      body = HistoryEmptyView(onRefresh: reload);
     } else {
       body = ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -108,375 +161,107 @@ class TicketsHistoryScreen extends HookConsumerWidget {
       );
     }
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'History',
-          style: textTheme.titleLarge?.copyWith(
-            color: colorScheme.primary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: reload,
-          child: body,
-        ),
-      ),
-    );
+    return body;
   }
-}
 
-/// ========= EMPTY VIEW =========
+  Widget _buildReviewsTab(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(reviewsHistoryVmProvider);
 
-class _EmptyView extends StatelessWidget {
-  final Future<void> Function() onRefresh;
+    Future<void> reload() async {
+      await ref.read(reviewsHistoryVmProvider.notifier).load();
+    }
 
-  const _EmptyView({required this.onRefresh});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.history,
-                    size: 64,
-                    color: Colors.grey.shade500,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No history yet',
-                    style: textTheme.titleMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Buy a ticket and it will appear here',
-                    style: textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: onRefresh,
-                    child: const Text('Refresh'),
-                  ),
-                ],
-              ),
-            ),
+    ref.listen(reviewsHistoryVmProvider, (prev, next) {
+      if (next.hasError && next.error != null && next.reviews.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!, textAlign: TextAlign.center),
           ),
         );
-      },
-    );
-  }
-}
+        ref.read(reviewsHistoryVmProvider.notifier).clearError();
+      }
+    });
 
-/// ========= ERROR VIEW =========
+    final List<Review> sortedReviews = List<Review>.from(state.reviews)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final Future<void> Function() onRetry;
+    Widget body;
 
-  const _ErrorView({
-    required this.message,
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red.shade300,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error',
-                      style: textTheme.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      message,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: onRetry,
-                      child: const Text('Try again'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class HistoryTicketListItem extends StatelessWidget {
-  const HistoryTicketListItem({
-    super.key,
-    required this.order,
-    this.onViewDetails,
-    this.onWriteReview,
-  });
-
-  final Order order;
-  final VoidCallback? onViewDetails;
-  final VoidCallback? onWriteReview;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final colorScheme = theme.colorScheme;
-
-    final title = (order.movieTitle != null && order.movieTitle!.isNotEmpty)
-        ? order.movieTitle!
-        : 'Movie #${order.movieId}';
-
-    final subtitle = 'Seats: ${_shortenSeats(order.seats, max: 5)}';
-    final priceLine =
-        'Amount: ${order.totalAmount.toStringAsFixed(2)} ${order.currency}';
-    final createdAt = _formatDateTime(order.createdAt);
-
-    final statusLabel = _statusLabel(order.status);
-    final statusColor = _statusColor(order.status, context);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: SizedBox(
-                  width: 72,
-                  height: 72,
-                  child: _PosterImage(posterUrl: order.posterUrl),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            statusLabel,
-                            style: textTheme.labelSmall?.copyWith(
-                              color: statusColor,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      priceLine,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: Colors.white70,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Created: $createdAt',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: Colors.white38,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onViewDetails,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.white54),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: Text(
-                    'View Details',
-                    style:
-                    textTheme.labelLarge?.copyWith(color: Colors.white),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: onWriteReview,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: Text(
-                    'Write a Review',
-                    style: textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onPrimary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// ========= POSTER =========
-
-class _PosterImage extends StatelessWidget {
-  final String? posterUrl;
-
-  const _PosterImage({this.posterUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    if (posterUrl == null || posterUrl!.isEmpty) {
-      return Image.asset(
-        'assets/images/placeholder_poster.jpg',
-        fit: BoxFit.cover,
+    if (state.isLoading && sortedReviews.isEmpty) {
+      body = const Center(child: CircularProgressIndicator());
+    } else if (state.hasError && sortedReviews.isEmpty) {
+      body = HistoryErrorView(
+        message: state.error ?? 'Error loading reviews',
+        onRetry: reload,
+      );
+    } else if (sortedReviews.isEmpty) {
+      body = HistoryEmptyReviewsView(onRefresh: reload);
+    } else {
+      body = ListView.separated(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        itemCount: sortedReviews.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final review = sortedReviews[index];
+          return HistoryReviewListItem(review: review);
+        },
       );
     }
 
-    return Image.network(
-      posterUrl!,
-      fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => Image.asset(
-        'assets/images/placeholder_poster.jpg',
-        fit: BoxFit.cover,
-      ),
-    );
+    return body;
   }
-}
 
-// ===================== Helpers =====================
+  Widget _buildPromocodesTab(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(promocodesHistoryVmProvider);
 
-String _formatDateTime(DateTime dt) {
-  final d = dt.day.toString().padLeft(2, '0');
-  final m = dt.month.toString().padLeft(2, '0');
-  final y = dt.year.toString();
-  final hh = dt.hour.toString().padLeft(2, '0');
-  final mm = dt.minute.toString().padLeft(2, '0');
-  return '$d.$m.$y $hh:$mm';
-}
+    Future<void> reload() async {
+      await ref.read(promocodesHistoryVmProvider.notifier).load();
+    }
 
-/// "A1, A2, A3, A4, A5..."
-String _shortenSeats(List<String> seats, {int max = 5}) {
-  if (seats.isEmpty) return '-';
-  if (seats.length <= max) {
-    return seats.join(', ');
-  }
-  final visible = seats.take(max).join(', ');
-  return '$visible...';
-}
+    ref.listen(promocodesHistoryVmProvider, (prev, next) {
+      if (next.hasError && next.error != null && next.promocodes.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!, textAlign: TextAlign.center),
+          ),
+        );
+        ref.read(promocodesHistoryVmProvider.notifier).clearError();
+      }
+    });
 
-String _statusLabel(OrderStatus status) {
-  switch (status) {
-    case OrderStatus.paid:
-      return 'Paid';
-    case OrderStatus.cancelled:
-      return 'Cancelled';
-    case OrderStatus.refunded:
-      return 'Refunded';
-    default:
-      return 'Unknown';
-  }
-}
+    final List<Promocode> sortedPromocodes = List<Promocode>.from(state.promocodes)
+      ..sort((a, b) {
+        if (a.usedAt != null && b.usedAt != null) {
+          return b.usedAt!.compareTo(a.usedAt!);
+        }
+        if (a.usedAt != null) return -1;
+        if (b.usedAt != null) return 1;
+        return b.id.compareTo(a.id);
+      });
 
-Color _statusColor(OrderStatus status, BuildContext context) {
-  switch (status) {
-    case OrderStatus.paid:
-      return Colors.green;
-    case OrderStatus.cancelled:
-      return Colors.red;
-    case OrderStatus.refunded:
-      return Colors.orange;
-    default:
-      return Theme.of(context).colorScheme.primary;
+    Widget body;
+
+    if (state.isLoading && sortedPromocodes.isEmpty) {
+      body = const Center(child: CircularProgressIndicator());
+    } else if (state.hasError && sortedPromocodes.isEmpty) {
+      body = HistoryErrorView(
+        message: state.error ?? 'Error loading promocodes',
+        onRetry: reload,
+      );
+    } else if (sortedPromocodes.isEmpty) {
+      body = HistoryEmptyPromocodesView(onRefresh: reload);
+    } else {
+      body = ListView.separated(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        itemCount: sortedPromocodes.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final promocode = sortedPromocodes[index];
+          return HistoryPromocodeListItem(promocode: promocode);
+        },
+      );
+    }
+
+    return body;
   }
 }
