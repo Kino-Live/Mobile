@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/domain/entities/booking/hall.dart';
+import 'package:kinolive_mobile/domain/entities/promocodes/promocode.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/payment/payment_form.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/payment/liqpay_webview_page.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/booking/payment_vm.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/profile/promocodes_history_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';
 
 class PaymentScreenArgs {
@@ -33,7 +37,7 @@ class PaymentScreenArgs {
   });
 }
 
-class PaymentScreen extends ConsumerWidget {
+class PaymentScreen extends HookConsumerWidget {
   const PaymentScreen({super.key, required this.args});
   final PaymentScreenArgs args;
 
@@ -44,6 +48,16 @@ class PaymentScreen extends ConsumerWidget {
     final hall = hallInfo.hall;
 
     final vmState = ref.watch(paymentVmProvider(args));
+    final promocodesState = ref.watch(promocodesHistoryVmProvider);
+    
+    final selectedPromocode = useState<Promocode?>(null);
+
+    useEffect(() {
+      Future.microtask(() {
+        ref.read(promocodesHistoryVmProvider.notifier).load();
+      });
+      return null;
+    }, const []);
 
     final formData = PaymentFormData(
       movieTitle: args.movieTitle,
@@ -58,12 +72,20 @@ class PaymentScreen extends ConsumerWidget {
       selectedCodes: args.selectedCodes,
       totalPrice: args.totalPrice,
       totalCurrency: args.totalCurrency,
+      promocodes: promocodesState.promocodes,
+      selectedPromocode: selectedPromocode.value,
+      onPromocodeSelected: (promo) {
+        selectedPromocode.value = promo;
+        ref.read(paymentVmProvider(args).notifier).setSelectedPromocode(promo);
+      },
     );
 
     final formActions = PaymentFormActions(
       onBack: () => context.pop(),
-      onRefresh: () async {},
-      onPay: () => _handlePay(context, ref),
+      onRefresh: () async {
+        await ref.read(promocodesHistoryVmProvider.notifier).load();
+      },
+      onPay: () => _handlePay(context, ref, selectedPromocode.value, formData),
     );
 
     return Scaffold(
@@ -80,10 +102,29 @@ class PaymentScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _handlePay(BuildContext context, WidgetRef ref) async {
+  Future<void> _handlePay(BuildContext context, WidgetRef ref, Promocode? promocode, PaymentFormData formData) async {
     final vm = ref.read(paymentVmProvider(args).notifier);
 
-    final payment = await vm.initLiqpay(args);
+    if (formData.finalAmount == 0) {
+      await vm.createOrderAfterLiqpay(args, promocode: promocode);
+      
+      final state = ref.read(paymentVmProvider(args));
+      
+      if (state.isSuccess && state.order != null) {
+        context.goNamed(
+          paymentSuccessName,
+          pathParameters: {'orderId': state.order!.id},
+        );
+        return;
+      }
+      
+      if (state.hasError) {
+        _showSnack(context, state.error ?? 'Failed to create order');
+      }
+      return;
+    }
+
+    final payment = await vm.initLiqpay(args, promocode: promocode);
     if (payment == null) {
       final state = ref.read(paymentVmProvider(args));
       if (state.hasError) {
@@ -116,7 +157,7 @@ class PaymentScreen extends ConsumerWidget {
       return;
     }
 
-    await vm.createOrderAfterLiqpay(args);
+    await vm.createOrderAfterLiqpay(args, promocode: promocode);
 
     final state = ref.read(paymentVmProvider(args));
 

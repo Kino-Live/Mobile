@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kinolive_mobile/domain/entities/booking/hall.dart';
+import 'package:kinolive_mobile/domain/entities/promocodes/promocode.dart';
+import 'package:kinolive_mobile/presentation/widgets/booking/payment/promocode_selector.dart';
 import 'package:kinolive_mobile/presentation/widgets/booking/seat_selection/info_row.dart';
 import 'package:kinolive_mobile/presentation/widgets/booking/seat_selection/selected_tickets_panel.dart';
 import 'package:kinolive_mobile/presentation/widgets/booking/seat_selection/tag.dart';
@@ -22,6 +24,9 @@ class PaymentFormData {
   final List<String> selectedCodes;
   final double totalPrice;
   final String totalCurrency;
+  final List<Promocode> promocodes;
+  final Promocode? selectedPromocode;
+  final Function(Promocode?) onPromocodeSelected;
 
   const PaymentFormData({
     required this.movieTitle,
@@ -36,7 +41,25 @@ class PaymentFormData {
     required this.selectedCodes,
     required this.totalPrice,
     required this.totalCurrency,
+    required this.promocodes,
+    this.selectedPromocode,
+    required this.onPromocodeSelected,
   });
+  
+  double get finalAmount {
+    if (selectedPromocode == null) return totalPrice;
+    final discount = selectedPromocode!.amount > totalPrice 
+        ? totalPrice 
+        : selectedPromocode!.amount;
+    return (totalPrice - discount).clamp(0.0, double.infinity);
+  }
+  
+  double get discountAmount {
+    if (selectedPromocode == null) return 0.0;
+    return selectedPromocode!.amount > totalPrice 
+        ? totalPrice 
+        : selectedPromocode!.amount;
+  }
 }
 
 class PaymentFormActions {
@@ -91,6 +114,7 @@ class PaymentForm extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -170,6 +194,18 @@ class PaymentForm extends StatelessWidget {
                     totalPrice: data.totalPrice,
                     totalCurrency: data.totalCurrency,
                     maxVisibleItems: 6,
+                    promocodeDiscount: data.discountAmount,
+                    finalAmount: data.finalAmount,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  PromocodeSelector(
+                    promocodes: data.promocodes,
+                    selectedPromocode: data.selectedPromocode,
+                    onPromocodeSelected: data.onPromocodeSelected,
+                    totalAmount: data.totalPrice,
+                    currency: data.totalCurrency,
                   ),
 
                   const SizedBox(height: 24),
