@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
 import 'package:kinolive_mobile/domain/entities/payments/check_liqpay_status.dart';
 import 'package:kinolive_mobile/domain/entities/payments/liqpay_init_payment.dart';
+import 'package:kinolive_mobile/domain/entities/promocodes/promocode.dart';
 import 'package:kinolive_mobile/domain/usecases/orders/create_order.dart';
 import 'package:kinolive_mobile/domain/usecases/payments/init_liqpay_payment.dart';
 import 'package:kinolive_mobile/presentation/screens/booking/payment/payment_screen.dart';
@@ -59,6 +60,8 @@ class PaymentVm extends Notifier<PaymentState> {
   late final CreateOrder _createOrder;
   late final InitLiqPayPayment _initLiqpayPayment;
   late final CheckLiqPayStatus _checkLiqpayStatus;
+  
+  Promocode? _selectedPromocode;
 
   @override
   PaymentState build() {
@@ -68,7 +71,19 @@ class PaymentVm extends Notifier<PaymentState> {
     return const PaymentState();
   }
 
-  Future<LiqpayInitPayment?> initLiqpay(PaymentScreenArgs args) async {
+  void setSelectedPromocode(Promocode? promocode) {
+    _selectedPromocode = promocode;
+  }
+
+  double _calculateFinalAmount(PaymentScreenArgs args, Promocode? promocode) {
+    if (promocode == null) return args.totalPrice;
+    final discount = promocode.amount > args.totalPrice 
+        ? args.totalPrice 
+        : promocode.amount;
+    return (args.totalPrice - discount).clamp(0.0, double.infinity);
+  }
+
+  Future<LiqpayInitPayment?> initLiqpay(PaymentScreenArgs args, {Promocode? promocode}) async {
     if (state.isProcessing) return null;
 
     state = state.copyWith(
@@ -85,8 +100,10 @@ class PaymentVm extends Notifier<PaymentState> {
       final orderId =
           'cinema_${hallInfo.showtime.id}_${DateTime.now().millisecondsSinceEpoch}';
 
+      final finalAmount = _calculateFinalAmount(args, promocode ?? _selectedPromocode);
+
       final payment = await _initLiqpayPayment(
-        amount: args.totalPrice,
+        amount: finalAmount,
         currency: args.totalCurrency,
         orderId: orderId,
         description: 'Tickets for ${args.movieTitle}',
@@ -143,7 +160,7 @@ class PaymentVm extends Notifier<PaymentState> {
     }
   }
 
-  Future<void> createOrderAfterLiqpay(PaymentScreenArgs args) async {
+  Future<void> createOrderAfterLiqpay(PaymentScreenArgs args, {Promocode? promocode}) async {
     if (state.isProcessing) return;
 
     state = state.copyWith(
@@ -154,7 +171,8 @@ class PaymentVm extends Notifier<PaymentState> {
     try {
       final showtime = args.hallInfo.showtime;
       final hall = args.hallInfo.hall;
-
+      
+      final selectedPromo = promocode ?? _selectedPromocode;
       final order = await _createOrder(
         showtimeId: showtime.id,
         movieId: showtime.movieId,
@@ -162,6 +180,7 @@ class PaymentVm extends Notifier<PaymentState> {
         seats: args.selectedCodes,
         totalAmount: args.totalPrice,
         currency: args.totalCurrency,
+        promocode: selectedPromo?.code,
       );
 
       state = state.copyWith(

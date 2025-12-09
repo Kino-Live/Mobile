@@ -78,9 +78,12 @@ class MyTicketsVm extends Notifier<MyTicketsState> {
     }
   }
 
-  Future<void> refund(String orderId) async {
+  Future<Map<String, dynamic>?> refund(String orderId) async {
     try {
-      final updated = await _refundOrder(orderId);
+      final result = await _refundOrder(orderId);
+      final updated = result['order'] as Order;
+      final promocode = result['promocode'] as Map<String, dynamic>?;
+      
       final updatedList = state.orders
           .map((o) => o.id == orderId ? updated : o)
           .toList(growable: false);
@@ -90,14 +93,18 @@ class MyTicketsVm extends Notifier<MyTicketsState> {
         orders: updatedList,
         error: null,
       );
+      
+      return promocode != null ? {'promocode': promocode} : null;
     } on AppException catch (e) {
       state = state.copyWith(
         error: e.message,
       );
+      return null;
     } catch (e) {
       state = state.copyWith(
         error: e.toString(),
       );
+      return null;
     }
   }
 
