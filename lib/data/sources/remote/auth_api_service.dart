@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:kinolive_mobile/data/mappers/network_error_mapper.dart';
 import 'package:kinolive_mobile/data/models/auth/profile_dto.dart';
@@ -65,6 +66,89 @@ class AuthApiService {
       }
 
       return ProfileDto.fromJson(profileJson);
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
+    }
+  }
+
+  Future<ProfileDto> updateProfile({
+    String? firstName,
+    String? lastName,
+    String? username,
+    String? phoneNumber,
+    String? dateOfBirth,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      if (firstName != null) body['first_name'] = firstName;
+      if (lastName != null) body['last_name'] = lastName;
+      if (username != null) body['username'] = username;
+      if (phoneNumber != null) body['phone_number'] = phoneNumber;
+      if (dateOfBirth != null) body['date_of_birth'] = dateOfBirth;
+
+      final res = await _dio.put('/profile', data: body);
+
+      final data = res.data;
+
+      if (data is! Map<String, dynamic>) {
+        throw const InvalidResponseException("Invalid profile response");
+      }
+
+      final profileJson = data['profile'];
+      if (profileJson is! Map<String, dynamic>) {
+        throw const InvalidResponseException("Profile missing in response");
+      }
+
+      return ProfileDto.fromJson(profileJson);
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } catch (_) {
+      throw const SomethingGetWrong();
+    }
+  }
+
+  Future<String> uploadProfilePhoto(File photoFile) async {
+    try {
+      final filename = photoFile.path.split(RegExp(r'[/\\]')).last;
+      
+      final formData = FormData.fromMap({
+        'photo': await MultipartFile.fromFile(
+          photoFile.path,
+          filename: filename,
+        ),
+      });
+
+      final res = await _dio.post(
+        '/profile/photo',
+        data: formData,
+      );
+
+      final data = res.data;
+
+      if (data is! Map<String, dynamic>) {
+        throw const InvalidResponseException("Invalid response");
+      }
+
+      final photoUrl = data['profile_photo_url'];
+      if (photoUrl is! String || photoUrl.isEmpty) {
+        throw const InvalidResponseException("Photo URL missing in response");
+      }
+
+      return photoUrl;
+    } on DioException catch (e) {
+      throw NetworkErrorMapper.map(e);
+    } on AppException {
+      rethrow;
+    } catch (e) {
+      throw SomethingGetWrong('Upload failed: ${e.toString()}');
+    }
+  }
+
+  Future<void> deleteProfilePhoto() async {
+    try {
+      await _dio.delete('/profile/photo');
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
     } catch (_) {
