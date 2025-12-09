@@ -13,6 +13,7 @@ class CreateOrder {
     required List<String> seats,
     required double totalAmount,
     required String currency,
+    String? promocode,
   }) {
     return _repo.createOrder(
       showtimeId: showtimeId,
@@ -21,6 +22,7 @@ class CreateOrder {
       seats: seats,
       totalAmount: totalAmount,
       currency: currency,
+      promocode: promocode,
     );
   }
 }

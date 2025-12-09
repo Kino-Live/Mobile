@@ -1,4 +1,3 @@
-import 'package:kinolive_mobile/domain/entities/orders/order.dart';
 import 'package:kinolive_mobile/domain/repositories/orders_repository.dart';
 
 class RefundOrder {
@@ -6,7 +5,7 @@ class RefundOrder {
 
   RefundOrder(this._repo);
 
-  Future<Order> call(String orderId) {
+  Future<Map<String, dynamic>> call(String orderId) {
     return _repo.refundOrder(orderId);
   }
 }
