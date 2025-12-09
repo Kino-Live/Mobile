@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/domain/entities/movie.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/movie_reviews_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/cast_card.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/expandable_text.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/info_pill.dart';
+import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/reviews_section.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/instant_refresh_scroll_view.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class MovieDetailsForm extends StatefulWidget {
+class MovieDetailsForm extends HookConsumerWidget {
   const MovieDetailsForm({
     super.key,
     required this.movie,
@@ -20,18 +24,28 @@ class MovieDetailsForm extends StatefulWidget {
   final Future<void> Function()? onRefresh;
 
   @override
-  State<MovieDetailsForm> createState() => _MovieDetailsFormState();
-}
-
-class _MovieDetailsFormState extends State<MovieDetailsForm> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final reviewsState = ref.watch(movieReviewsVmProvider(movie.id));
 
-    final movie = widget.movie;
+    useEffect(() {
+      Future.microtask(() {
+        ref.read(movieReviewsVmProvider(movie.id).notifier).load(movie.id);
+      });
+      return null;
+    }, [movie.id]);
+
+    ref.listen(movieReviewsVmProvider(movie.id), (prev, next) {
+      if (next.hasError && next.error != null) {
+        debugPrint('Error loading reviews: ${next.error}');
+      }
+    });
 
     return InstantRefreshScrollView(
-      onRefresh: widget.onRefresh,
+      onRefresh: () async {
+        await onRefresh?.call();
+        await ref.read(movieReviewsVmProvider(movie.id).notifier).load(movie.id);
+      },
       slivers: [
         SliverAppBar(
           pinned: true,
@@ -75,7 +89,7 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                 Align(
                   alignment: Alignment.center,
                   child: InkWell(
-                    onTap: () => widget.onPlayTrailer(movie),
+                    onTap: () => onPlayTrailer(movie),
                     borderRadius: BorderRadius.circular(48),
                     child: Container(
                       width: 64,
@@ -188,7 +202,7 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                       child: OutlinedButton(
                         onPressed: () => context.pushNamed(
                           scheduleName,
-                          pathParameters: {'id': widget.movie.id.toString()},
+                          pathParameters: {'id': movie.id.toString()},
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.white,
@@ -213,6 +227,13 @@ class _MovieDetailsFormState extends State<MovieDetailsForm> {
                   ],
                 ),
 
+                const SizedBox(height: 32),
+                ReviewsSection(
+                  movieId: movie.id,
+                  reviews: reviewsState.reviews,
+                  isLoading: reviewsState.isLoading,
+                  error: reviewsState.error,
+                ),
                 const SizedBox(height: 32),
               ],
             ),
