@@ -98,7 +98,10 @@ class TicketsHistoryScreen extends HookConsumerWidget {
               );
             },
             onWriteReview: () {
-              // TODO: go to "rate / write a review"
+              context.pushNamed(
+                writeReviewName,
+                extra: order,
+              );
             },
           );
         },
