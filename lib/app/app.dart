@@ -5,6 +5,8 @@ import 'package:kinolive_mobile/app/app_constants.dart';
 import 'package:kinolive_mobile/app/router/router.dart';
 import 'package:kinolive_mobile/app/design/theme.dart';
 
+import 'localization.dart';
+
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
   @override
@@ -16,6 +18,9 @@ class MyApp extends ConsumerWidget {
       title: appName,
       theme: customThemeData,
       routerConfig: router,
+      locale: appLocale,
+      localizationsDelegates: appLocalizationsDelegates,
+      supportedLocales: appSupportedLocales,
     );
   }
 }
