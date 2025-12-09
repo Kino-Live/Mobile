@@ -9,6 +9,8 @@ import 'package:kinolive_mobile/domain/usecases/auth/get_saved_session.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/login_user.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/logout_user.dart';
 import 'package:kinolive_mobile/domain/usecases/auth/register_user.dart';
+import 'dart:io';
+import 'package:kinolive_mobile/domain/usecases/auth/update_profile.dart';
 import 'package:kinolive_mobile/shared/providers/network/dio_provider.dart';
 
 final keyValueStorageProvider = Provider<SecureKeyValueStorage>((ref) {
@@ -54,4 +56,19 @@ final registerUserProvider = Provider<RegisterUser>((ref) {
 final getProfileProvider = Provider<GetProfile>((ref) {
   final repo = ref.watch(authRepositoryProvider);
   return GetProfile(repo);
+});
+
+final updateProfileProvider = Provider<UpdateProfile>((ref) {
+  final repo = ref.watch(authRepositoryProvider);
+  return UpdateProfile(repo);
+});
+
+final uploadProfilePhotoProvider = Provider<Future<String> Function(File)>((ref) {
+  final repo = ref.watch(authRepositoryProvider);
+  return (File photoFile) => repo.uploadProfilePhoto(photoFile);
+});
+
+final deleteProfilePhotoProvider = Provider<Future<void> Function()>((ref) {
+  final repo = ref.watch(authRepositoryProvider);
+  return () => repo.deleteProfilePhoto();
 });
