@@ -58,9 +58,9 @@ class ProfileScreen extends HookConsumerWidget {
             ref.read(profileVmProvider.notifier).load(),
       );
     } else {
-      final String? name = profile?.name;
+      final String? fullName = profile?.fullName;
       final String? email = profile?.email;
-      final String? phone = profile?.phone;
+      final String? phone = profile?.phoneNumber;
 
       bodyContent = Center(
         child: Padding(
@@ -73,20 +73,25 @@ class ProfileScreen extends HookConsumerWidget {
               CircleAvatar(
                 radius: 44,
                 backgroundColor: Colors.grey.shade800,
-                child: const ClipOval(
-                  child: Icon(
-                    Icons.person,
-                    size: 48,
-                    color: Colors.white70,
-                  ),
-                ),
+                backgroundImage: profile?.profilePhotoUrl != null
+                    ? NetworkImage(profile!.profilePhotoUrl!)
+                    : null,
+                child: profile?.profilePhotoUrl == null
+                    ? const ClipOval(
+                        child: Icon(
+                          Icons.person,
+                          size: 48,
+                          color: Colors.white70,
+                        ),
+                      )
+                    : null,
               ),
 
               const SizedBox(height: 16),
 
               // --- User Info ---
               Text(
-                fallback(name, 'None'),
+                fallback(fullName, 'None'),
                 style: textTheme.titleMedium?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -124,6 +129,15 @@ class ProfileScreen extends HookConsumerWidget {
                 title: 'History',
                 onTap: () {
                   context.push(historyPath);
+                },
+              ),
+              const SizedBox(height: 16),
+
+              ProfileMenuButton(
+                icon: Icons.edit_outlined,
+                title: 'Edit Profile',
+                onTap: () {
+                  context.push(editProfilePath);
                 },
               ),
               const SizedBox(height: 16),
