@@ -15,18 +15,25 @@ class OrdersApiService {
     required List<String> seats,
     required double totalAmount,
     required String currency,
+    String? promocode,
   }) async {
     try {
+      final data = {
+        'showtime_id': showtimeId,
+        'movie_id': movieId,
+        'hall_id': hallId,
+        'seats': seats,
+        'total_amount': totalAmount,
+        'currency': currency,
+      };
+      
+      if (promocode != null && promocode.isNotEmpty) {
+        data['promocode'] = promocode;
+      }
+      
       final Response<Map<String, dynamic>> resp = await _dio.post(
         '/orders',
-        data: {
-          'showtime_id': showtimeId,
-          'movie_id': movieId,
-          'hall_id': hallId,
-          'seats': seats,
-          'total_amount': totalAmount,
-          'currency': currency,
-        },
+        data: data,
       );
 
       final json = resp.data;
@@ -96,7 +103,7 @@ class OrdersApiService {
     }
   }
 
-  Future<OrderDto> refundOrder(String orderId) async {
+  Future<Map<String, dynamic>> refundOrder(String orderId) async {
     try {
       final Response<Map<String, dynamic>> resp =
       await _dio.post('/orders/$orderId/refund');
@@ -111,7 +118,12 @@ class OrdersApiService {
         throw const InvalidResponseException('Malformed order payload');
       }
 
-      return OrderDto.fromJson(order);
+      final promocode = json['promocode'];
+      
+      return {
+        'order': OrderDto.fromJson(order),
+        'promocode': promocode is Map<String, dynamic> ? promocode : null,
+      };
     } on DioException catch (e) {
       throw NetworkErrorMapper.map(e);
     } on AppException {
