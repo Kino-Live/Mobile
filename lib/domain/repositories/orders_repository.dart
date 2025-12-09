@@ -9,11 +9,12 @@ abstract class OrdersRepository {
     required List<String> seats,
     required double totalAmount,
     required String currency,
+    String? promocode,
   });
 
   Future<List<Order>> getMyOrders();
 
   Future<OrderDetails> getOrderDetails(String orderId);
 
-  Future<Order> refundOrder(String orderId);
+  Future<Map<String, dynamic>> refundOrder(String orderId);
 }

@@ -18,6 +18,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
     required List<String> seats,
     required double totalAmount,
     required String currency,
+    String? promocode,
   }) async {
     final dto = await _api.createOrder(
       showtimeId: showtimeId,
@@ -26,6 +27,7 @@ class OrdersRepositoryImpl implements OrdersRepository {
       seats: seats,
       totalAmount: totalAmount,
       currency: currency,
+      promocode: promocode,
     );
 
     return orderFromDto(dto);
@@ -44,9 +46,15 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
-  Future<Order> refundOrder(String orderId) async {
-    final dto = await _api.refundOrder(orderId);
-    return orderFromDto(dto);
+  Future<Map<String, dynamic>> refundOrder(String orderId) async {
+    final result = await _api.refundOrder(orderId);
+    final orderDto = result['order'] as OrderDto;
+    final promocode = result['promocode'] as Map<String, dynamic>?;
+    
+    return {
+      'order': orderFromDto(orderDto),
+      'promocode': promocode,
+    };
   }
 }
 
