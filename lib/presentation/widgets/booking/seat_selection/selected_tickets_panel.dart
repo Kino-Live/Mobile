@@ -9,6 +9,8 @@ class SelectedTicketsPanel extends StatelessWidget {
     required this.totalPrice,
     required this.totalCurrency,
     this.maxVisibleItems = 3,
+    this.promocodeDiscount = 0.0,
+    this.finalAmount,
   });
 
   final List<HallRow> rows;
@@ -16,6 +18,8 @@ class SelectedTicketsPanel extends StatelessWidget {
   final double totalPrice;
   final String totalCurrency;
   final int maxVisibleItems;
+  final double promocodeDiscount;
+  final double? finalAmount;
 
   HallSeat? _findSeat(String code) {
     for (final row in rows) {
@@ -110,6 +114,46 @@ class SelectedTicketsPanel extends StatelessWidget {
           const SizedBox(height: 8),
           const Divider(height: 1),
           const SizedBox(height: 8),
+          if (finalAmount != null) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Subtotal',
+                  style: tt.bodyMedium?.copyWith(
+                    color: Colors.white70,
+                  ),
+                ),
+                Text(
+                  '${_formatPrice(totalPrice)} ${totalCurrency.isEmpty ? '' : totalCurrency}',
+                  style: tt.bodyMedium?.copyWith(
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Promocode discount',
+                  style: tt.bodyMedium?.copyWith(
+                    color: Colors.white70,
+                  ),
+                ),
+                Text(
+                  promocodeDiscount > 0 
+                      ? '-${_formatPrice(promocodeDiscount)} ${totalCurrency.isEmpty ? '' : totalCurrency}'
+                      : '0 ${totalCurrency.isEmpty ? '' : totalCurrency}',
+                  style: tt.bodyMedium?.copyWith(
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -120,10 +164,10 @@ class SelectedTicketsPanel extends StatelessWidget {
                 ),
               ),
               Text(
-                '${_formatPrice(totalPrice)} ${totalCurrency.isEmpty ? '' : totalCurrency}',
+                '${_formatPrice(finalAmount ?? totalPrice)} ${totalCurrency.isEmpty ? '' : totalCurrency}',
                 style: tt.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: cs.primary,
+                  color: finalAmount != null ? Colors.green : cs.primary,
                 ),
               ),
             ],
