@@ -45,3 +45,6 @@ const String ticketDetailsName = 'ticket-details';
 
 const String historyPath = '/history';
 const String historyName = 'history';
+
+const String editProfilePath = '/edit-profile';
+const String editProfileName = 'edit-profile';
