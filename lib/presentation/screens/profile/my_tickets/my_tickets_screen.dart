@@ -37,9 +37,7 @@ class MyTicketsScreen extends HookConsumerWidget {
         .where((o) => o.isPaid && !o.isPast)
         .toList()
       ..sort((a, b) {
-        final sa = a.showStart ?? a.createdAt;
-        final sb = b.showStart ?? b.createdAt;
-        return sb.compareTo(sa);
+        return b.createdAt.compareTo(a.createdAt);
       });
 
     Future<void> reload() async {
@@ -217,9 +215,19 @@ void _showRefundBottomSheet(
                     child: ElevatedButton(
                       onPressed: () async {
                         Navigator.of(ctx).pop();
-                        await ref
+                        final result = await ref
                             .read(myTicketsVmProvider.notifier)
                             .refund(order.id);
+                        
+                        if (result != null && result['promocode'] != null) {
+                          _showPromocodeDialog(context, result['promocode'] as Map<String, dynamic>);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Tickets refunded successfully', textAlign: TextAlign.center),
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colorScheme.primary,
@@ -519,6 +527,136 @@ class _PosterImage extends StatelessWidget {
 }
 
 // ===================== Helpers =====================
+
+void _showPromocodeDialog(BuildContext context, Map<String, dynamic> promocodeData) {
+  final colorScheme = Theme.of(context).colorScheme;
+  final textTheme = Theme.of(context).textTheme;
+  
+  final code = promocodeData['code'] as String? ?? '';
+  final amount = promocodeData['amount'] as num? ?? 0.0;
+  final currency = promocodeData['currency'] as String? ?? 'UAH';
+  final expiresAt = promocodeData['expires_at'] as String?;
+  
+  String expiresText = '';
+  if (expiresAt != null) {
+    try {
+      final expiresDate = DateTime.parse(expiresAt);
+      final now = DateTime.now();
+      final daysUntilExpiry = expiresDate.difference(now).inDays;
+      if (daysUntilExpiry > 0) {
+        expiresText = 'Valid for $daysUntilExpiry days';
+      } else {
+        expiresText = 'Expires soon';
+      }
+    } catch (_) {
+      expiresText = 'Valid for 1 year';
+    }
+  } else {
+    expiresText = 'Valid for 1 year';
+  }
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: colorScheme.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+      title: Text(
+        'Promocode Created!',
+        style: textTheme.titleLarge?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Your refund has been processed. A promocode has been created for you:',
+            style: textTheme.bodyMedium?.copyWith(
+              color: Colors.white70,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  code,
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${amount.toStringAsFixed(2)} $currency',
+                  style: textTheme.titleMedium?.copyWith(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (expiresText.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    expiresText,
+                    style: textTheme.bodySmall?.copyWith(
+                      color: Colors.white60,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'You can use this promocode when booking your next tickets!',
+            style: textTheme.bodySmall?.copyWith(
+              color: Colors.white60,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+      actions: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: Text(
+              'Got it!',
+              style: textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onPrimary,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
 String _formatDateTime(DateTime dt) {
   final d = dt.day.toString().padLeft(2, '0');
