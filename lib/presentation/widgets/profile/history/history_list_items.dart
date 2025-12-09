@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
+import 'package:kinolive_mobile/domain/entities/promocodes/promocode.dart';
 import 'package:kinolive_mobile/domain/entities/reviews/review.dart';
-import 'package:kinolive_mobile/presentation/viewmodels/profile/promocodes_history_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/profile/history/history_poster_image.dart';
 import 'package:kinolive_mobile/shared/utils/history_helpers.dart';
 
@@ -277,19 +277,10 @@ class HistoryPromocodeListItem extends StatelessWidget {
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
 
-    final statusLabel = promocode.status == PromocodeStatus.used
-        ? 'Used'
-        : 'Not Used';
-    final statusColorValue = promocode.status == PromocodeStatus.used
-        ? Colors.green
-        : Colors.orange;
+    final statusLabel = _getPromocodeStatusLabel(promocode.status);
+    final statusColorValue = _getPromocodeStatusColor(promocode.status);
 
-    String discountText = '';
-    if (promocode.discountPercent != null) {
-      discountText = '${promocode.discountPercent}% off';
-    } else if (promocode.discountAmount != null) {
-      discountText = '\$${promocode.discountAmount!.toStringAsFixed(2)} off';
-    }
+    final discountText = '${promocode.amount.toStringAsFixed(2)} ${promocode.currency}';
 
     return Container(
       decoration: BoxDecoration(
@@ -313,21 +304,34 @@ class HistoryPromocodeListItem extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    if (discountText.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                    const SizedBox(height: 4),
+                    Text(
+                      discountText,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Created: ${formatDateTime(promocode.createdAt)}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white38,
+                      ),
+                    ),
+                    if (promocode.status == PromocodeStatus.used) ...[
+                      const SizedBox(height: 2),
                       Text(
-                        discountText,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: Colors.white70,
+                        'Used: ${formatDateTime(promocode.usedAt!)}',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: Colors.white38,
                         ),
                       ),
-                    ],
-                    if (promocode.description != null) ...[
-                      const SizedBox(height: 4),
+                    ] else ...[
+                      const SizedBox(height: 2),
                       Text(
-                        promocode.description!,
+                        'Expires: ${formatDateTime(promocode.expiresAt)}',
                         style: textTheme.bodySmall?.copyWith(
-                          color: Colors.white60,
+                          color: Colors.white38,
                         ),
                       ),
                     ],
@@ -353,18 +357,31 @@ class HistoryPromocodeListItem extends StatelessWidget {
               ),
             ],
           ),
-          if (promocode.usedAt != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Used: ${formatDateTime(promocode.usedAt!)}',
-              style: textTheme.bodySmall?.copyWith(
-                color: Colors.white38,
-              ),
-            ),
-          ],
         ],
       ),
     );
+  }
+}
+
+String _getPromocodeStatusLabel(PromocodeStatus status) {
+  switch (status) {
+    case PromocodeStatus.active:
+      return 'Active';
+    case PromocodeStatus.used:
+      return 'Used';
+    case PromocodeStatus.expired:
+      return 'Expired';
+  }
+}
+
+Color _getPromocodeStatusColor(PromocodeStatus status) {
+  switch (status) {
+    case PromocodeStatus.active:
+      return Colors.green;
+    case PromocodeStatus.used:
+      return Colors.blue;
+    case PromocodeStatus.expired:
+      return Colors.grey;
   }
 }
 
