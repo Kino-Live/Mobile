@@ -76,4 +76,12 @@ class ProfileVm extends Notifier<ProfileState> {
   }
 
   void clearError() => state = state.copyWith(error: null);
+
+  void setProfile(UserProfile profile) {
+    state = state.copyWith(
+      status: ProfileStatus.loaded,
+      profile: profile,
+      error: null,
+    );
+  }
 }
