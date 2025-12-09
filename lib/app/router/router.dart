@@ -20,6 +20,7 @@ import 'package:kinolive_mobile/presentation/screens/profile/my_tickets/details/
 import 'package:kinolive_mobile/presentation/screens/profile/my_tickets/my_tickets_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/profile/profile_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/reviews/write_review_screen.dart';
+import 'package:kinolive_mobile/presentation/screens/billboard/movie_reviews/movie_reviews_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/register/register_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/register/complete_profile/complete_profile_screen.dart';
@@ -151,6 +152,14 @@ final appRouter = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final order = state.extra as Order;
           return WriteReviewScreen(order: order);
+        },
+      ),
+      GoRoute(
+        name: movieReviewsName,
+        path: movieReviewsPath,
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return MovieReviewsScreen(movieId: id);
         },
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),
