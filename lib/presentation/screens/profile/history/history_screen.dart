@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
+import 'package:kinolive_mobile/domain/entities/promocodes/promocode.dart';
 import 'package:kinolive_mobile/domain/entities/reviews/review.dart';
 import 'package:kinolive_mobile/presentation/widgets/profile/history/history_empty_states.dart';
 import 'package:kinolive_mobile/presentation/widgets/profile/history/history_error_view.dart';
@@ -231,12 +232,19 @@ class TicketsHistoryScreen extends HookConsumerWidget {
 
     final List<Promocode> sortedPromocodes = List<Promocode>.from(state.promocodes)
       ..sort((a, b) {
-        if (a.usedAt != null && b.usedAt != null) {
-          return b.usedAt!.compareTo(a.usedAt!);
+        DateTime getSortDate(Promocode p) {
+          if (p.usedAt != null) {
+            return p.usedAt!;
+          }
+          if (p.status == PromocodeStatus.expired) {
+            return p.expiresAt;
+          }
+          return p.createdAt;
         }
-        if (a.usedAt != null) return -1;
-        if (b.usedAt != null) return 1;
-        return b.id.compareTo(a.id);
+        
+        final dateA = getSortDate(a);
+        final dateB = getSortDate(b);
+        return dateB.compareTo(dateA);
       });
 
     Widget body;
