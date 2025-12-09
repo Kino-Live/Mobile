@@ -53,7 +53,8 @@ class NotFoundException extends AppException {
 }
 
 class ValidationException extends AppException {
-  const ValidationException([super.message = 'Invalid request data']);
+  final Map<String, String>? fields;
+  const ValidationException([super.message = 'Invalid request data', this.fields]);
 }
 
 class ConflictException extends AppException {
