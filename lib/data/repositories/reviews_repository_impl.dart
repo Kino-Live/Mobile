@@ -11,7 +11,9 @@ class ReviewsRepositoryImpl implements ReviewsRepository {
   @override
   Future<List<Review>> getMovieReviews(int movieId) async {
     final dtoList = await _api.getMovieReviews(movieId);
-    return dtoList.map(reviewFromDto).toList();
+    final reviews = dtoList.map(reviewFromDto).toList();
+    reviews.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return reviews;
   }
 
   @override
@@ -31,7 +33,9 @@ class ReviewsRepositoryImpl implements ReviewsRepository {
   @override
   Future<List<Review>> getMyReviews() async {
     final dtoList = await _api.getMyReviews();
-    return dtoList.map(reviewFromDto).toList();
+    final reviews = dtoList.map(reviewFromDto).toList();
+    reviews.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return reviews;
   }
 }
 
