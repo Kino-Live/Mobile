@@ -19,6 +19,7 @@ import 'package:kinolive_mobile/presentation/screens/profile/edit_profile/edit_p
 import 'package:kinolive_mobile/presentation/screens/profile/my_tickets/details/ticket_details_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/profile/my_tickets/my_tickets_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/profile/profile_screen.dart';
+import 'package:kinolive_mobile/presentation/screens/reviews/write_review_screen.dart';
 
 import 'package:kinolive_mobile/presentation/screens/register/register_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/register/complete_profile/complete_profile_screen.dart';
@@ -32,6 +33,7 @@ import 'package:kinolive_mobile/presentation/screens/forgot_password/success/suc
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/splash/splash_screen.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
+import 'package:kinolive_mobile/domain/entities/orders/order.dart';
 
 const List<String> publicPaths = <String>[
   splashPath,
@@ -141,6 +143,14 @@ final appRouter = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final orderId = state.pathParameters['orderId']!;
           return TicketDetailsScreen(orderId: orderId);
+        },
+      ),
+      GoRoute(
+        name: writeReviewName,
+        path: writeReviewPath,
+        builder: (context, state) {
+          final order = state.extra as Order;
+          return WriteReviewScreen(order: order);
         },
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),

@@ -48,3 +48,6 @@ const String historyName = 'history';
 
 const String editProfilePath = '/edit-profile';
 const String editProfileName = 'edit-profile';
+
+const String writeReviewPath = '/write-review';
+const String writeReviewName = 'write-review';
