@@ -11,7 +11,6 @@ final dioProvider = Provider<Dio>((ref) {
       receiveTimeout: const Duration(seconds: 6),
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
       },
     ),
   );
@@ -24,6 +23,10 @@ final dioProvider = Provider<Dio>((ref) {
 
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
+      }
+
+      if (options.data is FormData) {
+        options.headers.remove('Content-Type');
       }
 
       handler.next(options);
