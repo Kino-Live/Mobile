@@ -62,104 +62,111 @@ class ProfileScreen extends HookConsumerWidget {
       final String? email = profile?.email;
       final String? phone = profile?.phoneNumber;
 
-      bodyContent = Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              const SizedBox(height: 32),
+      bodyContent = SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 32),
 
-              // --- User Avatar ---
-              CircleAvatar(
-                radius: 44,
-                backgroundColor: Colors.grey.shade800,
-                backgroundImage: profile?.profilePhotoUrl != null
-                    ? NetworkImage(profile!.profilePhotoUrl!)
-                    : null,
-                child: profile?.profilePhotoUrl == null
-                    ? const ClipOval(
-                        child: Icon(
-                          Icons.person,
-                          size: 48,
-                          color: Colors.white70,
-                        ),
-                      )
-                    : null,
-              ),
-
-              const SizedBox(height: 16),
-
-              // --- User Info ---
-              Text(
-                fallback(fullName, 'None'),
-                style: textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+                // --- User Avatar ---
+                CircleAvatar(
+                  radius: 44,
+                  backgroundColor: Colors.grey.shade800,
+                  backgroundImage: profile?.profilePhotoUrl != null
+                      ? NetworkImage(profile!.profilePhotoUrl!)
+                      : null,
+                  child: profile?.profilePhotoUrl == null
+                      ? const ClipOval(
+                          child: Icon(
+                            Icons.person,
+                            size: 48,
+                            color: Colors.white70,
+                          ),
+                        )
+                      : null,
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                fallback(email, 'No email'),
-                style: textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
+
+                const SizedBox(height: 16),
+
+                // --- User Info ---
+                Text(
+                  fallback(fullName, 'None'),
+                  style: textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                fallback(phone, 'No phone'),
-                style: textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
+                const SizedBox(height: 4),
+                Text(
+                  fallback(email, 'No email'),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: Colors.white70,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 2),
+                Text(
+                  fallback(phone, 'No phone'),
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: Colors.white70,
+                  ),
+                ),
 
-              const SizedBox(height: 32),
+                const SizedBox(height: 32),
 
-              // --- Menu Buttons ---
-              ProfileMenuButton(
-                icon: Icons.confirmation_number_outlined,
-                title: 'My tickets',
-                onTap: () {
-                  context.push(myTicketsPath);
-                },
-              ),
-              const SizedBox(height: 16),
+                // --- Menu Buttons ---
+                ProfileMenuButton(
+                  icon: Icons.confirmation_number_outlined,
+                  title: 'My tickets',
+                  onTap: () {
+                    context.push(myTicketsPath);
+                  },
+                ),
+                const SizedBox(height: 16),
 
-              ProfileMenuButton(
-                icon: Icons.history,
-                title: 'History',
-                onTap: () {
-                  context.push(historyPath);
-                },
-              ),
-              const SizedBox(height: 16),
+                ProfileMenuButton(
+                  icon: Icons.history,
+                  title: 'History',
+                  onTap: () {
+                    context.push(historyPath);
+                  },
+                ),
+                const SizedBox(height: 16),
 
-              ProfileMenuButton(
-                icon: Icons.edit_outlined,
-                title: 'Edit Profile',
-                onTap: () {
-                  context.push(editProfilePath);
-                },
-              ),
-              const SizedBox(height: 16),
+                ProfileMenuButton(
+                  icon: Icons.edit_outlined,
+                  title: 'Edit Profile',
+                  onTap: () {
+                    context.push(editProfilePath);
+                  },
+                ),
+                const SizedBox(height: 16),
 
-              ProfileMenuButton(
-                icon: Icons.settings_outlined,
-                title: 'Settings',
-                onTap: () {
-                  // TODO: navigate to settings
-                },
-              ),
-              const SizedBox(height: 16),
+                ProfileMenuButton(
+                  icon: Icons.settings_outlined,
+                  title: 'Settings',
+                  onTap: () {
+                    // TODO: navigate to settings
+                  },
+                ),
+                const SizedBox(height: 16),
 
-              // --- Logout ---
-              ProfileMenuButton(
-                icon: Icons.logout,
-                title: 'Logout',
-                titleColor: const Color(0xFFFF5B5B),
-                iconColor: const Color(0xFFFF5B5B),
-                onTap: logout,
-              ),
-            ],
+                // --- Logout ---
+                ProfileMenuButton(
+                  icon: Icons.logout,
+                  title: 'Logout',
+                  titleColor: const Color(0xFFFF5B5B),
+                  iconColor: const Color(0xFFFF5B5B),
+                  onTap: logout,
+                ),
+                
+                // Bottom padding to prevent overlap with bottom navigation bar
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       );
