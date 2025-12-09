@@ -49,8 +49,18 @@ class NetworkErrorMapper {
   static AppException _mapHttpError(int? code, String? message, DioException error) {
     switch (code) {
       case HttpStatus.badRequest: // 400
-      case 422: // Unprocessable Entity
-        return ValidationException(message ?? 'Invalid request data');
+      case 422:
+        Map<String, String>? fields;
+        final responseData = error.response?.data;
+        if (responseData is Map && responseData['fields'] is Map) {
+          fields = <String, String>{};
+          (responseData['fields'] as Map).forEach((key, value) {
+            if (value != null) {
+              fields![key.toString()] = value.toString();
+            }
+          });
+        }
+        return ValidationException(message ?? 'Invalid request data', fields);
 
       case HttpStatus.unauthorized: // 401
         final text = (message ?? '').toLowerCase();
