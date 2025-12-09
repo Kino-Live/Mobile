@@ -131,15 +131,9 @@ class EditProfileForm extends HookConsumerWidget {
       }
 
       await ref.read(editProfileVmProvider.notifier).updateProfile(
-            firstName: firstNameController.text.trim().isEmpty
-                ? null
-                : firstNameController.text.trim(),
-            lastName: lastNameController.text.trim().isEmpty
-                ? null
-                : lastNameController.text.trim(),
-            phoneNumber: phoneNumberController.text.trim().isEmpty
-                ? null
-                : phoneNumberController.text.trim(),
+            firstName: firstNameController.text.trim(),
+            lastName: lastNameController.text.trim(),
+            phoneNumber: phoneNumberController.text.trim(),
             dateOfBirth: parsedDate,
           );
       
