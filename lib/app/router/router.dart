@@ -21,6 +21,8 @@ import 'package:kinolive_mobile/presentation/screens/profile/my_tickets/my_ticke
 import 'package:kinolive_mobile/presentation/screens/profile/profile_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/reviews/write_review_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/billboard/movie_reviews/movie_reviews_screen.dart';
+import 'package:kinolive_mobile/presentation/screens/online_movies/watch_online_screen.dart';
+import 'package:kinolive_mobile/domain/entities/orders/order.dart';
 
 import 'package:kinolive_mobile/presentation/screens/register/register_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/register/complete_profile/complete_profile_screen.dart';
@@ -34,7 +36,6 @@ import 'package:kinolive_mobile/presentation/screens/forgot_password/success/suc
 import 'package:kinolive_mobile/presentation/screens/billboard/billboard_screen.dart';
 import 'package:kinolive_mobile/presentation/screens/splash/splash_screen.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
-import 'package:kinolive_mobile/domain/entities/orders/order.dart';
 
 const List<String> publicPaths = <String>[
   splashPath,
@@ -151,7 +152,7 @@ final appRouter = Provider<GoRouter>((ref) {
         path: writeReviewPath,
         builder: (context, state) {
           final order = state.extra as Order;
-          return WriteReviewScreen(order: order);
+          return WriteReviewScreen.fromOrder(order);
         },
       ),
       GoRoute(
@@ -160,6 +161,14 @@ final appRouter = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = int.parse(state.pathParameters['id']!);
           return MovieReviewsScreen(movieId: id);
+        },
+      ),
+      GoRoute(
+        name: watchOnlineName,
+        path: watchOnlinePath,
+        builder: (context, state) {
+          final movieId = int.parse(state.pathParameters['movieId']!);
+          return WatchOnlineScreen(movieId: movieId);
         },
       ),
       GoRoute(path: registerPath, builder: (context, state) => const RegisterScreen()),

@@ -54,3 +54,6 @@ const String writeReviewName = 'write-review';
 
 const String movieReviewsPath = '/movie/:id/reviews';
 const String movieReviewsName = 'movie-reviews';
+
+const String watchOnlinePath = '/watch-online/:movieId';
+const String watchOnlineName = 'watch-online';
