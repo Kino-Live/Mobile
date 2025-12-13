@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
-import 'package:kinolive_mobile/domain/entities/payments/check_liqpay_status.dart';
+import 'package:kinolive_mobile/domain/usecases/payments/check_liqpay_payment_status.dart';
 import 'package:kinolive_mobile/domain/entities/payments/liqpay_init_payment.dart';
 import 'package:kinolive_mobile/domain/entities/promocodes/promocode.dart';
 import 'package:kinolive_mobile/domain/usecases/orders/create_order.dart';
