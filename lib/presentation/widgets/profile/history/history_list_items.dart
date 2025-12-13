@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
 import 'package:kinolive_mobile/domain/entities/promocodes/promocode.dart';
 import 'package:kinolive_mobile/domain/entities/reviews/review.dart';
+import 'package:kinolive_mobile/domain/entities/online_movies/online_movie.dart';
 import 'package:kinolive_mobile/presentation/widgets/profile/history/history_poster_image.dart';
 import 'package:kinolive_mobile/shared/utils/history_helpers.dart';
 
@@ -382,6 +383,151 @@ Color _getPromocodeStatusColor(PromocodeStatus status) {
       return Colors.blue;
     case PromocodeStatus.expired:
       return Colors.grey;
+  }
+}
+
+class HistoryOnlineMovieListItem extends StatelessWidget {
+  const HistoryOnlineMovieListItem({
+    super.key,
+    required this.movie,
+    this.onViewDetails,
+    this.onWriteReview,
+  });
+
+  final MyOnlineMovie movie;
+  final VoidCallback? onViewDetails;
+  final VoidCallback? onWriteReview;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
+    final purchasedAt = formatDateTime(movie.purchasedAt);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 72,
+                  height: 72,
+                  child: HistoryPosterImage(posterUrl: movie.posterUrl),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            movie.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            'Online',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Purchased: $purchasedAt',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Amount: ${movie.price.toStringAsFixed(2)} ${movie.currency}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onViewDetails,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white54),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(
+                    'Watch Online',
+                    style: textTheme.labelLarge?.copyWith(color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: onWriteReview,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(
+                    'Write a Review',
+                    style: textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
