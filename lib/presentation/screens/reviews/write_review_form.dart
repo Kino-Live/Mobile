@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:kinolive_mobile/domain/entities/orders/order.dart';
+import 'package:kinolive_mobile/domain/entities/reviews/review_movie_info.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/reviews/write_review_vm.dart';
 
 class WriteReviewForm extends HookConsumerWidget {
   const WriteReviewForm({
     super.key,
-    required this.order,
+    required this.movieInfo,
     this.onChanged,
     this.onCancel,
   });
 
-  final Order order;
+  final ReviewMovieInfo movieInfo;
   final VoidCallback? onChanged;
   final VoidCallback? onCancel;
 
@@ -41,8 +41,8 @@ class WriteReviewForm extends HookConsumerWidget {
       };
     }, [commentController]);
 
-    final movieTitle = order.movieTitle ?? 'Movie #${order.movieId}';
-    final posterUrl = order.posterUrl ?? '';
+    final movieTitle = movieInfo.movieTitle;
+    final posterUrl = movieInfo.posterUrl;
     final genres = 'Hollywood Movie';
     final language = 'Language: English, Hindi';
 
@@ -56,7 +56,7 @@ class WriteReviewForm extends HookConsumerWidget {
       if (!formKey.currentState!.validate()) return;
 
       await ref.read(writeReviewVmProvider.notifier).submitReview(
-        movieId: order.movieId,
+        movieId: movieInfo.movieId,
         rating: rating.value,
         comment: commentController.text.trim(),
       );
@@ -152,13 +152,13 @@ class WriteReviewForm extends HookConsumerWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: _statusColor(order.status, context).withOpacity(0.15),
+                        color: Color(movieInfo.statusColorValue).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        _statusLabel(order.status),
+                        movieInfo.statusLabel,
                         style: textTheme.labelSmall?.copyWith(
-                          color: _statusColor(order.status, context),
+                          color: Color(movieInfo.statusColorValue),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -288,34 +288,6 @@ class WriteReviewForm extends HookConsumerWidget {
         ),
       ),
     );
-  }
-}
-
-// ===================== Status Helpers =====================
-
-String _statusLabel(OrderStatus status) {
-  switch (status) {
-    case OrderStatus.paid:
-      return 'Paid';
-    case OrderStatus.cancelled:
-      return 'Cancelled';
-    case OrderStatus.refunded:
-      return 'Refunded';
-    default:
-      return 'Unknown';
-  }
-}
-
-Color _statusColor(OrderStatus status, BuildContext context) {
-  switch (status) {
-    case OrderStatus.paid:
-      return Colors.green;
-    case OrderStatus.cancelled:
-      return Colors.red;
-    case OrderStatus.refunded:
-      return Colors.orange;
-    default:
-      return Theme.of(context).colorScheme.primary;
   }
 }
 

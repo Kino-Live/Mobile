@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/domain/entities/orders/order.dart';
+import 'package:kinolive_mobile/domain/entities/online_movies/online_movie.dart';
+import 'package:kinolive_mobile/domain/entities/reviews/review_movie_info.dart';
 import 'package:kinolive_mobile/presentation/screens/reviews/write_review_form.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/reviews/write_review_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dart';
@@ -8,10 +10,25 @@ import 'package:kinolive_mobile/presentation/widgets/general/loading_overlay.dar
 class WriteReviewScreen extends ConsumerStatefulWidget {
   const WriteReviewScreen({
     super.key,
-    required this.order,
+    this.order,
+    this.movieInfo,
   });
 
-  final Order order;
+  final Order? order;
+  final ReviewMovieInfo? movieInfo;
+
+  factory WriteReviewScreen.fromOrder(Order order) {
+    return WriteReviewScreen(
+      order: order,
+      movieInfo: ReviewMovieInfo.fromOrder(order),
+    );
+  }
+
+  factory WriteReviewScreen.fromOnlineMovie(MyOnlineMovie movie) {
+    return WriteReviewScreen(
+      movieInfo: ReviewMovieInfo.fromOnlineMovie(movie),
+    );
+  }
 
   @override
   ConsumerState<WriteReviewScreen> createState() => _WriteReviewScreenState();
@@ -126,7 +143,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
           child: LoadingOverlay(
             loading: isLoading,
             child: WriteReviewForm(
-              order: widget.order,
+              movieInfo: widget.movieInfo ?? ReviewMovieInfo.fromOrder(widget.order!),
               onChanged: () {
                 if (mounted) {
                   setState(() {
