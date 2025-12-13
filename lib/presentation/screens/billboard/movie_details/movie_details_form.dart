@@ -3,12 +3,17 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kinolive_mobile/app/router/router_path.dart';
 import 'package:kinolive_mobile/domain/entities/movie.dart';
+import 'package:kinolive_mobile/domain/entities/online_movies/online_movie.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/movie_reviews_vm.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/cast_card.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/expandable_text.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/info_pill.dart';
 import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/reviews_section.dart';
+import 'package:kinolive_mobile/presentation/screens/booking/payment/liqpay_webview_page.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/online_movies/online_movie_purchase_vm.dart';
+import 'package:kinolive_mobile/presentation/widgets/billboard/movie_details/watch_online_bottom_sheet.dart';
 import 'package:kinolive_mobile/presentation/widgets/general/instant_refresh_scroll_view.dart';
+import 'package:kinolive_mobile/shared/providers/online_movies_providers.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class MovieDetailsForm extends HookConsumerWidget {
@@ -216,7 +221,7 @@ class MovieDetailsForm extends HookConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: FilledButton(
-                        onPressed: () {},
+                        onPressed: () => _showWatchOnlineBottomSheet(context, ref, movie),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -241,5 +246,150 @@ class MovieDetailsForm extends HookConsumerWidget {
         ),
       ],
     );
+  }
+
+  static void _showWatchOnlineBottomSheet(
+    BuildContext context,
+    WidgetRef ref,
+    Movie movie,
+  ) async {
+    final repository = ref.read(onlineMoviesRepositoryProvider);
+    
+    try {
+      try {
+        await repository.getVideoUrl(movie.id);
+        if (context.mounted) {
+          context.push('/watch-online/${movie.id}');
+        }
+        return;
+      } catch (e) {
+        final onlineMovie = await repository.getMovieInfo(movie.id);
+        
+        if (onlineMovie == null) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('This movie is not available for online viewing', textAlign: TextAlign.center),
+              ),
+            );
+          }
+          return;
+        }
+
+        if (!context.mounted) return;
+
+        await showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (ctx) {
+            final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+            
+            return Padding(
+              padding: EdgeInsets.only(bottom: bottomInset),
+              child: WatchOnlineBottomSheet(
+                movie: onlineMovie,
+                onPurchase: () async {
+                  Navigator.of(ctx).pop();
+                  await _handlePurchase(context, ref, movie.id, onlineMovie);
+                },
+                onCancel: () {
+                  Navigator.of(ctx).pop();
+                },
+              ),
+            );
+          },
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${error.toString()}', textAlign: TextAlign.center),
+          ),
+        );
+      }
+    }
+  }
+
+  static Future<void> _handlePurchase(
+    BuildContext context,
+    WidgetRef ref,
+    int movieId,
+    OnlineMovie onlineMovie,
+  ) async {
+    final vm = ref.read(onlineMoviePurchaseVmProvider(movieId).notifier);
+    vm.setMovieId(movieId);
+    final payment = await vm.initLiqpay(onlineMovie);
+    if (payment == null) {
+      final state = ref.read(onlineMoviePurchaseVmProvider(movieId));
+      if (state.hasError && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.error ?? 'Failed to init payment', textAlign: TextAlign.center),
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!context.mounted) return;
+    
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => LiqPayWebViewPage(
+          data: payment.data,
+          signature: payment.signature,
+        ),
+      ),
+    );
+
+    final liqpayStatus = await vm.checkLiqpayStatus();
+    if (liqpayStatus == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to check payment status', textAlign: TextAlign.center),
+          ),
+        );
+      }
+      return;
+    }
+
+    debugPrint('LiqPay status = $liqpayStatus');
+
+    final isSuccess = liqpayStatus == 'success' || liqpayStatus == 'sandbox';
+
+    if (!isSuccess) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Payment not completed', textAlign: TextAlign.center),
+          ),
+        );
+      }
+      return;
+    }
+
+    final confirmed = await vm.confirmPurchase();
+    if (!confirmed) {
+      final state = ref.read(onlineMoviePurchaseVmProvider(movieId));
+      if (context.mounted && state.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(state.error ?? 'Failed to confirm purchase', textAlign: TextAlign.center),
+          ),
+        );
+      }
+      return;
+    }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Purchase successful! You can now watch the movie.', textAlign: TextAlign.center),
+        ),
+      );
+    }
   }
 }
