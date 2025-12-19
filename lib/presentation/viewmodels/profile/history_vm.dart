@@ -78,4 +78,12 @@ class TicketsHistoryVm extends Notifier<TicketsHistoryState> {
   }
 
   void clearError() => state = state.copyWith(error: null);
+  
+  void clearHistory() {
+    state = state.copyWith(
+      status: TicketsHistoryStatus.idle,
+      orders: const [],
+      error: null,
+    );
+  }
 }

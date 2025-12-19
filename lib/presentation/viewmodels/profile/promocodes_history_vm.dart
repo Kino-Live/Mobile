@@ -78,5 +78,13 @@ class PromocodesHistoryVm extends Notifier<PromocodesHistoryState> {
   }
 
   void clearError() => state = state.copyWith(error: null);
+  
+  void clearHistory() {
+    state = state.copyWith(
+      status: PromocodesHistoryStatus.idle,
+      promocodes: const [],
+      error: null,
+    );
+  }
 }
 

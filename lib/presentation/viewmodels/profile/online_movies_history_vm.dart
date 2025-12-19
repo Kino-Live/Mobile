@@ -75,5 +75,13 @@ class OnlineMoviesHistoryVm extends Notifier<OnlineMoviesHistoryState> {
   }
 
   void clearError() => state = state.copyWith(error: null);
+  
+  void clearHistory() {
+    state = state.copyWith(
+      status: OnlineMoviesHistoryStatus.idle,
+      movies: const [],
+      error: null,
+    );
+  }
 }
 

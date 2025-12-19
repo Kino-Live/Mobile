@@ -18,6 +18,7 @@ import 'package:kinolive_mobile/presentation/viewmodels/profile/promocodes_histo
 import 'package:kinolive_mobile/presentation/viewmodels/profile/reviews_history_vm.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/profile/online_movies_history_vm.dart';
 import 'package:kinolive_mobile/presentation/viewmodels/profile/history_filter_vm.dart';
+import 'package:kinolive_mobile/presentation/viewmodels/auth_controller.dart';
 import 'package:kinolive_mobile/presentation/widgets/profile/history/history_app_bar.dart';
 import 'package:kinolive_mobile/presentation/widgets/profile/history/history_filter_bar.dart';
 
@@ -30,22 +31,70 @@ class TicketsHistoryScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
+    
+    final authState = ref.watch(authStateProvider);
     final selectedTab = useState<HistoryTab>(HistoryTab.movies);
     final searchOpen = useState(false);
     final filtersOpen = useState(false);
     final filterState = ref.watch(historyFilterVmProvider);
     final controller = useTextEditingController(text: filterState.query);
+    
+    // Track last session token to detect user changes
+    final lastSessionTokenRef = useRef<String?>(null);
 
+    // Handle history loading when user changes or on mount
     useEffect(() {
-      Future.microtask(() {
-        ref.read(ticketsHistoryVmProvider.notifier).load();
-        ref.read(reviewsHistoryVmProvider.notifier).load();
-        ref.read(promocodesHistoryVmProvider.notifier).load();
-        ref.read(onlineMoviesHistoryVmProvider.notifier).load();
-      });
+      if (authState.isAuthenticated && authState.session != null) {
+        final currentToken = authState.session!.accessToken;
+        final lastToken = lastSessionTokenRef.value;
+        final userChanged = lastToken != null && lastToken != currentToken;
+        
+        // If user changed, clear all histories immediately and load new ones
+        if (userChanged) {
+          ref.read(ticketsHistoryVmProvider.notifier).clearHistory();
+          ref.read(reviewsHistoryVmProvider.notifier).clearHistory();
+          ref.read(promocodesHistoryVmProvider.notifier).clearHistory();
+          ref.read(onlineMoviesHistoryVmProvider.notifier).clearHistory();
+          ref.read(historyFilterVmProvider.notifier).clearFilters();
+          // Load new histories after clearing
+          Future.microtask(() {
+            if (context.mounted) {
+              ref.read(ticketsHistoryVmProvider.notifier).load();
+              ref.read(reviewsHistoryVmProvider.notifier).load();
+              ref.read(promocodesHistoryVmProvider.notifier).load();
+              ref.read(onlineMoviesHistoryVmProvider.notifier).load();
+            }
+          });
+        } else if (lastToken == null) {
+          // First time - load all histories
+          Future.microtask(() {
+            if (context.mounted) {
+              ref.read(ticketsHistoryVmProvider.notifier).load();
+              ref.read(reviewsHistoryVmProvider.notifier).load();
+              ref.read(promocodesHistoryVmProvider.notifier).load();
+              ref.read(onlineMoviesHistoryVmProvider.notifier).load();
+            }
+          });
+        }
+        
+        lastSessionTokenRef.value = currentToken;
+      } else {
+        // User logged out - clear all histories
+        lastSessionTokenRef.value = null;
+        try {
+          if (context.mounted) {
+            ref.read(ticketsHistoryVmProvider.notifier).clearHistory();
+            ref.read(reviewsHistoryVmProvider.notifier).clearHistory();
+            ref.read(promocodesHistoryVmProvider.notifier).clearHistory();
+            ref.read(onlineMoviesHistoryVmProvider.notifier).clearHistory();
+            ref.read(historyFilterVmProvider.notifier).clearFilters();
+          }
+        } catch (e) {
+          // Ignore errors - widget might be disposed
+        }
+      }
       return null;
-    }, const []);
+    }, [authState.session?.accessToken, authState.isAuthenticated]);
 
     void resetSearchAndFilters() {
       controller.clear();
@@ -148,6 +197,7 @@ class TicketsHistoryScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
+    final authState = ref.watch(authStateProvider);
     final ticketsState = ref.watch(ticketsHistoryVmProvider);
     final onlineMoviesState = ref.watch(onlineMoviesHistoryVmProvider);
     final filterState = ref.watch(historyFilterVmProvider);
@@ -288,6 +338,7 @@ class TicketsHistoryScreen extends HookConsumerWidget {
   }
 
   Widget _buildReviewsTab(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
     final state = ref.watch(reviewsHistoryVmProvider);
 
     Future<void> reload() async {
@@ -335,6 +386,7 @@ class TicketsHistoryScreen extends HookConsumerWidget {
   }
 
   Widget _buildPromocodesTab(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authStateProvider);
     final state = ref.watch(promocodesHistoryVmProvider);
 
     Future<void> reload() async {

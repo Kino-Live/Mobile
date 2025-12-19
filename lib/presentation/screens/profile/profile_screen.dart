@@ -16,13 +16,69 @@ class ProfileScreen extends HookConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
+    
+    final authState = ref.watch(authStateProvider);
+    final state = ref.watch(profileVmProvider);
+    final profile = state.profile;
+    
+    // Track last session token to detect user changes
+    final lastSessionTokenRef = useRef<String?>(null);
 
+    // Handle profile loading when user changes or on mount
     useEffect(() {
-      Future.microtask(
-            () => ref.read(profileVmProvider.notifier).load(),
-      );
+      // Only process if widget is still mounted
+      if (!context.mounted) return null;
+      
+      if (authState.isAuthenticated && authState.session != null) {
+        final currentToken = authState.session!.accessToken;
+        final lastToken = lastSessionTokenRef.value;
+        final userChanged = lastToken != null && lastToken != currentToken;
+        
+        // Get current state to check if we need to load
+        final currentState = ref.read(profileVmProvider);
+        
+        // If user changed, clear old profile immediately
+        if (userChanged) {
+          ref.read(profileVmProvider.notifier).clearProfile();
+          // Load new profile after clearing
+          Future.microtask(() {
+            if (context.mounted && ref.read(authStateProvider).isAuthenticated) {
+              ref.read(profileVmProvider.notifier).load();
+            }
+          });
+        } else if (lastToken == null) {
+          // First time - load profile
+          Future.microtask(() {
+            if (context.mounted && ref.read(authStateProvider).isAuthenticated) {
+              ref.read(profileVmProvider.notifier).load();
+            }
+          });
+        } else if (currentState.profile == null && !currentState.isLoading) {
+          // Profile is null but user is authenticated - load it
+          Future.microtask(() {
+            if (context.mounted && ref.read(authStateProvider).isAuthenticated) {
+              ref.read(profileVmProvider.notifier).load();
+            }
+          });
+        }
+        
+        lastSessionTokenRef.value = currentToken;
+      } else {
+        // User logged out - clear profile safely
+        lastSessionTokenRef.value = null;
+        try {
+          if (context.mounted) {
+            final currentState = ref.read(profileVmProvider);
+            if (currentState.profile != null) {
+              ref.read(profileVmProvider.notifier).clearProfile();
+            }
+          }
+        } catch (e) {
+          // Ignore errors - widget might be disposed
+        }
+      }
       return null;
-    }, const []);
+    }, [authState.session?.accessToken, authState.isAuthenticated]);
 
     ref.listen(profileVmProvider, (prev, next) {
       if (next.hasError && next.error != null) {
@@ -35,21 +91,31 @@ class ProfileScreen extends HookConsumerWidget {
       }
     });
 
-    final state = ref.watch(profileVmProvider);
-    final profile = state.profile;
-
     String fallback(String? value, String fallback) {
       if (value == null || value.trim().isEmpty) return fallback;
       return value;
     }
 
     Future<void> logout() async {
-      await ref.read(authStateProvider.notifier).logout();
+      try {
+        // Clear profile before logout to prevent errors
+        ref.read(profileVmProvider.notifier).clearProfile();
+        await ref.read(authStateProvider.notifier).logout();
+      } catch (e) {
+        // Ignore errors during logout - just proceed
+        await ref.read(authStateProvider.notifier).logout();
+      }
     }
 
     Widget bodyContent;
 
-    if (state.isLoading && profile == null) {
+    // Show loading if:
+    // 1. Currently loading
+    // 2. Authenticated but profile is null (user just switched or first load)
+    final shouldShowLoading = state.isLoading || 
+                              (authState.isAuthenticated && profile == null && !state.hasError);
+    
+    if (shouldShowLoading) {
       bodyContent = const Center(child: CircularProgressIndicator());
     } else if (state.hasError && profile == null) {
       bodyContent = _ProfileErrorView(

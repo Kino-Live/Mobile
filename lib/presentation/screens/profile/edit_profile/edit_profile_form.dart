@@ -30,36 +30,65 @@ class EditProfileForm extends HookConsumerWidget {
       return null;
     }, []);
 
-    final firstNameController = useTextEditingController(
-      text: profile?.firstName ?? '',
-    );
-    final lastNameController = useTextEditingController(
-      text: profile?.lastName ?? '',
-    );
-    final phoneNumberController = useTextEditingController(
-      text: profile?.phoneNumber ?? '',
-    );
-    
+    final firstNameController = useTextEditingController();
+    final lastNameController = useTextEditingController();
+    final phoneNumberController = useTextEditingController();
     final dateOfBirthController = useTextEditingController();
     
+    // Track last profile email to detect user changes
+    final lastProfileEmail = useRef<String?>(null);
+    final controllersInitialized = useRef<bool>(false);
+    
+    // Update controllers when profile is set in editState or user changes
     useEffect(() {
-      if (profile?.dateOfBirth != null) {
-        if (localeInitialized.value) {
-          final formatted = DateFormat('d MMMM yyyy', 'en').format(profile!.dateOfBirth!);
-          dateOfBirthController.text = formatted.split(' ').map((word) {
-            if (word.length > 0) {
-              return word[0].toUpperCase() + word.substring(1).toLowerCase();
+      if (profile != null) {
+        final currentEmail = profile.email;
+        final isUserChanged = lastProfileEmail.value != currentEmail;
+        final shouldInitialize = !controllersInitialized.value || isUserChanged;
+        
+        // Update controllers when user changes or when editState.profile is first set
+        if (shouldInitialize || editState.profile != null) {
+          lastProfileEmail.value = currentEmail;
+          controllersInitialized.value = true;
+          
+          // Update only if user changed or controllers are empty (preserve user edits for same user)
+          if (isUserChanged || 
+              firstNameController.text.isEmpty ||
+              lastNameController.text.isEmpty ||
+              phoneNumberController.text.isEmpty) {
+            firstNameController.text = profile.firstName ?? '';
+            lastNameController.text = profile.lastName ?? '';
+            phoneNumberController.text = profile.phoneNumber ?? '';
+          }
+          
+          // Always update date of birth
+          if (profile.dateOfBirth != null) {
+            if (localeInitialized.value) {
+              final formatted = DateFormat('d MMMM yyyy', 'en').format(profile.dateOfBirth!);
+              dateOfBirthController.text = formatted.split(' ').map((word) {
+                if (word.length > 0) {
+                  return word[0].toUpperCase() + word.substring(1).toLowerCase();
+                }
+                return word;
+              }).join(' ');
+            } else {
+              dateOfBirthController.text = DateFormat('yyyy-MM-dd').format(profile.dateOfBirth!);
             }
-            return word;
-          }).join(' ');
-        } else {
-          dateOfBirthController.text = DateFormat('yyyy-MM-dd').format(profile!.dateOfBirth!);
+          } else {
+            dateOfBirthController.text = '';
+          }
         }
       } else {
+        // Clear if profile is null
+        lastProfileEmail.value = null;
+        controllersInitialized.value = false;
+        firstNameController.text = '';
+        lastNameController.text = '';
+        phoneNumberController.text = '';
         dateOfBirthController.text = '';
       }
       return null;
-    }, [profile?.dateOfBirth, localeInitialized.value]);
+    }, [editState.profile?.email, editState.profile != null, profileState.profile?.email, localeInitialized.value]);
 
     useEffect(() {
       void listener() {
@@ -85,6 +114,12 @@ class EditProfileForm extends HookConsumerWidget {
     final dateOfBirth = useState<DateTime?>(profile?.dateOfBirth);
     final selectedImage = useState<File?>(null);
     final imagePicker = useMemoized(() => ImagePicker());
+    
+    // Update dateOfBirth state when profile changes
+    useEffect(() {
+      dateOfBirth.value = profile?.dateOfBirth;
+      return null;
+    }, [profile?.dateOfBirth]);
 
     useEffect(() {
       if (selectedImage.value != null) {
@@ -290,23 +325,36 @@ class EditProfileForm extends HookConsumerWidget {
               },
               child: Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey.shade800,
-                    backgroundImage: selectedImage.value != null
-                        ? FileImage(selectedImage.value!)
-                        : (profile?.profilePhotoUrl != null
-                            ? NetworkImage(profile!.profilePhotoUrl!)
-                            : null) as ImageProvider?,
-                    child: selectedImage.value == null && profile?.profilePhotoUrl == null
-                        ? const ClipOval(
-                            child: Icon(
-                              Icons.person,
-                              size: 60,
-                              color: Colors.white70,
-                            ),
-                          )
-                        : null,
+                  ClipOval(
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      color: Colors.grey.shade800,
+                      child: selectedImage.value != null
+                          ? Image.file(
+                              selectedImage.value!,
+                              fit: BoxFit.cover,
+                            )
+                          : (profile?.profilePhotoUrl != null
+                              ? Image.network(
+                                  // Add email as query param to prevent cache conflicts between users
+                                  '${profile!.profilePhotoUrl!}${profile.profilePhotoUrl!.contains('?') ? '&' : '?'}user=${Uri.encodeComponent(profile.email)}',
+                                  fit: BoxFit.cover,
+                                  key: ValueKey('profile_${profile.email}'),
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.person,
+                                      size: 60,
+                                      color: Colors.white70,
+                                    );
+                                  },
+                                )
+                              : const Icon(
+                                  Icons.person,
+                                  size: 60,
+                                  color: Colors.white70,
+                                )),
+                    ),
                   ),
                   Positioned(
                     bottom: 0,

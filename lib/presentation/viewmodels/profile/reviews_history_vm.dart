@@ -78,5 +78,13 @@ class ReviewsHistoryVm extends Notifier<ReviewsHistoryState> {
   }
 
   void clearError() => state = state.copyWith(error: null);
+  
+  void clearHistory() {
+    state = state.copyWith(
+      status: ReviewsHistoryStatus.idle,
+      reviews: const [],
+      error: null,
+    );
+  }
 }
 

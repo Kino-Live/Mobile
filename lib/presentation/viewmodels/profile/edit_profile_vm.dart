@@ -108,5 +108,11 @@ class EditProfileVm extends Notifier<EditProfileState> {
   }
 
   void clearError() => state = state.copyWith(error: null, fieldErrors: null);
+  
+  void resetStatus() => state = state.copyWith(
+    status: EditProfileStatus.idle,
+    error: null,
+    fieldErrors: null,
+  );
 }
 

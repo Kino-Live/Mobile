@@ -14,6 +14,8 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   bool _hasUnsavedChanges = false;
+  String? _lastInitializedEmail;
+  bool _statusReset = false;
 
   Future<bool> _onWillPop() async {
     if (!_hasUnsavedChanges) {
@@ -46,23 +48,38 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final profileState = ref.watch(profileVmProvider);
     final editState = ref.watch(editProfileVmProvider);
 
-    if (profileState.profile != null && editState.profile == null) {
+    // Reset any old success/error status when opening the screen (only once)
+    if (!_statusReset && 
+        (editState.status == EditProfileStatus.success || 
+         editState.status == EditProfileStatus.error)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(editProfileVmProvider.notifier).setInitialProfile(profileState.profile!);
+        if (mounted) {
+          _statusReset = true;
+          ref.read(editProfileVmProvider.notifier).resetStatus();
+        }
       });
     }
 
-    ref.listen(editProfileVmProvider, (prev, next) {
-      if (next.status == EditProfileStatus.error && next.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error!, textAlign: TextAlign.center),
-            duration: const Duration(seconds: 4),
-          ),
-        );
-        ref.read(editProfileVmProvider.notifier).clearError();
+    // Initialize profile only once per user (when email changes or first time)
+    if (profileState.profile != null) {
+      final currentProfile = profileState.profile!;
+      final currentEmail = currentProfile.email;
+      
+      // Only update if this is a different user (email changed) or first initialization
+      if (_lastInitializedEmail != currentEmail) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _lastInitializedEmail != currentEmail) {
+            _lastInitializedEmail = currentEmail;
+            ref.read(editProfileVmProvider.notifier).setInitialProfile(currentProfile);
+          }
+        });
       }
-      if (next.status == EditProfileStatus.success) {
+    }
+
+    ref.listen(editProfileVmProvider, (prev, next) {
+      // Only handle new success status (not old ones from previous sessions)
+      if (prev?.status != EditProfileStatus.success && 
+          next.status == EditProfileStatus.success) {
         if (mounted) {
           setState(() {
             _hasUnsavedChanges = false;
@@ -90,6 +107,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             );
           }
         });
+      }
+      
+      // Handle errors
+      if (prev?.status != EditProfileStatus.error && 
+          next.status == EditProfileStatus.error && 
+          next.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!, textAlign: TextAlign.center),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        ref.read(editProfileVmProvider.notifier).clearError();
       }
     });
 

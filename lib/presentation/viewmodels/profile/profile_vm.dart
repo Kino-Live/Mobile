@@ -57,21 +57,30 @@ class ProfileVm extends Notifier<ProfileState> {
 
     try {
       final profile = await _getProfile();
-      state = state.copyWith(
-        status: ProfileStatus.loaded,
-        profile: profile,
-        error: null,
-      );
+      // Only update state if we're still in loading state (user didn't logout)
+      if (state.status == ProfileStatus.loading) {
+        state = state.copyWith(
+          status: ProfileStatus.loaded,
+          profile: profile,
+          error: null,
+        );
+      }
     } on AppException catch (e) {
-      state = state.copyWith(
-        status: ProfileStatus.error,
-        error: e.message,
-      );
+      // Only update error if we're still in loading state
+      if (state.status == ProfileStatus.loading) {
+        state = state.copyWith(
+          status: ProfileStatus.error,
+          error: e.message,
+        );
+      }
     } catch (e) {
-      state = state.copyWith(
-        status: ProfileStatus.error,
-        error: e.toString(),
-      );
+      // Only update error if we're still in loading state
+      if (state.status == ProfileStatus.loading) {
+        state = state.copyWith(
+          status: ProfileStatus.error,
+          error: e.toString(),
+        );
+      }
     }
   }
 
@@ -81,6 +90,14 @@ class ProfileVm extends Notifier<ProfileState> {
     state = state.copyWith(
       status: ProfileStatus.loaded,
       profile: profile,
+      error: null,
+    );
+  }
+  
+  void clearProfile() {
+    state = state.copyWith(
+      status: ProfileStatus.idle,
+      profile: null,
       error: null,
     );
   }
