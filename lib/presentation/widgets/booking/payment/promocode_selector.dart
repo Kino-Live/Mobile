@@ -40,10 +40,6 @@ class PromocodeSelector extends StatelessWidget {
         return b.amount.compareTo(a.amount);
       });
 
-    if (sortedPromocodes.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -80,6 +76,21 @@ class PromocodeSelector extends StatelessWidget {
               promocode: selectedPromocode!,
               totalAmount: totalAmount,
               currency: currency,
+            )
+          else if (sortedPromocodes.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'No promocodes available',
+                style: tt.bodyMedium?.copyWith(
+                  color: Colors.white60,
+                ),
+                textAlign: TextAlign.center,
+              ),
             )
           else
             _PromocodeDropdown(
